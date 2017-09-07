@@ -58,14 +58,12 @@ func newRedis(dbCfg config.SubConfig) (ctx *Redis) {
 	}
 
 	ctx.dumpPath = path.Join(config.DumpPath, "databases", "redis")
-	ctx.prepare()
 	return
 }
 
 // Perform redis
 func (ctx *Redis) perform() error {
-	logger.Info("Perform database/Redis")
-	logger.Info("Redis dump path", ctx.dumpPath)
+	logger.Info("=> database | Redis:", ctx.Name)
 	if !helper.IsExistsPath(ctx.rdbPath) {
 		return fmt.Errorf("Redis RDB file: %s does not exist", ctx.rdbPath)
 	}
@@ -86,7 +84,7 @@ func (ctx *Redis) perform() error {
 	return nil
 }
 
-func (ctx *Redis) prepare() {
+func (ctx *Redis) prepare() error {
 	helper.MkdirP(ctx.dumpPath)
 
 	// redis-cli command
@@ -102,6 +100,7 @@ func (ctx *Redis) prepare() {
 	}
 	redisCliCommand = strings.Join(args, " ")
 
+	return nil
 }
 
 func (ctx *Redis) save() error {

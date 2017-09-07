@@ -24,6 +24,10 @@ func Println(v ...interface{}) {
 	myLog.Println(v...)
 }
 
+func Debug(v ...interface{}) {
+	myLog.Println("[debug]", fmt.Sprint(v...))
+}
+
 // Info log
 func Info(v ...interface{}) {
 	myLog.Println(v...)

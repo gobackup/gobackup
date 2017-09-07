@@ -1,10 +1,12 @@
 package config
 
 import (
+	"fmt"
 	"github.com/huacnlee/gobackup/logger"
 	"github.com/spf13/viper"
 	"os"
 	"path"
+	"time"
 )
 
 var (
@@ -34,7 +36,7 @@ func init() {
 		return
 	}
 
-	DumpPath = path.Join(os.TempDir(), "gobackup")
+	DumpPath = path.Join(os.TempDir(), "gobackup", fmt.Sprintf("%d", time.Now().UnixNano()))
 	loadDatabasesConfig()
 	loadStoragesConfig()
 
