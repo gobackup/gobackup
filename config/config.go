@@ -7,11 +7,11 @@ import (
 	"path"
 )
 
-type Config struct {
+var (
 	DumpPath  string
 	Databases []SubConfig
 	Storages  []SubConfig
-}
+)
 
 type SubConfig struct {
 	Name  string
@@ -19,7 +19,7 @@ type SubConfig struct {
 	Viper *viper.Viper
 }
 
-func LoadConfig() (cfg Config) {
+func init() {
 	viper.SetConfigType("yaml")
 	viper.SetConfigName("gobackup")
 	// /etc/gobackup/gobackup.yml
@@ -34,21 +34,18 @@ func LoadConfig() (cfg Config) {
 		return
 	}
 
-	cfg = Config{}
-	cfg.DumpPath = path.Join(os.TempDir(), "gobackup")
-	loadDatabasesConfig(&cfg)
-	loadStoragesConfig(&cfg)
-
-	logger.Info(cfg.Databases[0].Type)
+	DumpPath = path.Join(os.TempDir(), "gobackup")
+	loadDatabasesConfig()
+	loadStoragesConfig()
 
 	return
 }
 
-func loadDatabasesConfig(cfg *Config) {
+func loadDatabasesConfig() {
 	subViper := viper.Sub("databases")
 	for key := range viper.GetStringMap("databases") {
 		dbViper := subViper.Sub(key)
-		cfg.Databases = append(cfg.Databases, SubConfig{
+		Databases = append(Databases, SubConfig{
 			Name:  key,
 			Type:  dbViper.GetString("type"),
 			Viper: dbViper,
@@ -56,11 +53,11 @@ func loadDatabasesConfig(cfg *Config) {
 	}
 }
 
-func loadStoragesConfig(cfg *Config) {
+func loadStoragesConfig() {
 	subViper := viper.Sub("storages")
 	for key := range viper.GetStringMap("storages") {
 		dbViper := subViper.Sub(key)
-		cfg.Storages = append(cfg.Storages, SubConfig{
+		Storages = append(Storages, SubConfig{
 			Name:  key,
 			Type:  dbViper.GetString("type"),
 			Viper: dbViper,

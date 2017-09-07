@@ -14,6 +14,9 @@ databases:
     password: 123123
   redis1:
     type: redis
+    mode: copy
+    rdb_path: /usr/local/var/db/redis/dump.rdb
+    invoke_save: true
     host: localhost
   postgresql1:
     type: postgresql

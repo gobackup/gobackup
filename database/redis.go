@@ -2,31 +2,62 @@ package database
 
 import (
 	"fmt"
+	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
-	"os"
 	"path"
 	"regexp"
 	"strings"
 )
 
+type redisMode int
+
+const (
+	redisModeSync redisMode = iota
+	redisModeCopy
+)
+
 // Redis database
 type Redis struct {
-	redisCliPath string
-	database     string
+	Name       string
+	host       string
+	port       string
+	password   string
+	mode       redisMode
+	invokeSave bool
 	// path of rdb file, example: /var/lib/redis/dump.rdb
-	RdbFilePath string
+	rdbPath  string
+	dumpPath string
 }
 
 var (
 	redisCliCommand = "redis-cli"
-	redisDumpPath   = path.Join(os.TempDir(), "databases", "redis")
 )
 
-func newRedis() (ctx *Redis) {
+func newRedis(dbCfg config.SubConfig) (ctx *Redis) {
+	viper := dbCfg.Viper
+	viper.SetDefault("rdb_path", "/var/db/redis/dump.rdb")
+	viper.SetDefault("host", "127.0.0.1")
+	viper.SetDefault("port", "6379")
+	viper.SetDefault("invoke_save", true)
+	viper.SetDefault("mode", "copy")
+
 	ctx = &Redis{
-		RdbFilePath: "/usr/local/var/db/redis/dump.rdb",
+		Name:       dbCfg.Name,
+		host:       viper.GetString("host"),
+		port:       viper.GetString("port"),
+		password:   viper.GetString("password"),
+		rdbPath:    viper.GetString("rdb_path"),
+		invokeSave: viper.GetBool("invoke_save"),
 	}
+
+	if viper.GetString("mode") == "sync" {
+		ctx.mode = redisModeSync
+	} else {
+		ctx.mode = redisModeCopy
+	}
+
+	ctx.dumpPath = path.Join(config.DumpPath, "databases", "redis")
 	ctx.prepare()
 	return
 }
@@ -34,9 +65,9 @@ func newRedis() (ctx *Redis) {
 // Perform redis
 func (ctx *Redis) perform() error {
 	logger.Info("Perform database/Redis")
-	logger.Info("Redis dump path", redisDumpPath)
-	if !helper.IsExistsPath(ctx.RdbFilePath) {
-		return fmt.Errorf("Redis RDB file: %s does not exist", ctx.RdbFilePath)
+	logger.Info("Redis dump path", ctx.dumpPath)
+	if !helper.IsExistsPath(ctx.rdbPath) {
+		return fmt.Errorf("Redis RDB file: %s does not exist", ctx.rdbPath)
 	}
 
 	err := ctx.save()
@@ -52,13 +83,30 @@ func (ctx *Redis) perform() error {
 }
 
 func (ctx *Redis) prepare() {
-	helper.MkdirP(redisDumpPath)
+	helper.MkdirP(ctx.dumpPath)
+
+	// redis-cli command
+	args := []string{"redis-cli"}
+	if len(ctx.host) > 0 {
+		args = append(args, "-h "+ctx.host)
+	}
+	if len(ctx.port) > 0 {
+		args = append(args, "-p "+ctx.port)
+	}
+	if len(ctx.password) > 0 {
+		args = append(args, "-a "+ctx.password)
+	}
+	redisCliCommand = strings.Join(args, " ")
+
 }
 
 func (ctx *Redis) save() error {
+	if !ctx.invokeSave {
+		return nil
+	}
 	// FIXME: add retry
 	logger.Info("Perform redis-cli save...")
-	out, err := helper.Run(redisCliCommand, "SAVE")
+	out, err := helper.Exec(redisCliCommand, "SAVE")
 	if err != nil {
 		return fmt.Errorf("redis-cli SAVE failed %s", err)
 	}
@@ -71,8 +119,8 @@ func (ctx *Redis) save() error {
 }
 
 func (ctx *Redis) copy() error {
-	logger.Info("Copying redis dump to", redisDumpPath)
-	_, err := helper.Run("cp", ctx.RdbFilePath, redisDumpPath)
+	logger.Info("Copying redis dump to", ctx.dumpPath)
+	_, err := helper.Exec("cp", ctx.rdbPath, ctx.dumpPath)
 	if err != nil {
 		return fmt.Errorf("copy redis dump file error: %s", err)
 	}

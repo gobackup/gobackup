@@ -35,6 +35,10 @@ func newMySQL(dbCfg config.SubConfig) (ctx MySQL) {
 }
 
 func (ctx MySQL) perform() (err error) {
-	logger.Println("Perform MySQL...")
+	logger.Warn("Not implement")
+	return
+}
+
+func (ctx MySQL) dump() (err error) {
 	return
 }

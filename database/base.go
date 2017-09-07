@@ -18,25 +18,27 @@ func runModel(subCfg config.SubConfig) (err error) {
 	case "mysql":
 		ctx = newMySQL(subCfg)
 	case "redis":
-		ctx = newRedis()
+		ctx = newRedis(subCfg)
 	default:
 		logger.Warn(fmt.Errorf("databases.%s config `type: %s`, but is not implement", subCfg.Name, subCfg.Type))
 		return
 	}
 
 	err = ctx.perform()
+	if err != nil {
+		logger.Error(err)
+	}
 
 	return
 }
 
 // Run databases
-func Run(cfg config.Config) (err error) {
-	for _, dbCfg := range cfg.Databases {
-		err = runModel(dbCfg)
-		if err != nil {
-			return
-		}
+func Run() {
+	logger.Info("------------- Databases --------------")
+	for _, dbCfg := range config.Databases {
+		runModel(dbCfg)
 	}
+	logger.Info("------------- End databases --------------")
 
 	return
 }
