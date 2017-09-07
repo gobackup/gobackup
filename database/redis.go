@@ -75,7 +75,11 @@ func (ctx *Redis) perform() error {
 		return err
 	}
 
-	err = ctx.copy()
+	if ctx.mode == redisModeCopy {
+		err = ctx.copy()
+	} else {
+		err = ctx.sync()
+	}
 	if err != nil {
 		return err
 	}
@@ -115,6 +119,16 @@ func (ctx *Redis) save() error {
 		return fmt.Errorf(`Failed to invoke the "SAVE" command Response was: %s`, out)
 	}
 
+	return nil
+}
+
+func (ctx *Redis) sync() error {
+	dumpFilePath := path.Join(ctx.dumpPath, "dump.rdb")
+	logger.Info("Syncing redis dump to", dumpFilePath)
+	_, err := helper.Exec(redisCliCommand, "--rdb", "-", "|", "cat >", dumpFilePath)
+	if err != nil {
+		return fmt.Errorf("dump redis error: %s", err)
+	}
 	return nil
 }
 
