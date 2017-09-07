@@ -2,50 +2,41 @@ package database
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
+	"github.com/huacnlee/gobackup/config"
+	"github.com/huacnlee/gobackup/logger"
 )
 
 // Base interface
 type Base interface {
-	Perform() error
+	perform() error
 }
 
 // New - initialize Database
-func New(model string) (ctx Base, err error) {
-	switch model {
+func runModel(subCfg config.SubConfig) (err error) {
+	var ctx Base
+	switch subCfg.Type {
 	case "mysql":
-		ctx = MySQL{}
+		ctx = newMySQL(subCfg)
 	case "redis":
 		ctx = newRedis()
 	default:
-		err = fmt.Errorf("%s model is not implement", model)
+		logger.Warn(fmt.Errorf("databases.%s config `type: %s`, but is not implement", subCfg.Name, subCfg.Type))
+		return
 	}
+
+	err = ctx.perform()
 
 	return
 }
 
-func isExistsPath(p string) bool {
-	_, err := os.Stat(p)
-	if err != nil {
-		return os.IsExist(err)
-	}
-	return true
-}
-
-func ensureDir(dirPath string) {
-	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-		os.MkdirAll(dirPath, 0777)
-	}
-}
-
-func run(command string, args ...string) (output string, err error) {
-	cmd := exec.Command(command, args...)
-	out, err := cmd.Output()
-	if err != nil {
-		return
+// Run databases
+func Run(cfg config.Config) (err error) {
+	for _, dbCfg := range cfg.Databases {
+		err = runModel(dbCfg)
+		if err != nil {
+			return
+		}
 	}
 
-	output = string(out)
 	return
 }

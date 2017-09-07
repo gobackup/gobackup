@@ -12,7 +12,6 @@ var (
 )
 
 func init() {
-	log.Println("Init logger")
 }
 
 // Print log
@@ -25,8 +24,14 @@ func Println(v ...interface{}) {
 	myLog.Println(v...)
 }
 
+// Info log
 func Info(v ...interface{}) {
 	myLog.Println(v...)
+}
+
+// Warn log
+func Warn(v ...interface{}) {
+	myLog.Println("[warn]", fmt.Sprint(v...))
 }
 
 // Error log

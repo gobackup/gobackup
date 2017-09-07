@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
 	"os"
 	"path"
@@ -31,10 +32,10 @@ func newRedis() (ctx *Redis) {
 }
 
 // Perform redis
-func (ctx *Redis) Perform() error {
+func (ctx *Redis) perform() error {
 	logger.Info("Perform database/Redis")
 	logger.Info("Redis dump path", redisDumpPath)
-	if !isExistsPath(ctx.RdbFilePath) {
+	if !helper.IsExistsPath(ctx.RdbFilePath) {
 		return fmt.Errorf("Redis RDB file: %s does not exist", ctx.RdbFilePath)
 	}
 
@@ -51,13 +52,13 @@ func (ctx *Redis) Perform() error {
 }
 
 func (ctx *Redis) prepare() {
-	ensureDir(redisDumpPath)
+	helper.MkdirP(redisDumpPath)
 }
 
 func (ctx *Redis) save() error {
 	// FIXME: add retry
 	logger.Info("Perform redis-cli save...")
-	out, err := run(redisCliCommand, "SAVE")
+	out, err := helper.Run(redisCliCommand, "SAVE")
 	if err != nil {
 		return fmt.Errorf("redis-cli SAVE failed %s", err)
 	}
@@ -71,7 +72,7 @@ func (ctx *Redis) save() error {
 
 func (ctx *Redis) copy() error {
 	logger.Info("Copying redis dump to", redisDumpPath)
-	_, err := run("cp", ctx.RdbFilePath, redisDumpPath)
+	_, err := helper.Run("cp", ctx.RdbFilePath, redisDumpPath)
 	if err != nil {
 		return fmt.Errorf("copy redis dump file error: %s", err)
 	}
