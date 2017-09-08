@@ -21,6 +21,7 @@ models:
       path: /backup1/foo
       host: your-host.com
       port: 21
+      timeout: 30
       username: user1
       password: pass1
     databases:

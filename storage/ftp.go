@@ -8,6 +8,7 @@ import (
 	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/logger"
 	"github.com/secsy/goftp"
+	"time"
 )
 
 // FTP storage
@@ -22,20 +23,24 @@ type FTP struct {
 func (ctx *FTP) perform(model config.ModelConfig, archivePath string) error {
 	logger.Info("=> storage | FTP")
 
-	model.StoreWith.Viper.SetDefault("port", "21")
+	ftpViper := model.StoreWith.Viper
 
-	ctx.host = model.StoreWith.Viper.GetString("host")
-	ctx.port = model.StoreWith.Viper.GetString("port")
-	ctx.path = model.StoreWith.Viper.GetString("path")
-	ctx.username = model.StoreWith.Viper.GetString("username")
-	ctx.password = model.StoreWith.Viper.GetString("password")
+	ftpViper.SetDefault("port", "21")
+	ftpViper.SetDefault("timeout", 300)
+
+	ctx.host = ftpViper.GetString("host")
+	ctx.port = ftpViper.GetString("port")
+	ctx.path = ftpViper.GetString("path")
+	ctx.username = ftpViper.GetString("username")
+	ctx.password = ftpViper.GetString("password")
 
 	ftpConfig := goftp.Config{
-		User:     model.StoreWith.Viper.GetString("username"),
-		Password: model.StoreWith.Viper.GetString("password"),
+		User:     ftpViper.GetString("username"),
+		Password: ftpViper.GetString("password"),
+		Timeout:  ftpViper.GetDuration("timeout") * time.Second,
 	}
 
-	ftp, err := goftp.DialConfig(ftpConfig, model.StoreWith.Viper.GetString("host")+":"+model.StoreWith.Viper.GetString("port"))
+	ftp, err := goftp.DialConfig(ftpConfig, ftpViper.GetString("host")+":"+ftpViper.GetString("port"))
 	if err != nil {
 		return err
 	}

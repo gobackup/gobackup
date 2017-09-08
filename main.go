@@ -16,7 +16,7 @@ var (
 
 func main() {
 	app := cli.NewApp()
-	app.Version = "0.0.1"
+	app.Version = "0.0.2"
 	app.Name = "gobackup"
 	app.Usage = usage
 
