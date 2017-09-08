@@ -28,13 +28,14 @@ type Redis struct {
 	// path of rdb file, example: /var/lib/redis/dump.rdb
 	rdbPath  string
 	dumpPath string
+	model    config.ModelConfig
 }
 
 var (
 	redisCliCommand = "redis-cli"
 )
 
-func newRedis(dbCfg config.SubConfig) (ctx *Redis) {
+func (ctx *Redis) perform(model config.ModelConfig, dbCfg config.SubConfig) (err error) {
 	viper := dbCfg.Viper
 	viper.SetDefault("rdb_path", "/var/db/redis/dump.rdb")
 	viper.SetDefault("host", "127.0.0.1")
@@ -42,14 +43,13 @@ func newRedis(dbCfg config.SubConfig) (ctx *Redis) {
 	viper.SetDefault("invoke_save", true)
 	viper.SetDefault("mode", "copy")
 
-	ctx = &Redis{
-		Name:       dbCfg.Name,
-		host:       viper.GetString("host"),
-		port:       viper.GetString("port"),
-		password:   viper.GetString("password"),
-		rdbPath:    viper.GetString("rdb_path"),
-		invokeSave: viper.GetBool("invoke_save"),
-	}
+	ctx.model = model
+	ctx.Name = dbCfg.Name
+	ctx.host = viper.GetString("host")
+	ctx.port = viper.GetString("port")
+	ctx.password = viper.GetString("password")
+	ctx.rdbPath = viper.GetString("rdb_path")
+	ctx.invokeSave = viper.GetBool("invoke_save")
 
 	if viper.GetString("mode") == "sync" {
 		ctx.mode = redisModeSync
@@ -57,20 +57,19 @@ func newRedis(dbCfg config.SubConfig) (ctx *Redis) {
 		ctx.mode = redisModeCopy
 	}
 
-	ctx.dumpPath = path.Join(config.DumpPath, "redis")
-	return
-}
+	ctx.dumpPath = path.Join(ctx.model.DumpPath, "redis")
 
-// Perform redis
-func (ctx *Redis) perform() error {
+	if err = ctx.prepare(); err != nil {
+		return
+	}
+
 	logger.Info("=> database | Redis:", ctx.Name)
 	if !helper.IsExistsPath(ctx.rdbPath) {
 		return fmt.Errorf("Redis RDB file: %s does not exist", ctx.rdbPath)
 	}
 
-	err := ctx.save()
-	if err != nil {
-		return err
+	if err = ctx.save(); err != nil {
+		return
 	}
 
 	if ctx.mode == redisModeCopy {
@@ -79,9 +78,10 @@ func (ctx *Redis) perform() error {
 		err = ctx.sync()
 	}
 	if err != nil {
-		return err
+		return
 	}
-	return nil
+
+	return
 }
 
 func (ctx *Redis) prepare() error {

@@ -13,10 +13,10 @@ import (
 type Tgz struct {
 }
 
-func (ctx *Tgz) perform() (resultPath *string, err error) {
+func (ctx *Tgz) perform(model config.ModelConfig) (resultPath *string, err error) {
 	logger.Info("=> Compress with Tgz...")
 	archivePath := path.Join(os.TempDir(), "gobackup", time.Now().Format(time.RFC3339)+".tar.gz")
-	os.Chdir(config.DumpPath)
+	os.Chdir(model.DumpPath)
 	_, err = helper.Exec("tar", "zcf", archivePath, "./")
 	if err == nil {
 		logger.Info("->", archivePath)

@@ -1,2 +1,2 @@
 test:
-	go run main.go
+	go run main.go model.go

@@ -10,9 +10,9 @@ import (
 type Local struct {
 }
 
-func (ctx *Local) perform(archivePath string) error {
+func (ctx *Local) perform(model config.ModelConfig, archivePath string) error {
 	logger.Info("=> storage | Local")
-	destPath := config.StoreWith.Viper.GetString("path")
+	destPath := model.StoreWith.Viper.GetString("path")
 	helper.MkdirP(destPath)
 	_, err := helper.Exec("cp", archivePath, destPath)
 	if err != nil {

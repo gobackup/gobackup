@@ -10,13 +10,22 @@ import (
 )
 
 var (
+	// Models configs
+	Models []ModelConfig
+)
+
+// ModelConfig for special case
+type ModelConfig struct {
+	Name         string
 	DumpPath     string
 	CompressWith SubConfig
 	StoreWith    SubConfig
 	Databases    []SubConfig
 	Storages     []SubConfig
-)
+	Viper        *viper.Viper
+}
 
+// SubConfig sub config info
 type SubConfig struct {
 	Name  string
 	Type  string
@@ -38,29 +47,41 @@ func init() {
 		return
 	}
 
-	DumpPath = path.Join(os.TempDir(), "gobackup", fmt.Sprintf("%d", time.Now().UnixNano()))
-
-	CompressWith = SubConfig{
-		Type:  viper.GetString("compress_with.type"),
-		Viper: viper.Sub("compress_with"),
+	Models = []ModelConfig{}
+	for key := range viper.GetStringMap("models") {
+		logger.Info("key", key)
+		Models = append(Models, loadModel(key))
 	}
-
-	StoreWith = SubConfig{
-		Type:  viper.GetString("store_with.type"),
-		Viper: viper.Sub("store_with"),
-	}
-
-	loadDatabasesConfig()
-	loadStoragesConfig()
 
 	return
 }
 
-func loadDatabasesConfig() {
-	subViper := viper.Sub("databases")
-	for key := range viper.GetStringMap("databases") {
+func loadModel(key string) (model ModelConfig) {
+	model.Name = key
+	model.DumpPath = path.Join(os.TempDir(), "gobackup", fmt.Sprintf("%d", time.Now().UnixNano()))
+	model.Viper = viper.Sub("models." + key)
+
+	model.CompressWith = SubConfig{
+		Type:  model.Viper.GetString("compress_with.type"),
+		Viper: model.Viper.Sub("compress_with"),
+	}
+
+	model.StoreWith = SubConfig{
+		Type:  model.Viper.GetString("store_with.type"),
+		Viper: model.Viper.Sub("store_with"),
+	}
+
+	loadDatabasesConfig(&model)
+	loadStoragesConfig(&model)
+
+	return
+}
+
+func loadDatabasesConfig(model *ModelConfig) {
+	subViper := model.Viper.Sub("databases")
+	for key := range model.Viper.GetStringMap("databases") {
 		dbViper := subViper.Sub(key)
-		Databases = append(Databases, SubConfig{
+		model.Databases = append(model.Databases, SubConfig{
 			Name:  key,
 			Type:  dbViper.GetString("type"),
 			Viper: dbViper,
@@ -68,11 +89,11 @@ func loadDatabasesConfig() {
 	}
 }
 
-func loadStoragesConfig() {
-	subViper := viper.Sub("storages")
-	for key := range viper.GetStringMap("storages") {
+func loadStoragesConfig(model *ModelConfig) {
+	subViper := model.Viper.Sub("storages")
+	for key := range model.Viper.GetStringMap("storages") {
 		dbViper := subViper.Sub(key)
-		Storages = append(Storages, SubConfig{
+		model.Storages = append(model.Storages, SubConfig{
 			Name:  key,
 			Type:  dbViper.GetString("type"),
 			Viper: dbViper,

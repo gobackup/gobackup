@@ -19,35 +19,36 @@ type MySQL struct {
 	password    string
 	dumpCommand string
 	dumpPath    string
+	model       config.ModelConfig
 }
 
 // NewMySQL instrance
-func newMySQL(dbCfg config.SubConfig) (ctx *MySQL) {
+func (ctx MySQL) perform(model config.ModelConfig, dbCfg config.SubConfig) (err error) {
+
 	viper := dbCfg.Viper
 	viper.SetDefault("host", "localhost")
 	viper.SetDefault("username", "root")
 	viper.SetDefault("port", 3306)
 
-	ctx = &MySQL{
-		Name:     dbCfg.Name,
-		host:     viper.GetString("host"),
-		port:     viper.GetString("port"),
-		database: viper.GetString("database"),
-		username: viper.GetString("username"),
-		password: viper.GetString("password"),
+	ctx.Name = dbCfg.Name
+	ctx.host = viper.GetString("host")
+	ctx.port = viper.GetString("port")
+	ctx.database = viper.GetString("database")
+	ctx.username = viper.GetString("username")
+	ctx.password = viper.GetString("password")
+	ctx.model = model
+
+	if err = ctx.prepare(); err != nil {
+		return
 	}
 
-	return ctx
-}
-
-func (ctx MySQL) perform() (err error) {
 	logger.Info("=> database | MySQL:", ctx.Name)
 	err = ctx.dump()
 	return
 }
 
 func (ctx *MySQL) prepare() (err error) {
-	ctx.dumpPath = path.Join(config.DumpPath, "mysql")
+	ctx.dumpPath = path.Join(ctx.model.DumpPath, "mysql")
 	helper.MkdirP(ctx.dumpPath)
 
 	// mysqldump command

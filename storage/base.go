@@ -6,13 +6,13 @@ import (
 
 // Base storage
 type Base interface {
-	perform(archivePath string) error
+	perform(model config.ModelConfig, archivePath string) error
 }
 
 // Run storage
-func Run(archivePath string) error {
+func Run(model config.ModelConfig, archivePath string) error {
 	var ctx Base
-	switch config.StoreWith.Type {
+	switch model.StoreWith.Type {
 	case "local":
 		ctx = &Local{}
 	case "ftp":
@@ -21,7 +21,7 @@ func Run(archivePath string) error {
 		ctx = &Local{}
 	}
 
-	err := ctx.perform(archivePath)
+	err := ctx.perform(model, archivePath)
 	if err != nil {
 		return err
 	}

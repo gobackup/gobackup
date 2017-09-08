@@ -16,32 +16,22 @@ type FTP struct {
 	password string
 }
 
-func (ctx *FTP) perform(archivePath string) error {
+func (ctx *FTP) perform(model config.ModelConfig, archivePath string) error {
 	logger.Info("=> storage | FTP")
 
-	config.StoreWith.Viper.SetDefault("port", "21")
+	model.StoreWith.Viper.SetDefault("port", "21")
 
-	ctx.host = config.StoreWith.Viper.GetString("host")
-	ctx.port = config.StoreWith.Viper.GetString("port")
-	ctx.path = config.StoreWith.Viper.GetString("path")
-	ctx.username = config.StoreWith.Viper.GetString("username")
-	ctx.password = config.StoreWith.Viper.GetString("password")
+	ctx.host = model.StoreWith.Viper.GetString("host")
+	ctx.port = model.StoreWith.Viper.GetString("port")
+	ctx.path = model.StoreWith.Viper.GetString("path")
+	ctx.username = model.StoreWith.Viper.GetString("username")
+	ctx.password = model.StoreWith.Viper.GetString("password")
 
 	ftp, err := goftp.Connect(ctx.host + ":" + ctx.port)
 	if err != nil {
 		return err
 	}
 	defer ftp.Close()
-
-	// tlsConfig := tls.Config{
-	// 	InsecureSkipVerify: true,
-	// 	ClientAuth:         tls.RequestClientCert,
-	// }
-
-	// err = ftp.AuthTLS(&tlsConfig)
-	// if err != nil {
-	// 	return err
-	// }
 
 	logger.Info("-> Authorizing FTP...")
 	if err := ftp.Login(ctx.username, ctx.password); err != nil {

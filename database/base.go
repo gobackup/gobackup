@@ -8,30 +8,24 @@ import (
 
 // Base interface
 type Base interface {
-	perform() error
-	prepare() error
+	perform(model config.ModelConfig, dbConfig config.SubConfig) error
 }
 
 // New - initialize Database
-func runModel(subCfg config.SubConfig) (err error) {
+func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 	var ctx Base
-	switch subCfg.Type {
+	switch dbConfig.Type {
 	case "mysql":
-		ctx = newMySQL(subCfg)
+		ctx = &MySQL{}
 	case "redis":
-		ctx = newRedis(subCfg)
+		ctx = &Redis{}
 	default:
-		logger.Warn(fmt.Errorf("databases.%s config `type: %s`, but is not implement", subCfg.Name, subCfg.Type))
+		logger.Warn(fmt.Errorf("model: %s databases.%s config `type: %s`, but is not implement", model.Name, dbConfig.Name, dbConfig.Type))
 		return
-	}
-	// prepare
-	err = ctx.prepare()
-	if err != nil {
-		return err
 	}
 
 	// perform
-	err = ctx.perform()
+	err = ctx.perform(model, dbConfig)
 	if err != nil {
 		return err
 	}
@@ -41,10 +35,10 @@ func runModel(subCfg config.SubConfig) (err error) {
 }
 
 // Run databases
-func Run() error {
+func Run(model config.ModelConfig) error {
 	logger.Info("------------- Databases --------------")
-	for _, dbCfg := range config.Databases {
-		err := runModel(dbCfg)
+	for _, dbCfg := range model.Databases {
+		err := runModel(model, dbCfg)
 		if err != nil {
 			return err
 		}
