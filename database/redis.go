@@ -57,7 +57,7 @@ func newRedis(dbCfg config.SubConfig) (ctx *Redis) {
 		ctx.mode = redisModeCopy
 	}
 
-	ctx.dumpPath = path.Join(config.DumpPath, "databases", "redis")
+	ctx.dumpPath = path.Join(config.DumpPath, "redis")
 	return
 }
 
@@ -124,10 +124,15 @@ func (ctx *Redis) save() error {
 func (ctx *Redis) sync() error {
 	dumpFilePath := path.Join(ctx.dumpPath, "dump.rdb")
 	logger.Info("Syncing redis dump to", dumpFilePath)
-	_, err := helper.Exec(redisCliCommand, "--rdb", "-", "|", "cat >", dumpFilePath)
+	_, err := helper.Exec(redisCliCommand, "--rdb", dumpFilePath)
 	if err != nil {
 		return fmt.Errorf("dump redis error: %s", err)
 	}
+
+	if !helper.IsExistsPath(dumpFilePath) {
+		return fmt.Errorf("dump result file %s not found", dumpFilePath)
+	}
+
 	return nil
 }
 

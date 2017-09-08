@@ -10,9 +10,10 @@ import (
 )
 
 var (
-	DumpPath  string
-	Databases []SubConfig
-	Storages  []SubConfig
+	DumpPath     string
+	CompressWith string
+	Databases    []SubConfig
+	Storages     []SubConfig
 )
 
 type SubConfig struct {
@@ -37,6 +38,7 @@ func init() {
 	}
 
 	DumpPath = path.Join(os.TempDir(), "gobackup", fmt.Sprintf("%d", time.Now().UnixNano()))
+	CompressWith = viper.GetString("compress_with")
 	loadDatabasesConfig()
 	loadStoragesConfig()
 

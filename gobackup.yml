@@ -1,3 +1,4 @@
+compress_with: tgz
 databases:
   mysql1:
     type: mysql

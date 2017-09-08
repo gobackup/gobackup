@@ -27,13 +27,13 @@ func runModel(subCfg config.SubConfig) (err error) {
 	// prepare
 	err = ctx.prepare()
 	if err != nil {
-		logger.Error(err)
+		return err
 	}
 
 	// perform
 	err = ctx.perform()
 	if err != nil {
-		logger.Error(err)
+		return err
 	}
 	logger.Info("")
 
@@ -41,12 +41,15 @@ func runModel(subCfg config.SubConfig) (err error) {
 }
 
 // Run databases
-func Run() {
+func Run() error {
 	logger.Info("------------- Databases --------------")
 	for _, dbCfg := range config.Databases {
-		runModel(dbCfg)
+		err := runModel(dbCfg)
+		if err != nil {
+			return err
+		}
 	}
-	logger.Info("------------- End databases --------------")
+	logger.Info("----------- End databases ------------\n")
 
-	return
+	return nil
 }
