@@ -12,6 +12,7 @@ A simple backup tool like [backup/backup](https://github.com/backup/backup) Ruby
 - No deprecations.
 - Multiple Databases source support.
 - Multiple Storage type support.
+- Archive paths or files into a tar.
 
 ## Current Support status
 
@@ -24,6 +25,7 @@ A simple backup tool like [backup/backup](https://github.com/backup/backup) Ruby
 - MySQL
 - PostgreSQL
 - Redis - `mode: sync/copy`
+
 
 ### Storages
 

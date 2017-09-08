@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/huacnlee/gobackup/archive"
 	"github.com/huacnlee/gobackup/compressor"
 	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/database"
@@ -21,6 +22,12 @@ func (ctx Model) perform() {
 	defer ctx.cleanup()
 
 	err := database.Run(ctx.Config)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
+	err = archive.Run(ctx.Config)
 	if err != nil {
 		logger.Error(err)
 		return

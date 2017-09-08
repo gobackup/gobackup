@@ -1,5 +1,5 @@
 test:
-	go run main.go model.go -- perform -m test3
+	go run main.go model.go -- perform -m demo
 release:
 	mkdir -p ./build && rm -f ./build/*
 	@go build -ldflags "-s -w" -o build/gobackup ./*.go && cd build/ && zip gobackup-darwin-amd64.zip gobackup && rm gobackup && cd ..
