@@ -15,3 +15,9 @@ A simple backup tool like [backup/backup](https://github.com/backup/backup) Ruby
 
 - Local
 - FTP / SFTP
+
+## Usage
+
+```bash
+$ gobackup perform
+```

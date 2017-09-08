@@ -1,10 +1,13 @@
 package storage
 
 import (
+	"os"
+	"path"
+	"path/filepath"
 	// "crypto/tls"
 	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/logger"
-	"gopkg.in/dutchcoders/goftp.v1"
+	"github.com/secsy/goftp"
 )
 
 // FTP storage
@@ -27,27 +30,34 @@ func (ctx *FTP) perform(model config.ModelConfig, archivePath string) error {
 	ctx.username = model.StoreWith.Viper.GetString("username")
 	ctx.password = model.StoreWith.Viper.GetString("password")
 
-	ftp, err := goftp.Connect(ctx.host + ":" + ctx.port)
+	ftpConfig := goftp.Config{
+		User:     model.StoreWith.Viper.GetString("username"),
+		Password: model.StoreWith.Viper.GetString("password"),
+	}
+
+	ftp, err := goftp.DialConfig(ftpConfig, model.StoreWith.Viper.GetString("host")+":"+model.StoreWith.Viper.GetString("port"))
 	if err != nil {
 		return err
 	}
 	defer ftp.Close()
 
-	logger.Info("-> Authorizing FTP...")
-	if err := ftp.Login(ctx.username, ctx.password); err != nil {
-		return err
-	}
-
 	logger.Info("-> Uploading...")
-	if err := ftp.Mkd(ctx.path); err != nil {
+	_, err = ftp.Stat(ctx.path)
+	if os.IsNotExist(err) {
+		if _, err := ftp.Mkdir(ctx.path); err != nil {
+			return err
+		}
+	}
+
+	file, err := os.Open(archivePath)
+	if err != nil {
 		return err
 	}
 
-	if err := ftp.Cwd(ctx.path); err != nil {
-		return err
-	}
-
-	err = ftp.Upload(archivePath)
+	fileName := filepath.Base(archivePath)
+	remotePath := path.Join(ctx.path, fileName)
+	logger.Info("-> upload", remotePath)
+	err = ftp.Store(remotePath, file)
 	if err != nil {
 		return err
 	}
