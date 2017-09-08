@@ -25,6 +25,13 @@ A simple backup tool like [backup/backup](https://github.com/backup/backup) Ruby
 - Local
 - FTP
 
+## Install
+
+```bash
+# for Linux
+$ curl -sSL https://git.io/v5oaP | bash
+```
+
 ## Usage
 
 ```bash
