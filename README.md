@@ -26,6 +26,9 @@ A simple backup tool like [backup/backup](https://github.com/backup/backup) Ruby
 - PostgreSQL
 - Redis - `mode: sync/copy`
 
+### Archive
+
+Use `tar` command to archive many file or path into a `.tar` file.
 
 ### Storages
 
