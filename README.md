@@ -22,6 +22,7 @@ A simple backup tool like [backup/backup](https://github.com/backup/backup) Ruby
 ### Databases
 
 - MySQL
+- PostgreSQL
 - Redis - `mode: sync/copy`
 
 ### Storages

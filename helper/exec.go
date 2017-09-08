@@ -1,15 +1,15 @@
 package helper
 
 import (
-	// "github.com/huacnlee/gobackup/logger"
-	// "os"
+	"bytes"
+	"errors"
+	"github.com/huacnlee/gobackup/logger"
 	"os/exec"
 	"strings"
 )
 
 // Exec cli commands
 func Exec(command string, args ...string) (output string, err error) {
-	// logger.Debug(command, " ", strings.Join(args, " "))
 	commands := strings.Split(command, " ")
 	command = commands[0]
 	commandArgs := []string{}
@@ -18,10 +18,14 @@ func Exec(command string, args ...string) (output string, err error) {
 	}
 	commandArgs = append(commandArgs, args...)
 	cmd := exec.Command(command, commandArgs...)
-	// cmd.Stderr = logger
+
+	var stdErr bytes.Buffer
+	cmd.Stderr = &stdErr
 
 	out, err := cmd.Output()
 	if err != nil {
+		logger.Debug(command, " ", strings.Join(commandArgs, " "))
+		err = errors.New(stdErr.String())
 		return
 	}
 

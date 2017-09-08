@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"github.com/fatih/color"
 	"log"
 	"os"
 )
@@ -24,6 +25,7 @@ func Println(v ...interface{}) {
 	myLog.Println(v...)
 }
 
+// Debug log
 func Debug(v ...interface{}) {
 	myLog.Println("[debug]", fmt.Sprint(v...))
 }
@@ -35,10 +37,12 @@ func Info(v ...interface{}) {
 
 // Warn log
 func Warn(v ...interface{}) {
-	myLog.Println("[warn]", fmt.Sprint(v...))
+	c := color.YellowString(fmt.Sprint(v...))
+	myLog.Println(c)
 }
 
 // Error log
 func Error(v ...interface{}) {
-	myLog.Println("[error]", fmt.Sprint(v...))
+	c := color.RedString(fmt.Sprint(v...))
+	myLog.Println(c)
 }
