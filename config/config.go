@@ -49,7 +49,6 @@ func init() {
 
 	Models = []ModelConfig{}
 	for key := range viper.GetStringMap("models") {
-		logger.Info("key", key)
 		Models = append(Models, loadModel(key))
 	}
 
