@@ -20,6 +20,8 @@ models:
       host: your-host.com
       private_key: ~/.ssh/id_rsa
       username: ubuntu
+      password: password
+      timeout: 300
   test_model:
     compress_with:
       type: tgz
