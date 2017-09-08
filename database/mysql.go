@@ -6,6 +6,7 @@ import (
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
 	"path"
+	"strings"
 )
 
 // MySQL database
@@ -50,22 +51,24 @@ func (ctx *MySQL) prepare() (err error) {
 	helper.MkdirP(ctx.dumpPath)
 
 	// mysqldump command
-	ctx.dumpCommand = "mysqldump"
+	dumpArgs := []string{}
 	if len(ctx.database) == 0 {
 		return fmt.Errorf("mysql database config is required")
 	}
 	if len(ctx.host) > 0 {
-		ctx.dumpCommand += " -h " + ctx.host
+		dumpArgs = append(dumpArgs, "--host", ctx.host)
 	}
 	if len(ctx.port) > 0 {
-		ctx.dumpCommand += " -p " + ctx.port
+		dumpArgs = append(dumpArgs, "--port", ctx.port)
 	}
 	if len(ctx.username) > 0 {
-		ctx.dumpCommand += " -u " + ctx.username
+		dumpArgs = append(dumpArgs, "-u", ctx.username)
 	}
 	if len(ctx.password) > 0 {
-		ctx.dumpCommand += " -p" + ctx.password
+		dumpArgs = append(dumpArgs, "-p"+ctx.password)
 	}
+
+	ctx.dumpCommand = "mysqldump " + strings.Join(dumpArgs, " ") + " " + ctx.database
 
 	return nil
 }
@@ -73,7 +76,7 @@ func (ctx *MySQL) prepare() (err error) {
 func (ctx *MySQL) dump() error {
 	dumpFilePath := path.Join(ctx.dumpPath, ctx.database+".sql")
 	logger.Info("-> Dumping MySQL...")
-	_, err := helper.Exec(ctx.dumpCommand, ctx.database, ">", dumpFilePath)
+	_, err := helper.Exec(ctx.dumpCommand, "--result-file="+dumpFilePath)
 	if err != nil {
 		return fmt.Errorf("-> Dump error: %s %s", ctx.dumpCommand, err)
 	}

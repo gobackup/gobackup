@@ -24,10 +24,13 @@ func runModel(subCfg config.SubConfig) (err error) {
 		logger.Warn(fmt.Errorf("databases.%s config `type: %s`, but is not implement", subCfg.Name, subCfg.Type))
 		return
 	}
+	// prepare
 	err = ctx.prepare()
 	if err != nil {
 		logger.Error(err)
 	}
+
+	// perform
 	err = ctx.perform()
 	if err != nil {
 		logger.Error(err)

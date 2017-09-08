@@ -1,7 +1,6 @@
 package helper
 
 import (
-	"fmt"
 	"github.com/huacnlee/gobackup/logger"
 	"os/exec"
 	"strings"
@@ -9,6 +8,7 @@ import (
 
 // Exec cli commands
 func Exec(command string, args ...string) (output string, err error) {
+	logger.Debug(command, " ", strings.Join(args, " "))
 	commands := strings.Split(command, " ")
 	command = commands[0]
 	commandArgs := []string{}
@@ -17,7 +17,8 @@ func Exec(command string, args ...string) (output string, err error) {
 	}
 	commandArgs = append(commandArgs, args...)
 	cmd := exec.Command(command, commandArgs...)
-	logger.Debug(command, fmt.Sprint(commandArgs...))
+	// cmd.Stderr = os.Stderr
+
 	out, err := cmd.Output()
 	if err != nil {
 		return
