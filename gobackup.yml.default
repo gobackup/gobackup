@@ -13,7 +13,7 @@ models:
         database: test
         username: monster
         password: 123123
-  test2:
+  normal_files:
     store_with:
       type: scp
       path: ~/backup
@@ -22,6 +22,15 @@ models:
       username: ubuntu
       password: password
       timeout: 300
+    archive:
+      includes:
+        - /home/ubuntu/.ssh/
+        - /etc/nginx/nginx.conf
+        - /etc/redis/redis.conf
+        - /etc/logrotate.d/
+      excludes:
+        - /home/ubuntu/.ssh/known_hosts
+        - /etc/logrotate.d/syslog
   test_model:
     compress_with:
       type: tgz
