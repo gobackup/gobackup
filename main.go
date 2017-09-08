@@ -11,7 +11,7 @@ const (
 )
 
 var (
-	modelName = "all"
+	modelName = ""
 )
 
 func main() {
@@ -32,10 +32,6 @@ func main() {
 			},
 			Action: func(c *cli.Context) error {
 				if len(modelName) == 0 {
-					modelName = "all"
-				}
-
-				if modelName == "all" {
 					performAll()
 				} else {
 					performOne(modelName)
