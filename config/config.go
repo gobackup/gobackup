@@ -35,12 +35,12 @@ type SubConfig struct {
 func init() {
 	viper.SetConfigType("yaml")
 	viper.SetConfigName("gobackup")
-	// /etc/gobackup/gobackup.yml
-	viper.AddConfigPath("/etc/gobackup/") // path to look for the config file in
-	// ~/.gobackup/gobackup.yml
-	viper.AddConfigPath("$HOME/.gobackup") // call multiple times to add many search paths
 	// ./gobackup.yml
 	viper.AddConfigPath(".")
+	// ~/.gobackup/gobackup.yml
+	viper.AddConfigPath("$HOME/.gobackup") // call multiple times to add many search paths
+	// /etc/gobackup/gobackup.yml
+	viper.AddConfigPath("/etc/gobackup/") // path to look for the config file in
 	err := viper.ReadInConfig()
 	if err != nil {
 		logger.Error("Load gobackup config faild", err)
@@ -57,7 +57,7 @@ func init() {
 
 func loadModel(key string) (model ModelConfig) {
 	model.Name = key
-	model.DumpPath = path.Join(os.TempDir(), "gobackup", fmt.Sprintf("%d", time.Now().UnixNano()))
+	model.DumpPath = path.Join(os.TempDir(), "gobackup", fmt.Sprintf("%d", time.Now().UnixNano()), key)
 	model.Viper = viper.Sub("models." + key)
 
 	model.CompressWith = SubConfig{
