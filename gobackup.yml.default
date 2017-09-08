@@ -13,6 +13,13 @@ models:
         database: test
         username: monster
         password: 123123
+  test2:
+    store_with:
+      type: scp
+      path: ~/backup
+      host: your-host.com
+      private_key: ~/.ssh/id_rsa
+      username: ubuntu
   test_model:
     compress_with:
       type: tgz

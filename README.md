@@ -29,6 +29,7 @@ A simple backup tool like [backup/backup](https://github.com/backup/backup) Ruby
 
 - Local
 - FTP
+- SCP - Upload via SSH copy
 
 ## Install
 

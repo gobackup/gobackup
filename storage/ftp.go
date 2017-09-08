@@ -58,6 +58,7 @@ func (ctx *FTP) perform(model config.ModelConfig, archivePath string) error {
 	if err != nil {
 		return err
 	}
+	defer file.Close()
 
 	fileName := filepath.Base(archivePath)
 	remotePath := path.Join(ctx.path, fileName)
