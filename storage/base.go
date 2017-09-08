@@ -1,18 +1,26 @@
 package storage
 
+import (
+	"github.com/huacnlee/gobackup/config"
+)
+
 type Base interface {
-	Perform() error
+	perform(archivePath string) error
 }
 
-func New(model string) (ctx Base) {
-	switch model {
+func Run(archivePath string) error {
+	var ctx Base
+	switch config.StoreWith.Type {
 	case "local":
-		ctx = newLocal()
+		ctx = &Local{}
+	default:
+		ctx = &Local{}
 	}
 
-	return
-}
+	err := ctx.perform(archivePath)
+	if err != nil {
+		return err
+	}
 
-func compress() {
-
+	return nil
 }

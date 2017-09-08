@@ -11,7 +11,8 @@ import (
 
 var (
 	DumpPath     string
-	CompressWith string
+	CompressWith SubConfig
+	StoreWith    SubConfig
 	Databases    []SubConfig
 	Storages     []SubConfig
 )
@@ -38,7 +39,17 @@ func init() {
 	}
 
 	DumpPath = path.Join(os.TempDir(), "gobackup", fmt.Sprintf("%d", time.Now().UnixNano()))
-	CompressWith = viper.GetString("compress_with")
+
+	CompressWith = SubConfig{
+		Type:  viper.GetString("compress_with.type"),
+		Viper: viper.Sub("compress_with"),
+	}
+
+	StoreWith = SubConfig{
+		Type:  viper.GetString("store_with.type"),
+		Viper: viper.Sub("store_with"),
+	}
+
 	loadDatabasesConfig()
 	loadStoragesConfig()
 

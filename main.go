@@ -6,6 +6,7 @@ import (
 	"github.com/huacnlee/gobackup/database"
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
+	"github.com/huacnlee/gobackup/storage"
 )
 
 func main() {
@@ -17,7 +18,13 @@ func main() {
 		return
 	}
 
-	err = compressor.Run()
+	archivePath, err := compressor.Run()
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
+	err = storage.Run(*archivePath)
 	if err != nil {
 		logger.Error(err)
 		return

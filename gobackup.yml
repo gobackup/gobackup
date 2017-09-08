@@ -1,4 +1,8 @@
-compress_with: tgz
+compress_with:
+  type: tgz
+store_with:
+  type: local
+  path: /Users/jason/Downloads/backup1
 databases:
   mysql1:
     type: mysql
@@ -22,7 +26,3 @@ databases:
   postgresql1:
     type: postgresql
     host: localhost
-storages:
-  local:
-    type: local
-    path: /Users/jason/Downloads/backup1

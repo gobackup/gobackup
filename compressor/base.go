@@ -7,25 +7,25 @@ import (
 
 // Base compressor
 type Base interface {
-	perform() error
+	perform() (resultPath *string, err error)
 }
 
 // Run compressor
-func Run() error {
+func Run() (resultPath *string, err error) {
 	logger.Info("------------- Compressor --------------")
 	var ctx Base
-	switch config.CompressWith {
+	switch config.CompressWith.Type {
 	case "tgz":
 		ctx = &Tgz{}
 	default:
 		ctx = &Tgz{}
 	}
 
-	err := ctx.perform()
+	resultPath, err = ctx.perform()
 	if err != nil {
-		return err
+		return
 	}
 	logger.Info("----------- End Compressor ------------\n")
 
-	return nil
+	return
 }
