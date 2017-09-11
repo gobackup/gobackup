@@ -10,7 +10,6 @@ import (
 )
 
 var (
-	isTest bool
 	// Exist Is config file exist
 	Exist bool
 	// Models configs
@@ -36,19 +35,18 @@ type SubConfig struct {
 	Viper *viper.Viper
 }
 
-func init() {
-	loadConfig()
-}
-
 // loadConfig from:
 // - ./gobackup.yml
 // - ~/.gobackup/gobackup.yml
 // - /etc/gobackup/gobackup.yml
-func loadConfig() {
+func init() {
 	viper.SetConfigType("yaml")
 
+	isTest := os.Getenv("GO_ENV") == "test"
+
+	fmt.Println("runMode", os.Getenv("runMode"))
+
 	if isTest {
-		fmt.Println("is test")
 		viper.SetConfigName("gobackup_test")
 	} else {
 		viper.SetConfigName("gobackup")
@@ -56,7 +54,9 @@ func loadConfig() {
 
 	// ./gobackup.yml
 	viper.AddConfigPath(".")
-	if !isTest {
+	if isTest {
+		viper.AddConfigPath("../")
+	} else {
 		// ~/.gobackup/gobackup.yml
 		viper.AddConfigPath("$HOME/.gobackup") // call multiple times to add many search paths
 		// /etc/gobackup/gobackup.yml

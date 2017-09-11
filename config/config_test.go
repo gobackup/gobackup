@@ -5,11 +5,6 @@ import (
 	"testing"
 )
 
-func init() {
-	isTest = true
-	loadConfig()
-}
-
 func TestModelsLength(t *testing.T) {
 	assert.Equal(t, Exist, true)
 	assert.Len(t, Models, 3)
