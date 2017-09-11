@@ -43,6 +43,84 @@ Use `tar` command to archive many file or path into a `.tar` file.
 $ curl -sSL https://git.io/v5oaP | bash
 ```
 
+after that, you will get `/usr/local/bin/gobackup` command.
+
+```bash
+$ gobackup -h
+NAME:
+   gobackup - Easy full stack backup operations on UNIX-like systems
+
+USAGE:
+   gobackup [global options] command [command options] [arguments...]
+
+VERSION:
+   0.1.0
+
+COMMANDS:
+     perform  
+     help, h  Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --help, -h     show help
+   --version, -v  print the version
+```
+
+## Configuration
+
+GoBackup will seek config files in:
+
+- ~/.gobackup/gobackup.yml
+- /etc/gobackup/gobackup.yml
+
+Example config: [gobackup.exampl.yml](https://github.com/huacnlee/gobackup/blob/master/gobackup.example.yml)
+
+```yml
+models:
+  gitlab:
+    compress_with:
+      type: tgz
+    store_with:
+      type: scp
+      path: ~/backup
+      host: your-host.com
+      private_key: ~/.ssh/id_rsa
+      username: ubuntu
+      password: password
+      timeout: 300
+    databases:
+      gitlab:
+        type: mysql
+        host: localhost
+        port: 3306
+        database: gitlab_production
+        username: root
+        password: 
+      gitlab_redis:
+        type: redis
+        mode: sync
+        rdb_path: /var/db/redis/dump.rdb
+        invoke_save: true
+        password: 
+    archive:
+      includes:
+        - /home/git/.ssh/
+        - /etc/mysql/my.conf
+        - /etc/nginx/nginx.conf
+        - /etc/nginx/conf.d
+        - /etc/redis/redis.conf
+        - /etc/logrotate.d/
+      excludes:
+        - /home/ubuntu/.ssh/known_hosts
+        - /etc/logrotate.d/syslog
+  gitlab_repos:
+    store_with:
+      type: local
+      path: /data/backups/gitlab-repos/
+    archive:
+      includes:
+        - /home/git/repositories
+```
+
 ## Usage
 
 ```bash
