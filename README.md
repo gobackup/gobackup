@@ -43,6 +43,19 @@ Use `tar` command to archive many file or path into a `.tar` file.
 $ curl -sSL https://git.io/v5oaP | bash
 ```
 
+## Schedule run
+
+You may want run backup in scheduly, you need Crontab:
+
+```bash
+$ crontab -l
+0 0 * * * /usr/local/bin/gobackup perform >> ~/.gobackup/gobackup.log
+```
+
+> `0 0 * * *` means run at 0:00 AM, every day.
+
+And after a day, you can check up the execute status by `~/.gobackup/gobackup.log`.
+
 ## Usage
 
 ```bash
