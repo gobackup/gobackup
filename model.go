@@ -39,7 +39,7 @@ func (ctx Model) perform() {
 		return
 	}
 
-	err = storage.Run(ctx.Config, *archivePath)
+	err = storage.Run(ctx.Config, archivePath)
 	if err != nil {
 		logger.Error(err)
 		return

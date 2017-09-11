@@ -10,7 +10,7 @@ import (
 
 // Base compressor
 type Base interface {
-	perform(model config.ModelConfig) (archivePath *string, err error)
+	perform(model config.ModelConfig) (archivePath string, err error)
 }
 
 func archiveFilePath(ext string) string {
@@ -18,7 +18,7 @@ func archiveFilePath(ext string) string {
 }
 
 // Run compressor
-func Run(model config.ModelConfig) (archivePath *string, err error) {
+func Run(model config.ModelConfig) (archivePath string, err error) {
 	logger.Info("------------- Compressor --------------")
 	var ctx Base
 	switch model.CompressWith.Type {
