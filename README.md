@@ -1,6 +1,8 @@
 GoBackup
 --------
 
+[![Build Status](https://travis-ci.org/huacnlee/gobackup.svg?branch=master)](https://travis-ci.org/huacnlee/gobackup)
+
 A simple backup tool like [backup/backup](https://github.com/backup/backup) RubyGem.
 
 GoBackup 是一个类似 [backup/backup](https://github.com/backup/backup) 的一站式备份工具，为中小型服务器／个人服务器而设计，配合 Crontab 以实现定时备份的目的。
@@ -61,7 +63,7 @@ VERSION:
    0.1.0
 
 COMMANDS:
-     perform  
+     perform
      help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
@@ -98,13 +100,13 @@ models:
         port: 3306
         database: gitlab_production
         username: root
-        password: 
+        password:
       gitlab_redis:
         type: redis
         mode: sync
         rdb_path: /var/db/redis/dump.rdb
         invoke_save: true
-        password: 
+        password:
     archive:
       includes:
         - /home/git/.ssh/
