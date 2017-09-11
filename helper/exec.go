@@ -29,6 +29,6 @@ func Exec(command string, args ...string) (output string, err error) {
 		return
 	}
 
-	output = string(out)
+	output = strings.Trim(string(out), "\n")
 	return
 }

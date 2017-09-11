@@ -4,6 +4,7 @@ import (
 	"os"
 )
 
+// IsExistsPath check path exist
 func IsExistsPath(p string) bool {
 	_, err := os.Stat(p)
 	if err != nil {
@@ -12,6 +13,7 @@ func IsExistsPath(p string) bool {
 	return true
 }
 
+// MkdirP like mkdir -p
 func MkdirP(dirPath string) {
 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
 		os.MkdirAll(dirPath, 0777)
