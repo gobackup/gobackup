@@ -1,3 +1,7 @@
+# gobackup config example
+# -----------------------
+# Put this file in follow place:
+# ~/.gobackup/gobackup.yml or /etc/gobackup/gobackup.yml
 models:
   test1:
     compress_with:
