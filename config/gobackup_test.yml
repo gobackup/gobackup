@@ -6,22 +6,22 @@ models:
       type: local
       path: /Users/jason/Downloads/backup1
     databases:
-      test:
+      dummy_test:
         type: mysql
         host: localhost
         port: 3306
-        database: test
-        username: monster
-        password: 123123
-  normal_files:
-    store_with:
-      type: scp
-      path: ~/backup
-      host: your-host.com
-      private_key: ~/.ssh/id_rsa
-      username: ubuntu
-      password: password
-      timeout: 300
+        database: dummy_test
+        username: root
+        password: 123456
+      redis1:
+        type: redis
+        mode: sync
+        rdb_path: /var/db/redis/dump.rdb
+        invoke_save: true
+        password: 456123
+      postgresql:
+        type: postgresql
+        host: localhost
     archive:
       includes:
         - /home/ubuntu/.ssh/
@@ -31,6 +31,15 @@ models:
       excludes:
         - /home/ubuntu/.ssh/known_hosts
         - /etc/logrotate.d/syslog
+  normal_files:
+    store_with:
+      type: scp
+      path: ~/backup
+      host: your-host.com
+      private_key: ~/.ssh/id_rsa
+      username: ubuntu
+      password: password
+      timeout: 300
   test_model:
     compress_with:
       type: tgz
@@ -42,18 +51,4 @@ models:
       timeout: 30
       username: user1
       password: pass1
-    databases:
-      dummy_test:
-        type: mysql
-        host: localhost
-        database: dummy_test
-        username: root
-      redis:
-        type: redis
-        mode: sync
-        rdb_path: /usr/local/var/db/redis/dump.rdb
-        invoke_save: true
-        password: 123123
-      postgresql:
-        type: postgresql
-        host: localhost
+

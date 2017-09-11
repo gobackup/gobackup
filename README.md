@@ -78,7 +78,7 @@ GoBackup will seek config files in:
 - ~/.gobackup/gobackup.yml
 - /etc/gobackup/gobackup.yml
 
-Example config: [gobackup.exampl.yml](https://github.com/huacnlee/gobackup/blob/master/gobackup.example.yml)
+Example config: [gobackup.exampl.yml](https://github.com/huacnlee/gobackup/blob/master/config/gobackup_test.yml)
 
 ```yml
 models:

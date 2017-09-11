@@ -10,6 +10,9 @@ import (
 )
 
 var (
+	isTest bool
+	// Exist Is config file exist
+	Exist bool
 	// Models configs
 	Models []ModelConfig
 )
@@ -34,20 +37,38 @@ type SubConfig struct {
 }
 
 func init() {
+	loadConfig()
+}
+
+// loadConfig from:
+// - ./gobackup.yml
+// - ~/.gobackup/gobackup.yml
+// - /etc/gobackup/gobackup.yml
+func loadConfig() {
 	viper.SetConfigType("yaml")
-	viper.SetConfigName("gobackup")
+
+	if isTest {
+		fmt.Println("is test")
+		viper.SetConfigName("gobackup_test")
+	} else {
+		viper.SetConfigName("gobackup")
+	}
+
 	// ./gobackup.yml
 	viper.AddConfigPath(".")
-	// ~/.gobackup/gobackup.yml
-	viper.AddConfigPath("$HOME/.gobackup") // call multiple times to add many search paths
-	// /etc/gobackup/gobackup.yml
-	viper.AddConfigPath("/etc/gobackup/") // path to look for the config file in
+	if !isTest {
+		// ~/.gobackup/gobackup.yml
+		viper.AddConfigPath("$HOME/.gobackup") // call multiple times to add many search paths
+		// /etc/gobackup/gobackup.yml
+		viper.AddConfigPath("/etc/gobackup/") // path to look for the config file in
+	}
 	err := viper.ReadInConfig()
 	if err != nil {
 		logger.Error("Load gobackup config faild", err)
 		return
 	}
 
+	Exist = true
 	Models = []ModelConfig{}
 	for key := range viper.GetStringMap("models") {
 		Models = append(Models, loadModel(key))
@@ -101,4 +122,24 @@ func loadStoragesConfig(model *ModelConfig) {
 			Viper: dbViper,
 		})
 	}
+}
+
+func getModelByName(name string) (model *ModelConfig) {
+	for _, m := range Models {
+		if m.Name == name {
+			model = &m
+			return
+		}
+	}
+	return
+}
+
+func (model *ModelConfig) getDatabaseByName(name string) (subConfig *SubConfig) {
+	for _, m := range model.Databases {
+		if m.Name == name {
+			subConfig = &m
+			return
+		}
+	}
+	return
 }
