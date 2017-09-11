@@ -1,4 +1,6 @@
 test:
+	go test ./...
+run:
 	go run main.go model.go -- perform -m demo
 release:
 	mkdir -p ./build && rm -f ./build/*
