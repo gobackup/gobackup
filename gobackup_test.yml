@@ -3,7 +3,7 @@
 # Put this file in follow place:
 # ~/.gobackup/gobackup.yml or /etc/gobackup/gobackup.yml
 models:
-  test1:
+  base_test:
     compress_with:
       type: tgz
     store_with:

@@ -23,8 +23,7 @@ type MySQL struct {
 }
 
 // NewMySQL instrance
-func (ctx MySQL) perform(model config.ModelConfig, dbCfg config.SubConfig) (err error) {
-
+func (ctx *MySQL) perform(model config.ModelConfig, dbCfg config.SubConfig) (err error) {
 	viper := dbCfg.Viper
 	viper.SetDefault("host", "localhost")
 	viper.SetDefault("username", "root")
@@ -69,7 +68,9 @@ func (ctx *MySQL) prepare() (err error) {
 		dumpArgs = append(dumpArgs, "-p"+ctx.password)
 	}
 
-	ctx.dumpCommand = "mysqldump " + strings.Join(dumpArgs, " ") + " " + ctx.database
+	dumpArgs = append(dumpArgs, ctx.database)
+
+	ctx.dumpCommand = "mysqldump" + " " + strings.Join(dumpArgs, " ")
 
 	return nil
 }

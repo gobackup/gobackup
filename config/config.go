@@ -44,8 +44,6 @@ func init() {
 
 	isTest := os.Getenv("GO_ENV") == "test"
 
-	fmt.Println("runMode", os.Getenv("runMode"))
-
 	if isTest {
 		viper.SetConfigName("gobackup_test")
 	} else {
@@ -124,7 +122,8 @@ func loadStoragesConfig(model *ModelConfig) {
 	}
 }
 
-func getModelByName(name string) (model *ModelConfig) {
+// GetModelByName get model by name
+func GetModelByName(name string) (model *ModelConfig) {
 	for _, m := range Models {
 		if m.Name == name {
 			model = &m
@@ -134,7 +133,8 @@ func getModelByName(name string) (model *ModelConfig) {
 	return
 }
 
-func (model *ModelConfig) getDatabaseByName(name string) (subConfig *SubConfig) {
+// GetDatabaseByName get database config by name
+func (model *ModelConfig) GetDatabaseByName(name string) (subConfig *SubConfig) {
 	for _, m := range model.Databases {
 		if m.Name == name {
 			subConfig = &m

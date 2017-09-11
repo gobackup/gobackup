@@ -11,9 +11,9 @@ func TestModelsLength(t *testing.T) {
 }
 
 func TestModel(t *testing.T) {
-	model := getModelByName("test1")
+	model := GetModelByName("base_test")
 
-	assert.Equal(t, model.Name, "test1")
+	assert.Equal(t, model.Name, "base_test")
 
 	// compress_with
 	assert.Equal(t, model.CompressWith.Type, "tgz")
@@ -27,7 +27,7 @@ func TestModel(t *testing.T) {
 	assert.Len(t, model.Databases, 3)
 
 	// mysql
-	db := model.getDatabaseByName("dummy_test")
+	db := model.GetDatabaseByName("dummy_test")
 	assert.Equal(t, db.Name, "dummy_test")
 	assert.Equal(t, db.Type, "mysql")
 	assert.Equal(t, db.Viper.GetString("host"), "localhost")
@@ -37,7 +37,7 @@ func TestModel(t *testing.T) {
 	assert.Equal(t, db.Viper.GetString("password"), "123456")
 
 	// redis
-	db = model.getDatabaseByName("redis1")
+	db = model.GetDatabaseByName("redis1")
 	assert.Equal(t, db.Name, "redis1")
 	assert.Equal(t, db.Type, "redis")
 	assert.Equal(t, db.Viper.GetString("mode"), "sync")
@@ -46,7 +46,7 @@ func TestModel(t *testing.T) {
 	assert.Equal(t, db.Viper.GetString("password"), "456123")
 
 	// redis
-	db = model.getDatabaseByName("postgresql")
+	db = model.GetDatabaseByName("postgresql")
 	assert.Equal(t, db.Name, "postgresql")
 	assert.Equal(t, db.Type, "postgresql")
 	assert.Equal(t, db.Viper.GetString("host"), "localhost")
