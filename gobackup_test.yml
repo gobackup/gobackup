@@ -55,4 +55,14 @@ models:
       timeout: 30
       username: user1
       password: pass1
+  test_s3:
+    compress_with:
+      type: tgz
+    store_with:
+      type: s3
+      bucket: gobackup-test
+      region: ap-southeast-1
+      path: backups
+      access_key_id: Ohsgwk86h2ks
+      secret_access_key: Ojsiw729wujhKdhwsIIOw9173
 

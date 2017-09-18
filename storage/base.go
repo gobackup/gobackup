@@ -19,6 +19,8 @@ func Run(model config.ModelConfig, archivePath string) error {
 		ctx = &FTP{}
 	case "scp":
 		ctx = &SCP{}
+	case "s3":
+		ctx = &S3{}
 	default:
 		ctx = &Local{}
 	}

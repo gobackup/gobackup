@@ -39,6 +39,7 @@ Use `tar` command to archive many file or path into a `.tar` file.
 - Local
 - FTP
 - SCP - Upload via SSH copy
+- Amazon S3
 
 ## Install
 
