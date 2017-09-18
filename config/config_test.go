@@ -7,7 +7,7 @@ import (
 
 func TestModelsLength(t *testing.T) {
 	assert.Equal(t, Exist, true)
-	assert.Len(t, Models, 3)
+	assert.Len(t, Models, 4)
 }
 
 func TestModel(t *testing.T) {
