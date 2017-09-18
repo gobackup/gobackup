@@ -10,6 +10,13 @@ import (
 )
 
 // MySQL database
+//
+// type: mysql
+// host: localhost
+// port: 3306
+// database: test
+// username: root
+// password:
 type MySQL struct {
 	Name        string
 	host        string

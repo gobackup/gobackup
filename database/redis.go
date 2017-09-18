@@ -18,6 +18,14 @@ const (
 )
 
 // Redis database
+//
+// type: redis
+// mode: sync # or copy for use rdb_path
+// invoke_save: true
+// host: 192.168.1.2
+// port: 6379
+// password:
+// rdb_path: /var/db/redis/dump.rdb
 type Redis struct {
 	Name       string
 	host       string

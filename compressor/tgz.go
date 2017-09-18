@@ -7,6 +7,8 @@ import (
 )
 
 // Tgz .tar.gz compressor
+//
+// type: tgz
 type Tgz struct {
 }
 

@@ -7,6 +7,9 @@ import (
 )
 
 // Local storage
+//
+// type: local
+// path: /data/backups
 type Local struct {
 }
 

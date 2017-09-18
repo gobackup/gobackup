@@ -11,6 +11,13 @@ import (
 )
 
 // PostgreSQL database
+//
+// type: postgresql
+// host: localhost
+// port: 5432
+// database: test
+// username:
+// password:
 type PostgreSQL struct {
 	Name        string
 	host        string

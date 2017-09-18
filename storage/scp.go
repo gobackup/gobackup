@@ -14,6 +14,14 @@ import (
 )
 
 // SCP storage
+//
+// type: scp
+// host: 192.168.1.2
+// port: 22
+// username: root
+// password:
+// timeout: 300
+// private_key: ~/.ssh/id_rsa
 type SCP struct {
 	path     string
 	host     string

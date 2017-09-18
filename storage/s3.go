@@ -13,7 +13,15 @@ import (
 	"path/filepath"
 )
 
-// Amazon S3 storage
+// S3 - Amazon S3 storage
+//
+// type: s3
+// bucket: gobackup-test
+// region: us-east-1
+// path: backups
+// access_key_id: your-access-key-id
+// secret_access_key: your-secret-access-key
+// max_retries: 5
 type S3 struct {
 	bucket string
 	path   string

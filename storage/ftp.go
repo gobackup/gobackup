@@ -12,6 +12,14 @@ import (
 )
 
 // FTP storage
+//
+// type: ftp
+// path: /backups
+// host: ftp.your-host.com
+// port: 21
+// timeout: 30
+// username:
+// password:
 type FTP struct {
 	path     string
 	host     string
