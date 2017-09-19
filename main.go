@@ -12,11 +12,12 @@ const (
 
 var (
 	modelName = ""
+	version   = "0.3.0"
 )
 
 func main() {
 	app := cli.NewApp()
-	app.Version = "0.3.0"
+	app.Version = version
 	app.Name = "gobackup"
 	app.Usage = usage
 

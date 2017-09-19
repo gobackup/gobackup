@@ -1,0 +1,9 @@
+builds:
+  - binary: gobackup
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+archive:
+  format: tar.gz
