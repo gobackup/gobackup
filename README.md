@@ -39,8 +39,8 @@ Use `tar` command to archive many file or path into a `.tar` file.
 - Local
 - FTP
 - SCP - Upload via SSH copy
-- Amazon S3
-- Aliyu OSS
+- [Amazon S3](https://aws.amazon.com/cn/s3/)
+- [Aliyun OSS](https://www.aliyun.com/product/oss)
 
 ## Install
 
