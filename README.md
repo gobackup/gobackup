@@ -1,9 +1,12 @@
-GoBackup
---------
+<p align="center">
+<img src="https://user-images.githubusercontent.com/5518/30584059-31dd6b3a-9d5b-11e7-9cdc-df9a8778cf02.png" width="160" />
 
-[![Build Status](https://travis-ci.org/huacnlee/gobackup.svg?branch=master)](https://travis-ci.org/huacnlee/gobackup)
-
-A simple backup tool like [backup/backup](https://github.com/backup/backup) RubyGem.
+<h1 align="center">GoBackup</h1>
+<p align="center">A simple backup tool like <a href="https://github.com/backup/backup">backup/backup</a> RubyGem.</p>
+<p align="center">
+   <a href="https://travis-ci.org/huacnlee/gobackup"><img src="https://travis-ci.org/huacnlee/gobackup.svg?branch=master" alt="Build Status" /></a>
+</p>
+</p>
 
 GoBackup 是一个类似 [backup/backup](https://github.com/backup/backup) 的一站式备份工具，为中小型服务器／个人服务器而设计，配合 Crontab 以实现定时备份的目的。
 
