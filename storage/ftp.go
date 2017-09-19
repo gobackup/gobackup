@@ -3,7 +3,6 @@ package storage
 import (
 	"os"
 	"path"
-	"path/filepath"
 	// "crypto/tls"
 	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/logger"
@@ -28,7 +27,7 @@ type FTP struct {
 	password string
 }
 
-func (ctx *FTP) perform(model config.ModelConfig, archivePath string) error {
+func (ctx *FTP) perform(model config.ModelConfig, fileKey, archivePath string) error {
 	logger.Info("=> storage | FTP")
 
 	ftpViper := model.StoreWith.Viper
@@ -68,8 +67,7 @@ func (ctx *FTP) perform(model config.ModelConfig, archivePath string) error {
 	}
 	defer file.Close()
 
-	fileName := filepath.Base(archivePath)
-	remotePath := path.Join(ctx.path, fileName)
+	remotePath := path.Join(ctx.path, fileKey)
 	logger.Info("-> upload", remotePath)
 	err = ftp.Store(remotePath, file)
 	if err != nil {

@@ -1,12 +1,14 @@
 package storage
 
 import (
+	"fmt"
 	"github.com/huacnlee/gobackup/config"
+	"path/filepath"
 )
 
 // Base storage
 type Base interface {
-	perform(model config.ModelConfig, archivePath string) error
+	perform(model config.ModelConfig, fileKey, archivePath string) error
 }
 
 // Run storage
@@ -21,11 +23,14 @@ func Run(model config.ModelConfig, archivePath string) error {
 		ctx = &SCP{}
 	case "s3":
 		ctx = &S3{}
+	case "oss":
+		ctx = &OSS{}
 	default:
-		ctx = &Local{}
+		return fmt.Errorf("[%s] storage type has not implement", model.StoreWith.Type)
 	}
 
-	err := ctx.perform(model, archivePath)
+	fileKey := filepath.Base(archivePath)
+	err := ctx.perform(model, fileKey, archivePath)
 	if err != nil {
 		return err
 	}

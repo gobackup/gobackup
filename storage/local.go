@@ -13,7 +13,7 @@ import (
 type Local struct {
 }
 
-func (ctx *Local) perform(model config.ModelConfig, archivePath string) error {
+func (ctx *Local) perform(model config.ModelConfig, fileKey, archivePath string) error {
 	logger.Info("=> storage | Local")
 	destPath := model.StoreWith.Viper.GetString("path")
 	helper.MkdirP(destPath)

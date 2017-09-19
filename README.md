@@ -40,6 +40,7 @@ Use `tar` command to archive many file or path into a `.tar` file.
 - FTP
 - SCP - Upload via SSH copy
 - Amazon S3
+- Aliyu OSS
 
 ## Install
 

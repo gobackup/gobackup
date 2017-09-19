@@ -21,35 +21,43 @@ func (ctx Model) perform() {
 	logger.Info("WorkDir:", ctx.Config.DumpPath)
 	defer ctx.cleanup()
 
+	logger.Info("------------- Databases -------------")
 	err := database.Run(ctx.Config)
 	if err != nil {
 		logger.Error(err)
 		return
 	}
+	logger.Info("------------- Databases -------------\n")
 
+	logger.Info("------------- Archives -------------")
 	err = archive.Run(ctx.Config)
 	if err != nil {
 		logger.Error(err)
 		return
 	}
+	logger.Info("------------- Archives -------------\n")
 
+	logger.Info("------------ Compressor -------------")
 	archivePath, err := compressor.Run(ctx.Config)
 	if err != nil {
 		logger.Error(err)
 		return
 	}
+	logger.Info("------------ Compressor ------------\n")
 
+	logger.Info("------------- Storage --------------")
 	err = storage.Run(ctx.Config, archivePath)
 	if err != nil {
 		logger.Error(err)
 		return
 	}
+	logger.Info("------------- Storage --------------\n")
 
 }
 
 // Cleanup model temp files
 func (ctx Model) cleanup() {
-	logger.Info("Cleanup temp dir...")
+	logger.Info("Cleanup temp dir...\n")
 	helper.Exec("rm", "-rf", ctx.Config.DumpPath)
 	logger.Info("======= End " + ctx.Config.Name + " =======\n\n")
 }

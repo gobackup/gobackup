@@ -19,7 +19,6 @@ func archiveFilePath(ext string) string {
 
 // Run compressor
 func Run(model config.ModelConfig) (archivePath string, err error) {
-	logger.Info("------------- Compressor --------------")
 	var ctx Base
 	switch model.CompressWith.Type {
 	case "tgz":
@@ -35,7 +34,6 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 		return
 	}
 	logger.Info("->", archivePath)
-	logger.Info("----------- End Compressor ------------\n")
 
 	return
 }

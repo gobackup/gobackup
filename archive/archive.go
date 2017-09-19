@@ -9,9 +9,8 @@ import (
 	"path/filepath"
 )
 
+// Run archive
 func Run(model config.ModelConfig) (err error) {
-	logger.Info("----------- Archive Files ----------")
-
 	tarPath := path.Join(model.DumpPath, "archive.tar")
 
 	includes := model.Archive.GetStringSlice("includes")
@@ -33,8 +32,6 @@ func Run(model config.ModelConfig) (err error) {
 
 	helper.Exec(cmd, includes...)
 
-	//
-	logger.Info("----------- Archive Files ----------\n")
 	return nil
 }
 

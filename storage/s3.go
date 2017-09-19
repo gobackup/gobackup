@@ -10,7 +10,6 @@ import (
 	"github.com/huacnlee/gobackup/logger"
 	"os"
 	"path"
-	"path/filepath"
 )
 
 // S3 - Amazon S3 storage
@@ -22,12 +21,13 @@ import (
 // access_key_id: your-access-key-id
 // secret_access_key: your-secret-access-key
 // max_retries: 5
+// timeout: 300
 type S3 struct {
 	bucket string
 	path   string
 }
 
-func (ctx *S3) perform(model config.ModelConfig, archivePath string) error {
+func (ctx *S3) perform(model config.ModelConfig, fileKey, archivePath string) error {
 	logger.Info("=> storage | Amazon S3")
 	s3Viper := model.StoreWith.Viper
 	s3Viper.SetDefault("region", "us-east-1")
@@ -56,11 +56,11 @@ func (ctx *S3) perform(model config.ModelConfig, archivePath string) error {
 		return fmt.Errorf("failed to open file %q, %v", archivePath, err)
 	}
 
-	key := path.Join(ctx.path, filepath.Base(archivePath))
+	remotePath := path.Join(ctx.path, fileKey)
 
 	input := &s3manager.UploadInput{
 		Bucket: aws.String(ctx.bucket),
-		Key:    aws.String(key),
+		Key:    aws.String(remotePath),
 		Body:   f,
 	}
 

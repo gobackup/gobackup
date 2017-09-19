@@ -4,7 +4,6 @@ import (
 	"golang.org/x/crypto/ssh"
 	"os"
 	"path"
-	"path/filepath"
 	"time"
 	// "crypto/tls"
 	"github.com/bramvdbogaerde/go-scp"
@@ -30,7 +29,7 @@ type SCP struct {
 	password string
 }
 
-func (ctx *SCP) perform(model config.ModelConfig, archivePath string) error {
+func (ctx *SCP) perform(model config.ModelConfig, fileKey, archivePath string) error {
 	logger.Info("=> storage | SCP")
 
 	scpViper := model.StoreWith.Viper
@@ -65,8 +64,7 @@ func (ctx *SCP) perform(model config.ModelConfig, archivePath string) error {
 	}
 	defer file.Close()
 
-	filename := filepath.Base(archivePath)
-	remotePath := path.Join(ctx.path, filename)
+	remotePath := path.Join(ctx.path, fileKey)
 
 	logger.Info("-> scp", remotePath)
 	client.CopyFile(file, remotePath, "0655")
