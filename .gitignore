@@ -15,4 +15,5 @@
 gobackup.yml
 gobackup
 build/
+dist/
 log/

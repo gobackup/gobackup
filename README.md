@@ -46,7 +46,7 @@ Use `tar` command to archive many file or path into a `.tar` file.
 
 ```bash
 # for Linux
-$ curl -sSL https://git.io/v5oaP | bash
+$ curl -sSL https://git.io/gobackup | bash
 ```
 
 after that, you will get `/usr/local/bin/gobackup` command.
