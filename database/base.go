@@ -38,14 +38,12 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 
 // Run databases
 func Run(model config.ModelConfig) error {
-	logger.Info("------------- Databases --------------")
 	for _, dbCfg := range model.Databases {
 		err := runModel(model, dbCfg)
 		if err != nil {
 			return err
 		}
 	}
-	logger.Info("----------- End databases ------------\n")
 
 	return nil
 }
