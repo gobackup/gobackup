@@ -5,18 +5,25 @@ import (
 	"errors"
 	"github.com/huacnlee/gobackup/logger"
 	"os/exec"
+	"regexp"
 	"strings"
+)
+
+var (
+	spaceRegexp = regexp.MustCompile("[\\s]+")
 )
 
 // Exec cli commands
 func Exec(command string, args ...string) (output string, err error) {
-	commands := strings.Split(command, " ")
+	commands := spaceRegexp.Split(command, -1)
 	command = commands[0]
 	commandArgs := []string{}
 	if len(commands) > 1 {
 		commandArgs = commands[1:]
 	}
-	commandArgs = append(commandArgs, args...)
+	if len(args) > 0 {
+		commandArgs = append(commandArgs, args...)
+	}
 	cmd := exec.Command(command, commandArgs...)
 
 	var stdErr bytes.Buffer
