@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"github.com/huacnlee/gobackup/helper"
 	"golang.org/x/crypto/ssh"
 	"os"
 	"path"
@@ -22,11 +23,12 @@ import (
 // timeout: 300
 // private_key: ~/.ssh/id_rsa
 type SCP struct {
-	path     string
-	host     string
-	port     string
-	username string
-	password string
+	path       string
+	host       string
+	port       string
+	privateKey string
+	username   string
+	password   string
 }
 
 func (ctx *SCP) perform(model config.ModelConfig, fileKey, archivePath string) error {
@@ -36,14 +38,22 @@ func (ctx *SCP) perform(model config.ModelConfig, fileKey, archivePath string) e
 
 	scpViper.SetDefault("port", "22")
 	scpViper.SetDefault("timeout", 300)
+	scpViper.SetDefault("private_key", "~/.ssh/id_rsa")
 
 	ctx.host = scpViper.GetString("host")
 	ctx.port = scpViper.GetString("port")
 	ctx.path = scpViper.GetString("path")
 	ctx.username = scpViper.GetString("username")
 	ctx.password = scpViper.GetString("password")
+	ctx.privateKey = helper.ExplandHome(scpViper.GetString("private_key"))
 
-	clientConfig, _ := auth.PrivateKey(ctx.username, scpViper.GetString("private_key"))
+	logger.Info("PrivateKey", ctx.privateKey)
+
+	clientConfig, _ := auth.PrivateKey(
+		ctx.username,
+		ctx.privateKey,
+		ssh.InsecureIgnoreHostKey(),
+	)
 	clientConfig.Timeout = scpViper.GetDuration("timeout") * time.Second
 	if len(ctx.password) > 0 {
 		clientConfig.Auth = append(clientConfig.Auth, ssh.Password(ctx.password))

@@ -25,3 +25,20 @@ func TestMkdirP(t *testing.T) {
 	exist = IsExistsPath(dest)
 	assert.True(t, exist)
 }
+
+func TestExplandHome(t *testing.T) {
+	newPath := ExplandHome("")
+	assert.Equal(t, newPath, "")
+
+	newPath = ExplandHome("/home/jason/111")
+	assert.Equal(t, newPath, "/home/jason/111")
+
+	newPath = ExplandHome("~")
+	assert.Equal(t, newPath, "~")
+
+	newPath = ExplandHome("~/")
+	assert.NotEqual(t, newPath[:2], "~/")
+
+	newPath = ExplandHome("~/foo/bar/dar")
+	assert.Equal(t, newPath, path.Join(os.Getenv("HOME"), "/foo/bar/dar"))
+}
