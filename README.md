@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://user-images.githubusercontent.com/5518/30584059-31dd6b3a-9d5b-11e7-9cdc-df9a8778cf02.png" width="160" />
+<img src="https://user-images.githubusercontent.com/5518/30629420-452166de-9e0e-11e7-918e-71545dfd1b55.png" width="160" />
 
 <h1 align="center">GoBackup</h1>
 <p align="center">A simple backup tool like <a href="https://github.com/backup/backup">backup/backup</a> RubyGem.</p>
