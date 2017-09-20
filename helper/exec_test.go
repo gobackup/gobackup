@@ -24,5 +24,6 @@ func TestExec(t *testing.T) {
 
 	res, err = Exec("not-found-command", "foo")
 	assert.NotNil(t, err)
+	assert.Equal(t, err.Error(), "not-found-command cannot be found")
 	assert.Empty(t, res)
 }

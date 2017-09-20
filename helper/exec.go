@@ -3,7 +3,9 @@ package helper
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"github.com/huacnlee/gobackup/logger"
+	"os"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -24,7 +26,14 @@ func Exec(command string, args ...string) (output string, err error) {
 	if len(args) > 0 {
 		commandArgs = append(commandArgs, args...)
 	}
-	cmd := exec.Command(command, commandArgs...)
+
+	fullCommand, err := exec.LookPath(command)
+	if err != nil {
+		return "", fmt.Errorf("%s cannot be found", command)
+	}
+
+	cmd := exec.Command(fullCommand, commandArgs...)
+	cmd.Env = os.Environ()
 
 	var stdErr bytes.Buffer
 	cmd.Stderr = &stdErr

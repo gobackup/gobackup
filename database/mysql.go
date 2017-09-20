@@ -29,7 +29,6 @@ type MySQL struct {
 	model       config.ModelConfig
 }
 
-// NewMySQL instrance
 func (ctx *MySQL) perform(model config.ModelConfig, dbCfg config.SubConfig) (err error) {
 	viper := dbCfg.Viper
 	viper.SetDefault("host", "localhost")
@@ -87,7 +86,7 @@ func (ctx *MySQL) dump() error {
 	logger.Info("-> Dumping MySQL...")
 	_, err := helper.Exec(ctx.dumpCommand, "--result-file="+dumpFilePath)
 	if err != nil {
-		return fmt.Errorf("-> Dump error: %s %s", ctx.dumpCommand, err)
+		return fmt.Errorf("-> Dump error: %s", err)
 	}
 	logger.Info("dump path:", dumpFilePath)
 	return nil
