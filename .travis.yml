@@ -3,7 +3,8 @@ language: go
 go:
   - 1.8
 before_script: go get -t ./...
-script: make test
-install_test: curl -sSL https://git.io/gobackup | bash && gobackup -v
+script:
+  - make test
+  - curl -sSL https://git.io/gobackup | bash && gobackup -v
 
 
