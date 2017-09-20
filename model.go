@@ -18,7 +18,7 @@ type Model struct {
 // Perform model
 func (ctx Model) perform() {
 	logger.Info("======== " + ctx.Config.Name + " ========")
-	logger.Info("WorkDir:", ctx.Config.DumpPath)
+	logger.Info("WorkDir:", ctx.Config.DumpPath+"\n")
 	defer ctx.cleanup()
 
 	logger.Info("------------- Databases -------------")

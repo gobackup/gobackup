@@ -21,6 +21,8 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 		ctx = &Redis{}
 	case "postgresql":
 		ctx = &PostgreSQL{}
+	case "mongodb":
+		ctx = &MongoDB{}
 	default:
 		logger.Warn(fmt.Errorf("model: %s databases.%s config `type: %s`, but is not implement", model.Name, dbConfig.Name, dbConfig.Type))
 		return

@@ -38,9 +38,11 @@ func Exec(command string, args ...string) (output string, err error) {
 	var stdErr bytes.Buffer
 	cmd.Stderr = &stdErr
 
+	logger.Debug(fullCommand, " ", strings.Join(commandArgs, " "))
+
 	out, err := cmd.Output()
 	if err != nil {
-		logger.Debug(command, " ", strings.Join(commandArgs, " "))
+		logger.Debug(fullCommand, " ", strings.Join(commandArgs, " "))
 		err = errors.New(stdErr.String())
 		return
 	}

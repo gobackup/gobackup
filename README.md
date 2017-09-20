@@ -32,6 +32,7 @@ GoBackup 是一个类似 [backup/backup](https://github.com/backup/backup) 的�
 - MySQL
 - PostgreSQL
 - Redis - `mode: sync/copy`
+- MongoDB
 
 ### Archive
 

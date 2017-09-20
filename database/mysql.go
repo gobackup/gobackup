@@ -53,7 +53,7 @@ func (ctx *MySQL) perform(model config.ModelConfig, dbCfg config.SubConfig) (err
 }
 
 func (ctx *MySQL) prepare() (err error) {
-	ctx.dumpPath = path.Join(ctx.model.DumpPath, "mysql")
+	ctx.dumpPath = path.Join(ctx.model.DumpPath, "mysql", ctx.Name)
 	helper.MkdirP(ctx.dumpPath)
 
 	// mysqldump command

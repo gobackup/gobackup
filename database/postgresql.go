@@ -53,7 +53,7 @@ func (ctx PostgreSQL) perform(model config.ModelConfig, dbCfg config.SubConfig) 
 }
 
 func (ctx *PostgreSQL) prepare() (err error) {
-	ctx.dumpPath = path.Join(ctx.model.DumpPath, "postgresql")
+	ctx.dumpPath = path.Join(ctx.model.DumpPath, "postgresql", ctx.Name)
 	helper.MkdirP(ctx.dumpPath)
 
 	// mysqldump command

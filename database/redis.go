@@ -65,7 +65,7 @@ func (ctx *Redis) perform(model config.ModelConfig, dbCfg config.SubConfig) (err
 		ctx.mode = redisModeCopy
 	}
 
-	ctx.dumpPath = path.Join(ctx.model.DumpPath, "redis")
+	ctx.dumpPath = path.Join(ctx.model.DumpPath, "redis", ctx.Name)
 
 	if err = ctx.prepare(); err != nil {
 		return

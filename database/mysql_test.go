@@ -21,7 +21,7 @@ func TestMySQLPrepare(t *testing.T) {
 	err := mysql.prepare()
 	assert.NoError(t, err)
 
-	assert.Equal(t, mysql.dumpPath, "/foo/bar/mysql")
+	assert.Equal(t, mysql.dumpPath, "/foo/bar/mysql/mysql1")
 	assert.Equal(t, mysql.dumpCommand, "mysqldump --host 127.0.0.2 --port 6378 -paaaa dummy_test")
 }
 
