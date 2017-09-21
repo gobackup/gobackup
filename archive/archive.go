@@ -11,6 +11,10 @@ import (
 
 // Run archive
 func Run(model config.ModelConfig) (err error) {
+	if model.Archive == nil {
+		return nil
+	}
+
 	tarPath := path.Join(model.DumpPath, "archive.tar")
 
 	includes := model.Archive.GetStringSlice("includes")
