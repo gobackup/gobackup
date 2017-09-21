@@ -3,8 +3,9 @@ package database
 import (
 	"github.com/huacnlee/gobackup/config"
 	// "github.com/spf13/viper"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMySQLPrepare(t *testing.T) {
@@ -23,6 +24,25 @@ func TestMySQLPrepare(t *testing.T) {
 
 	assert.Equal(t, mysql.dumpPath, "/foo/bar/mysql/mysql1")
 	assert.Equal(t, mysql.dumpCommand, "mysqldump --host 127.0.0.2 --port 6378 -paaaa dummy_test")
+}
+
+func TestMySQLPrepareWithAdditionalOptions(t *testing.T) {
+	mysql := &MySQL{
+		Name:              "mysql1",
+		database:          "dummy_test",
+		host:              "127.0.0.2",
+		port:              "6378",
+		password:          "aaaa",
+		additionalOptions: "--single-transaction --quick",
+		model: config.ModelConfig{
+			DumpPath: "/foo/bar",
+		},
+	}
+	err := mysql.prepare()
+	assert.NoError(t, err)
+
+	assert.Equal(t, mysql.dumpPath, "/foo/bar/mysql/mysql1")
+	assert.Equal(t, mysql.dumpCommand, "mysqldump --host 127.0.0.2 --port 6378 -paaaa --single-transaction --quick dummy_test")
 }
 
 func TestMySQLPerform(t *testing.T) {
