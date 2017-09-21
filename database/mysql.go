@@ -2,11 +2,12 @@ package database
 
 import (
 	"fmt"
+	"path"
+	"strings"
+
 	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
-	"path"
-	"strings"
 )
 
 // MySQL database
@@ -18,15 +19,16 @@ import (
 // username: root
 // password:
 type MySQL struct {
-	Name        string
-	host        string
-	port        string
-	database    string
-	username    string
-	password    string
-	dumpCommand string
-	dumpPath    string
-	model       config.ModelConfig
+	Name              string
+	host              string
+	port              string
+	database          string
+	username          string
+	password          string
+	dumpCommand       string
+	dumpPath          string
+	additionalOptions string
+	model             config.ModelConfig
 }
 
 func (ctx *MySQL) perform(model config.ModelConfig, dbCfg config.SubConfig) (err error) {
@@ -34,6 +36,7 @@ func (ctx *MySQL) perform(model config.ModelConfig, dbCfg config.SubConfig) (err
 	viper.SetDefault("host", "localhost")
 	viper.SetDefault("username", "root")
 	viper.SetDefault("port", 3306)
+	viper.SetDefault("additional_options", "")
 
 	ctx.Name = dbCfg.Name
 	ctx.host = viper.GetString("host")
@@ -41,6 +44,7 @@ func (ctx *MySQL) perform(model config.ModelConfig, dbCfg config.SubConfig) (err
 	ctx.database = viper.GetString("database")
 	ctx.username = viper.GetString("username")
 	ctx.password = viper.GetString("password")
+	ctx.additionalOptions = viper.GetString("additional_options")
 	ctx.model = model
 
 	if err = ctx.prepare(); err != nil {
@@ -72,6 +76,9 @@ func (ctx *MySQL) prepare() (err error) {
 	}
 	if len(ctx.password) > 0 {
 		dumpArgs = append(dumpArgs, "-p"+ctx.password)
+	}
+	if len(ctx.additionalOptions) > 0 {
+		dumpArgs = append(dumpArgs, ctx.additionalOptions)
 	}
 
 	dumpArgs = append(dumpArgs, ctx.database)

@@ -105,6 +105,7 @@ models:
         database: gitlab_production
         username: root
         password:
+        additional_options: --single-transaction --quick
       gitlab_redis:
         type: redis
         mode: sync
