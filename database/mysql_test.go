@@ -28,7 +28,7 @@ func TestMySQL_dumpArgs(t *testing.T) {
 		"127.0.0.2",
 		"--port",
 		"6378",
-		"-p'aaaa'",
+		"-paaaa",
 		"dummy_test",
 		"--result-file=/foo/bar/mysql/mysql1/dummy_test.sql",
 	})
@@ -40,7 +40,7 @@ func TestMySQL_dumpArgsWithAdditionalOptions(t *testing.T) {
 		database:          "dummy_test",
 		host:              "127.0.0.2",
 		port:              "6378",
-		password:          "aaaa",
+		password:          "*&^92'",
 		additionalOptions: "--single-transaction --quick",
 		model: config.ModelConfig{
 			DumpPath: "/foo/bar",
@@ -57,7 +57,7 @@ func TestMySQL_dumpArgsWithAdditionalOptions(t *testing.T) {
 		"127.0.0.2",
 		"--port",
 		"6378",
-		"-p'aaaa'",
+		"-p*&^92'",
 		"--single-transaction --quick",
 		"dummy_test",
 		"--result-file=/foo/bar/mysql/mysql1/dummy_test.sql",
