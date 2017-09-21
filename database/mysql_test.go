@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMySQLPrepare(t *testing.T) {
+func TestMySQL_dumpArgs(t *testing.T) {
 	mysql := &MySQL{
 		Name:     "mysql1",
 		database: "dummy_test",
@@ -22,11 +22,19 @@ func TestMySQLPrepare(t *testing.T) {
 	err := mysql.prepare()
 	assert.NoError(t, err)
 
-	assert.Equal(t, mysql.dumpPath, "/foo/bar/mysql/mysql1")
-	assert.Equal(t, mysql.dumpCommand, "mysqldump --host 127.0.0.2 --port 6378 -paaaa dummy_test")
+	dumpArgs := mysql.dumpArgs()
+	assert.Equal(t, dumpArgs, []string{
+		"--host",
+		"127.0.0.2",
+		"--port",
+		"6378",
+		"-p'aaaa'",
+		"dummy_test",
+		"--result-file=/foo/bar/mysql/mysql1/dummy_test.sql",
+	})
 }
 
-func TestMySQLPrepareWithAdditionalOptions(t *testing.T) {
+func TestMySQL_dumpArgsWithAdditionalOptions(t *testing.T) {
 	mysql := &MySQL{
 		Name:              "mysql1",
 		database:          "dummy_test",
@@ -42,7 +50,18 @@ func TestMySQLPrepareWithAdditionalOptions(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, mysql.dumpPath, "/foo/bar/mysql/mysql1")
-	assert.Equal(t, mysql.dumpCommand, "mysqldump --host 127.0.0.2 --port 6378 -paaaa --single-transaction --quick dummy_test")
+
+	dumpArgs := mysql.dumpArgs()
+	assert.Equal(t, dumpArgs, []string{
+		"--host",
+		"127.0.0.2",
+		"--port",
+		"6378",
+		"-p'aaaa'",
+		"--single-transaction --quick",
+		"dummy_test",
+		"--result-file=/foo/bar/mysql/mysql1/dummy_test.sql",
+	})
 }
 
 func TestMySQLPerform(t *testing.T) {

@@ -2,12 +2,10 @@ package database
 
 import (
 	"fmt"
-	"path"
-	"strings"
-
 	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
+	"path"
 )
 
 // MySQL database
@@ -26,7 +24,6 @@ type MySQL struct {
 	database          string
 	username          string
 	password          string
-	dumpCommand       string
 	dumpPath          string
 	additionalOptions string
 	model             config.ModelConfig
@@ -61,10 +58,15 @@ func (ctx *MySQL) prepare() (err error) {
 	helper.MkdirP(ctx.dumpPath)
 
 	// mysqldump command
-	dumpArgs := []string{}
 	if len(ctx.database) == 0 {
 		return fmt.Errorf("mysql database config is required")
 	}
+
+	return nil
+}
+
+func (ctx *MySQL) dumpArgs() []string {
+	dumpArgs := []string{}
 	if len(ctx.host) > 0 {
 		dumpArgs = append(dumpArgs, "--host", ctx.host)
 	}
@@ -75,26 +77,24 @@ func (ctx *MySQL) prepare() (err error) {
 		dumpArgs = append(dumpArgs, "-u", ctx.username)
 	}
 	if len(ctx.password) > 0 {
-		dumpArgs = append(dumpArgs, "-p"+ctx.password)
+		dumpArgs = append(dumpArgs, `-p`+ctx.password)
 	}
 	if len(ctx.additionalOptions) > 0 {
 		dumpArgs = append(dumpArgs, ctx.additionalOptions)
 	}
 
 	dumpArgs = append(dumpArgs, ctx.database)
-
-	ctx.dumpCommand = "mysqldump" + " " + strings.Join(dumpArgs, " ")
-
-	return nil
+	dumpFilePath := path.Join(ctx.dumpPath, ctx.database+".sql")
+	dumpArgs = append(dumpArgs, "--result-file="+dumpFilePath)
+	return dumpArgs
 }
 
 func (ctx *MySQL) dump() error {
-	dumpFilePath := path.Join(ctx.dumpPath, ctx.database+".sql")
 	logger.Info("-> Dumping MySQL...")
-	_, err := helper.Exec(ctx.dumpCommand, "--result-file="+dumpFilePath)
+	_, err := helper.Exec("mysqldump", ctx.dumpArgs()...)
 	if err != nil {
 		return fmt.Errorf("-> Dump error: %s", err)
 	}
-	logger.Info("dump path:", dumpFilePath)
+	logger.Info("dump path:", ctx.dumpPath)
 	return nil
 }

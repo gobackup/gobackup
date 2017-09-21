@@ -79,7 +79,7 @@ func (ctx *MongoDB) credentialOptions() string {
 		opts = append(opts, "--username="+ctx.username)
 	}
 	if len(ctx.password) > 0 {
-		opts = append(opts, "--password="+ctx.password)
+		opts = append(opts, `--password=`+ctx.password)
 	}
 	if len(ctx.authdb) > 0 {
 		opts = append(opts, "--authenticationDatabase="+ctx.authdb)

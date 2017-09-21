@@ -29,13 +29,15 @@ func (ctx Model) perform() {
 	}
 	logger.Info("------------- Databases -------------\n")
 
-	logger.Info("------------- Archives -------------")
-	err = archive.Run(ctx.Config)
-	if err != nil {
-		logger.Error(err)
-		return
+	if ctx.Config.Archive != nil {
+		logger.Info("------------- Archives -------------")
+		err = archive.Run(ctx.Config)
+		if err != nil {
+			logger.Error(err)
+			return
+		}
+		logger.Info("------------- Archives -------------\n")
 	}
-	logger.Info("------------- Archives -------------\n")
 
 	logger.Info("------------ Compressor -------------")
 	archivePath, err := compressor.Run(ctx.Config)
