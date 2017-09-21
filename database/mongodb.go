@@ -12,8 +12,8 @@ import (
 // MongoDB database
 //
 // type: mongodb
-// host:
-// port:
+// host: 127.0.0.1
+// port: 27017
 // database:
 // username:
 // password:
@@ -38,6 +38,9 @@ var (
 func (ctx *MongoDB) perform(model config.ModelConfig, dbCfg config.SubConfig) (err error) {
 	viper := dbCfg.Viper
 	viper.SetDefault("oplog", false)
+	viper.SetDefault("host", "127.0.0.1")
+	viper.SetDefault("username", "root")
+	viper.SetDefault("port", 27017)
 
 	ctx.Name = dbCfg.Name
 

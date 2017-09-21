@@ -13,11 +13,12 @@ import (
 // MySQL database
 //
 // type: mysql
-// host: localhost
+// host: 127.0.0.1
 // port: 3306
-// database: test
+// database:
 // username: root
 // password:
+// additionalOptions:
 type MySQL struct {
 	Name              string
 	host              string
@@ -33,10 +34,9 @@ type MySQL struct {
 
 func (ctx *MySQL) perform(model config.ModelConfig, dbCfg config.SubConfig) (err error) {
 	viper := dbCfg.Viper
-	viper.SetDefault("host", "localhost")
+	viper.SetDefault("host", "127.0.0.1")
 	viper.SetDefault("username", "root")
 	viper.SetDefault("port", 3306)
-	viper.SetDefault("additional_options", "")
 
 	ctx.Name = dbCfg.Name
 	ctx.host = viper.GetString("host")
