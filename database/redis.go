@@ -63,6 +63,10 @@ func (ctx *Redis) perform(model config.ModelConfig, dbCfg config.SubConfig) (err
 		ctx.mode = redisModeSync
 	} else {
 		ctx.mode = redisModeCopy
+
+		if !helper.IsExistsPath(ctx.rdbPath) {
+			return fmt.Errorf("Redis RDB file: %s does not exist", ctx.rdbPath)
+		}
 	}
 
 	ctx.dumpPath = path.Join(ctx.model.DumpPath, "redis", ctx.Name)
@@ -72,9 +76,6 @@ func (ctx *Redis) perform(model config.ModelConfig, dbCfg config.SubConfig) (err
 	}
 
 	logger.Info("=> database | Redis:", ctx.Name)
-	if !helper.IsExistsPath(ctx.rdbPath) {
-		return fmt.Errorf("Redis RDB file: %s does not exist", ctx.rdbPath)
-	}
 
 	if err = ctx.save(); err != nil {
 		return
@@ -104,7 +105,7 @@ func (ctx *Redis) prepare() error {
 		args = append(args, "-p "+ctx.port)
 	}
 	if len(ctx.password) > 0 {
-		args = append(args, "-a "+ctx.password)
+		args = append(args, `-a `+ctx.password)
 	}
 	redisCliCommand = strings.Join(args, " ")
 
