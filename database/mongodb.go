@@ -45,6 +45,7 @@ func (ctx *MongoDB) perform(model config.ModelConfig, dbCfg config.SubConfig) (e
 	ctx.Name = dbCfg.Name
 
 	ctx.dumpPath = path.Join(model.DumpPath, "mongodb", ctx.Name)
+	helper.MkdirP(ctx.dumpPath)
 	ctx.host = viper.GetString("host")
 	ctx.port = viper.GetString("port")
 	ctx.database = viper.GetString("database")
@@ -109,7 +110,6 @@ func (ctx *MongoDB) oplogOption() string {
 
 func (ctx *MongoDB) dump() error {
 	logger.Info("-> Dumping MongoDB...")
-	helper.MkdirP(ctx.dumpPath)
 	out, err := helper.Exec(ctx.mongodump())
 	if err != nil {
 		return fmt.Errorf("-> Dump error: %s", err)

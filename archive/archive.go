@@ -16,6 +16,7 @@ func Run(model config.ModelConfig) (err error) {
 	}
 
 	tarPath := path.Join(model.DumpPath, "archive.tar")
+	helper.MkdirP(model.DumpPath)
 
 	includes := model.Archive.GetStringSlice("includes")
 	includes = cleanPaths(includes)

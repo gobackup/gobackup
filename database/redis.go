@@ -70,7 +70,7 @@ func (ctx *Redis) perform(model config.ModelConfig, dbCfg config.SubConfig) (err
 	}
 
 	ctx.dumpPath = path.Join(ctx.model.DumpPath, "redis", ctx.Name)
-
+	helper.MkdirP(ctx.dumpPath)
 	if err = ctx.prepare(); err != nil {
 		return
 	}
@@ -94,8 +94,6 @@ func (ctx *Redis) perform(model config.ModelConfig, dbCfg config.SubConfig) (err
 }
 
 func (ctx *Redis) prepare() error {
-	helper.MkdirP(ctx.dumpPath)
-
 	// redis-cli command
 	args := []string{"redis-cli"}
 	if len(ctx.host) > 0 {
