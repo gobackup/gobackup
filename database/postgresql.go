@@ -5,7 +5,7 @@ import (
 	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
-	"os/exec"
+	"os"
 	"path"
 	"strings"
 )
@@ -73,16 +73,15 @@ func (ctx *PostgreSQL) prepare() (err error) {
 
 	ctx.dumpCommand = "pg_dump " + strings.Join(dumpArgs, " ") + " " + ctx.database
 
-	if len(ctx.password) > 0 {
-		exec.Command("export", "PGPASSWORD="+ctx.password).Run()
-	}
-
 	return nil
 }
 
 func (ctx *PostgreSQL) dump() error {
 	dumpFilePath := path.Join(ctx.dumpPath, ctx.database+".sql")
 	logger.Info("-> Dumping PostgreSQL...")
+	if len(ctx.password) > 0 {
+		os.Setenv("PGPASSWORD", ctx.password)
+	}
 	_, err := helper.Exec(ctx.dumpCommand, "-f", dumpFilePath)
 	if err != nil {
 		return err
