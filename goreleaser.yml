@@ -1,9 +1,12 @@
 builds:
-  - binary: gobackup
+  -
+    binary: gobackup
+    ldflags: -s -w -X main.version={{.Version}}
     goos:
       - darwin
       - linux
     goarch:
       - amd64
 archive:
+  name_template: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
   format: tar.gz
