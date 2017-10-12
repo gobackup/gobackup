@@ -19,6 +19,10 @@ func TestModel(t *testing.T) {
 	assert.Equal(t, model.CompressWith.Type, "tgz")
 	assert.NotNil(t, model.CompressWith.Viper)
 
+	// encrypt_with
+	assert.Equal(t, model.EncryptWith.Type, "openssl")
+	assert.NotNil(t, model.EncryptWith.Viper)
+
 	// store_with
 	assert.Equal(t, model.StoreWith.Type, "local")
 	assert.Equal(t, model.StoreWith.Viper.GetString("path"), "/Users/jason/Downloads/backup1")
