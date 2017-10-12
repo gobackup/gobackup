@@ -50,10 +50,9 @@ Use `tar` command to archive many file or path into a `.tar` file.
 - [Amazon S3](https://aws.amazon.com/s3/)
 - [Aliyun OSS](https://www.aliyun.com/product/oss)
 
-## Install
+## Install (macOS / Linux)
 
 ```bash
-# for Linux
 $ curl -sSL https://git.io/gobackup | bash
 ```
 

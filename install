@@ -1,3 +1,11 @@
-curl -Lo gobackup-linux-amd64.tar.gz https://github.com/huacnlee/gobackup/releases/download/0.4.5/gobackup-linux-amd64.tar.gz
-tar zxf gobackup-linux-amd64.tar.gz && sudo mv gobackup /usr/local/bin/gobackup && rm gobackup-linux-amd64.tar.gz
+version='0.4.5'
+platform='linux'
+os_uname=`uname`
+if [[ "$os_uname" == 'Linux' ]]; then
+   platform='linux'
+elif [[ "$os_uname" == 'Darwin' ]]; then
+   platform='darwin'
+fi
+curl -Lo gobackup.tar.gz https://github.com/huacnlee/gobackup/releases/download/$version/gobackup-$platform-amd64.tar.gz
+tar zxf gobackup.tar.gz && sudo mv gobackup /usr/local/bin/gobackup && rm gobackup.tar.gz
 mkdir -p ~/.gobackup && touch ~/.gobackup/gobackup.yml
