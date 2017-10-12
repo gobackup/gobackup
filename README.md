@@ -27,10 +27,6 @@ https://gobackup.github.io/
 
 ## Current Support status
 
-### Compressor
-
-- Tgz - `.tar.gz`
-
 ### Databases
 
 - MySQL
@@ -41,6 +37,14 @@ https://gobackup.github.io/
 ### Archive
 
 Use `tar` command to archive many file or path into a `.tar` file.
+
+### Compressor
+
+- Tgz - `.tar.gz`
+
+### Encryptor
+
+- OpenSSL - `aes-256-cbc` encrypt
 
 ### Storages
 
