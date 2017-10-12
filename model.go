@@ -5,6 +5,7 @@ import (
 	"github.com/huacnlee/gobackup/compressor"
 	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/database"
+	"github.com/huacnlee/gobackup/encryptor"
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
 	"github.com/huacnlee/gobackup/storage"
@@ -19,7 +20,7 @@ type Model struct {
 func (ctx Model) perform() {
 	logger.Info("======== " + ctx.Config.Name + " ========")
 	logger.Info("WorkDir:", ctx.Config.DumpPath+"\n")
-	defer ctx.cleanup()
+	// defer ctx.cleanup()
 
 	logger.Info("------------- Databases -------------")
 	err := database.Run(ctx.Config)
@@ -39,13 +40,17 @@ func (ctx Model) perform() {
 		logger.Info("------------- Archives -------------\n")
 	}
 
-	logger.Info("------------ Compressor -------------")
 	archivePath, err := compressor.Run(ctx.Config)
 	if err != nil {
 		logger.Error(err)
 		return
 	}
-	logger.Info("------------ Compressor ------------\n")
+
+	archivePath, err = encryptor.Run(archivePath, ctx.Config)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
 
 	logger.Info("------------- Storage --------------")
 	err = storage.Run(ctx.Config, archivePath)

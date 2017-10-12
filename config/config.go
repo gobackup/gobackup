@@ -21,6 +21,7 @@ type ModelConfig struct {
 	Name         string
 	DumpPath     string
 	CompressWith SubConfig
+	EncryptWith  SubConfig
 	StoreWith    SubConfig
 	Archive      *viper.Viper
 	Databases    []SubConfig
@@ -83,6 +84,11 @@ func loadModel(key string) (model ModelConfig) {
 	model.CompressWith = SubConfig{
 		Type:  model.Viper.GetString("compress_with.type"),
 		Viper: model.Viper.Sub("compress_with"),
+	}
+
+	model.EncryptWith = SubConfig{
+		Type:  model.Viper.GetString("encrypt_with.type"),
+		Viper: model.Viper.Sub("encrypt_with"),
 	}
 
 	model.StoreWith = SubConfig{

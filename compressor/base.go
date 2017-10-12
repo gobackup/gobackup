@@ -13,8 +13,8 @@ type Base interface {
 	perform(model config.ModelConfig) (archivePath string, err error)
 }
 
-func archiveFilePath(ext string) string {
-	return path.Join(os.TempDir(), "gobackup", time.Now().Format("2006.01.02.15.04.05")+ext)
+func archiveFilePath(model config.ModelConfig, ext string) string {
+	return path.Join(model.DumpPath, time.Now().Format("2006.01.02.15.04.05")+ext)
 }
 
 // Run compressor
@@ -27,6 +27,9 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 		ctx = &Tgz{}
 	}
 
+	logger.Info("------------ Compressor -------------")
+	logger.Info("=> Compress with " + model.CompressWith.Type + "...")
+
 	// set workdir
 	os.Chdir(path.Join(model.DumpPath, "../"))
 	archivePath, err = ctx.perform(model)
@@ -34,6 +37,7 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 		return
 	}
 	logger.Info("->", archivePath)
+	logger.Info("------------ Compressor -------------\n")
 
 	return
 }
