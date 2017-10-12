@@ -20,24 +20,20 @@ type Model struct {
 func (ctx Model) perform() {
 	logger.Info("======== " + ctx.Config.Name + " ========")
 	logger.Info("WorkDir:", ctx.Config.DumpPath+"\n")
-	// defer ctx.cleanup()
+	defer ctx.cleanup()
 
-	logger.Info("------------- Databases -------------")
 	err := database.Run(ctx.Config)
 	if err != nil {
 		logger.Error(err)
 		return
 	}
-	logger.Info("------------- Databases -------------\n")
 
 	if ctx.Config.Archive != nil {
-		logger.Info("------------- Archives -------------")
 		err = archive.Run(ctx.Config)
 		if err != nil {
 			logger.Error(err)
 			return
 		}
-		logger.Info("------------- Archives -------------\n")
 	}
 
 	archivePath, err := compressor.Run(ctx.Config)
@@ -52,13 +48,11 @@ func (ctx Model) perform() {
 		return
 	}
 
-	logger.Info("------------- Storage --------------")
 	err = storage.Run(ctx.Config, archivePath)
 	if err != nil {
 		logger.Error(err)
 		return
 	}
-	logger.Info("------------- Storage --------------\n")
 
 }
 

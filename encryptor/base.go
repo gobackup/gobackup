@@ -22,7 +22,7 @@ func Run(archivePath string, model config.ModelConfig) (encryptPath string, err 
 	}
 
 	logger.Info("------------ Encryptor -------------")
-	logger.Info("=> Encrypt with " + model.EncryptWith.Type + "...")
+	logger.Info("=> Encrypt | " + model.EncryptWith.Type)
 	encryptPath, err = ctx.perform(archivePath, model)
 	if err != nil {
 		return

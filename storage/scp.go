@@ -32,8 +32,6 @@ type SCP struct {
 }
 
 func (ctx *SCP) perform(model config.ModelConfig, fileKey, archivePath string) error {
-	logger.Info("=> storage | SCP")
-
 	scpViper := model.StoreWith.Viper
 
 	scpViper.SetDefault("port", "22")

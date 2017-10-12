@@ -15,6 +15,8 @@ func Run(model config.ModelConfig) (err error) {
 		return nil
 	}
 
+	logger.Info("------------- Archives -------------")
+
 	tarPath := path.Join(model.DumpPath, "archive.tar")
 	helper.MkdirP(model.DumpPath)
 
@@ -36,6 +38,8 @@ func Run(model config.ModelConfig) (err error) {
 	}
 
 	helper.Exec(cmd, includes...)
+
+	logger.Info("------------- Archives -------------\n")
 
 	return nil
 }

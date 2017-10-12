@@ -28,7 +28,7 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 	}
 
 	logger.Info("------------ Compressor -------------")
-	logger.Info("=> Compress with " + model.CompressWith.Type + "...")
+	logger.Info("=> Compress | " + model.CompressWith.Type)
 
 	// set workdir
 	os.Chdir(path.Join(model.DumpPath, "../"))

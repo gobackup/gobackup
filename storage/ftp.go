@@ -28,8 +28,6 @@ type FTP struct {
 }
 
 func (ctx *FTP) perform(model config.ModelConfig, fileKey, archivePath string) error {
-	logger.Info("=> storage | FTP")
-
 	ftpViper := model.StoreWith.Viper
 
 	ftpViper.SetDefault("port", "21")

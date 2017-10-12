@@ -28,7 +28,6 @@ type S3 struct {
 }
 
 func (ctx *S3) perform(model config.ModelConfig, fileKey, archivePath string) error {
-	logger.Info("=> storage | Amazon S3")
 	s3Viper := model.StoreWith.Viper
 	s3Viper.SetDefault("region", "us-east-1")
 

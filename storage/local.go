@@ -14,7 +14,6 @@ type Local struct {
 }
 
 func (ctx *Local) perform(model config.ModelConfig, fileKey, archivePath string) error {
-	logger.Info("=> storage | Local")
 	destPath := model.StoreWith.Viper.GetString("path")
 	helper.MkdirP(destPath)
 	_, err := helper.Exec("cp", archivePath, destPath)
