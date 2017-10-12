@@ -3,4 +3,5 @@ test:
 run:
 	go run main.go model.go -- perform -m demo
 release:
-	@goreleaser
+	@rm -Rf dist/
+	@goreleaser --skip-validate
