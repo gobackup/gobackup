@@ -77,7 +77,7 @@ func (ctx *SCP) perform(model config.ModelConfig, fileKey, archivePath string) e
 	remotePath := path.Join(ctx.path, fileKey)
 
 	logger.Info("-> scp", remotePath)
-	client.CopyFile(file, remotePath, "0655")
+	client.CopyFromFile(*file, remotePath, "0655")
 
 	logger.Info("Store successed")
 	return nil
