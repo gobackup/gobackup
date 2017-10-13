@@ -19,12 +19,9 @@ func (ctx Monkey) perform(model config.ModelConfig) (archivePath string, err err
 }
 
 func TestArchiveFilePath(t *testing.T) {
-	model := config.ModelConfig{
-		DumpPath: path.Join(os.TempDir(), "gobackup"),
-	}
-	prefixPath := path.Join(model.DumpPath, time.Now().Format("2006.01.02.15.04"))
-	assert.True(t, strings.HasPrefix(archiveFilePath(model, ".tar"), prefixPath))
-	assert.True(t, strings.HasSuffix(archiveFilePath(model, ".tar"), ".tar"))
+	prefixPath := path.Join(os.TempDir(), "gobackup", time.Now().Format("2006.01.02.15.04"))
+	assert.True(t, strings.HasPrefix(archiveFilePath(".tar"), prefixPath))
+	assert.True(t, strings.HasSuffix(archiveFilePath(".tar"), ".tar"))
 }
 
 func TestBaseInterface(t *testing.T) {

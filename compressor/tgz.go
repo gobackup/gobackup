@@ -12,7 +12,7 @@ type Tgz struct {
 }
 
 func (ctx *Tgz) perform(model config.ModelConfig) (archivePath string, err error) {
-	filePath := archiveFilePath(model, ".tar.gz")
+	filePath := archiveFilePath(".tar.gz")
 
 	opts := ctx.options()
 	opts = append(opts, filePath)
