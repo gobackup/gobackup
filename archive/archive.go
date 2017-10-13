@@ -17,31 +17,42 @@ func Run(model config.ModelConfig) (err error) {
 
 	logger.Info("------------- Archives -------------")
 
-	tarPath := path.Join(model.DumpPath, "archive.tar")
 	helper.MkdirP(model.DumpPath)
 
 	includes := model.Archive.GetStringSlice("includes")
 	includes = cleanPaths(includes)
+
+	excludes := model.Archive.GetStringSlice("excludes")
+	excludes = cleanPaths(excludes)
 
 	if len(includes) == 0 {
 		return fmt.Errorf("archive.includes have no config")
 	}
 	logger.Info("=> includes", len(includes), "rules")
 
-	cmd := "tar -cPf " + tarPath
-
-	excludes := model.Archive.GetStringSlice("excludes")
-	excludes = cleanPaths(excludes)
-
-	for _, exclude := range excludes {
-		cmd += " --exclude='" + filepath.Clean(exclude) + "'"
-	}
-
-	helper.Exec(cmd, includes...)
+	opts := options(model.DumpPath, excludes, includes)
+	helper.Exec("tar", opts...)
 
 	logger.Info("------------- Archives -------------\n")
 
 	return nil
+}
+
+func options(dumpPath string, excludes, includes []string) (opts []string) {
+	tarPath := path.Join(dumpPath, "archive.tar")
+	opts = append(opts, "-cPf", tarPath)
+
+	if helper.IsGnuTar {
+		opts = append(opts, "--ignore-failed-read")
+	}
+
+	for _, exclude := range excludes {
+		opts = append(opts, "--exclude='"+filepath.Clean(exclude)+"'")
+	}
+
+	opts = append(opts, includes...)
+
+	return opts
 }
 
 func cleanPaths(paths []string) (results []string) {
