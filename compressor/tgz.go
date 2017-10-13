@@ -27,9 +27,10 @@ func (ctx *Tgz) perform(model config.ModelConfig) (archivePath string, err error
 }
 
 func (ctx *Tgz) options() (opts []string) {
-	opts = append(opts, "zcf")
 	if helper.IsGnuTar {
 		opts = append(opts, "--ignore-failed-read")
 	}
+	opts = append(opts, "-zcf")
+
 	return
 }
