@@ -2,7 +2,6 @@ package encryptor
 
 import (
 	"fmt"
-	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/helper"
 )
 
@@ -12,13 +11,14 @@ import (
 // - salt: true
 // - password:
 type OpenSSL struct {
+	Base
 	salt     bool
 	base64   bool
 	password string
 }
 
-func (ctx *OpenSSL) perform(archivePath string, model config.ModelConfig) (encryptPath string, err error) {
-	sslViper := model.EncryptWith.Viper
+func (ctx *OpenSSL) perform() (encryptPath string, err error) {
+	sslViper := ctx.viper
 	sslViper.SetDefault("salt", true)
 	sslViper.SetDefault("base64", false)
 
@@ -31,10 +31,10 @@ func (ctx *OpenSSL) perform(archivePath string, model config.ModelConfig) (encry
 		return
 	}
 
-	encryptPath = archivePath + ".enc"
+	encryptPath = ctx.archivePath + ".enc"
 
 	opts := ctx.options()
-	opts = append(opts, "-in", archivePath, "-out", encryptPath)
+	opts = append(opts, "-in", ctx.archivePath, "-out", encryptPath)
 	_, err = helper.Exec("openssl", opts...)
 	return
 }

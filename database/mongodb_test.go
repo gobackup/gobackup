@@ -42,7 +42,11 @@ func TestMongoDB_oplogOption(t *testing.T) {
 }
 
 func TestMongoDB_mongodump(t *testing.T) {
+	base := Base{
+		dumpPath: "/tmp/gobackup/test",
+	}
 	ctx := &MongoDB{
+		Base:     base,
 		host:     "127.0.0.1",
 		port:     "4567",
 		database: "hello",
@@ -50,8 +54,7 @@ func TestMongoDB_mongodump(t *testing.T) {
 		password: "bar",
 		authdb:   "sssbbb",
 		oplog:    true,
-		dumpPath: "/foo/bar",
 	}
-	expect := "mongodump --db=hello --username=foo --password=bar --authenticationDatabase=sssbbb --host=127.0.0.1 --port=4567 --oplog --out=/foo/bar"
+	expect := "mongodump --db=hello --username=foo --password=bar --authenticationDatabase=sssbbb --host=127.0.0.1 --port=4567 --oplog --out=/tmp/gobackup/test"
 	assert.Equal(t, ctx.mongodump(), expect)
 }

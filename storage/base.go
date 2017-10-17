@@ -4,36 +4,57 @@ import (
 	"fmt"
 	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/logger"
+	"github.com/spf13/viper"
 	"path/filepath"
 )
 
 // Base storage
-type Base interface {
-	perform(model config.ModelConfig, fileKey, archivePath string) error
+type Base struct {
+	model       config.ModelConfig
+	fileKey     string
+	archivePath string
+	viper       *viper.Viper
+}
+
+// Context storage interface
+type Context interface {
+	perform() error
+}
+
+func newBase(model config.ModelConfig, archivePath string) (base Base) {
+	base = Base{
+		model:       model,
+		archivePath: archivePath,
+		viper:       model.StoreWith.Viper,
+		fileKey:     filepath.Base(archivePath),
+	}
+	return
 }
 
 // Run storage
 func Run(model config.ModelConfig, archivePath string) error {
 	logger.Info("------------- Storage --------------")
-	var ctx Base
+
+	base := newBase(model, archivePath)
+	var ctx Context
 	switch model.StoreWith.Type {
 	case "local":
-		ctx = &Local{}
+		ctx = &Local{Base: base}
 	case "ftp":
-		ctx = &FTP{}
+		ctx = &FTP{Base: base}
 	case "scp":
-		ctx = &SCP{}
+		ctx = &SCP{Base: base}
 	case "s3":
-		ctx = &S3{}
+		ctx = &S3{Base: base}
 	case "oss":
-		ctx = &OSS{}
+		ctx = &OSS{Base: base}
 	default:
 		return fmt.Errorf("[%s] storage type has not implement", model.StoreWith.Type)
 	}
 
 	logger.Info("=> Storage | " + model.StoreWith.Type)
-	fileKey := filepath.Base(archivePath)
-	err := ctx.perform(model, fileKey, archivePath)
+
+	err := ctx.perform()
 	if err != nil {
 		return err
 	}

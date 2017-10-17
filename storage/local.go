@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
 )
@@ -11,12 +10,13 @@ import (
 // type: local
 // path: /data/backups
 type Local struct {
+	Base
 }
 
-func (ctx *Local) perform(model config.ModelConfig, fileKey, archivePath string) error {
-	destPath := model.StoreWith.Viper.GetString("path")
+func (ctx *Local) perform() error {
+	destPath := ctx.model.StoreWith.Viper.GetString("path")
 	helper.MkdirP(destPath)
-	_, err := helper.Exec("cp", archivePath, destPath)
+	_, err := helper.Exec("cp", ctx.archivePath, destPath)
 	if err != nil {
 		return err
 	}

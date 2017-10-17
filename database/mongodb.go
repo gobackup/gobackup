@@ -2,10 +2,8 @@ package database
 
 import (
 	"fmt"
-	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
-	"path"
 	"strings"
 )
 
@@ -20,7 +18,7 @@ import (
 // authdb:
 // oplog: false
 type MongoDB struct {
-	Name     string
+	Base
 	host     string
 	port     string
 	database string
@@ -28,24 +26,19 @@ type MongoDB struct {
 	password string
 	authdb   string
 	oplog    bool
-	dumpPath string
 }
 
 var (
 	mongodumpCli = "mongodump"
 )
 
-func (ctx *MongoDB) perform(model config.ModelConfig, dbCfg config.SubConfig) (err error) {
-	viper := dbCfg.Viper
+func (ctx *MongoDB) perform() (err error) {
+	viper := ctx.viper
 	viper.SetDefault("oplog", false)
 	viper.SetDefault("host", "127.0.0.1")
 	viper.SetDefault("username", "root")
 	viper.SetDefault("port", 27017)
 
-	ctx.Name = dbCfg.Name
-
-	ctx.dumpPath = path.Join(model.DumpPath, "mongodb", ctx.Name)
-	helper.MkdirP(ctx.dumpPath)
 	ctx.host = viper.GetString("host")
 	ctx.port = viper.GetString("port")
 	ctx.database = viper.GetString("database")
@@ -109,7 +102,6 @@ func (ctx *MongoDB) oplogOption() string {
 }
 
 func (ctx *MongoDB) dump() error {
-	logger.Info("-> Dumping MongoDB...")
 	out, err := helper.Exec(ctx.mongodump())
 	if err != nil {
 		return fmt.Errorf("-> Dump error: %s", err)

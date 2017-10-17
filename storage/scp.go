@@ -9,7 +9,6 @@ import (
 	// "crypto/tls"
 	"github.com/bramvdbogaerde/go-scp"
 	"github.com/bramvdbogaerde/go-scp/auth"
-	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/logger"
 )
 
@@ -23,6 +22,7 @@ import (
 // timeout: 300
 // private_key: ~/.ssh/id_rsa
 type SCP struct {
+	Base
 	path       string
 	host       string
 	port       string
@@ -31,19 +31,17 @@ type SCP struct {
 	password   string
 }
 
-func (ctx *SCP) perform(model config.ModelConfig, fileKey, archivePath string) error {
-	scpViper := model.StoreWith.Viper
+func (ctx *SCP) perform() error {
+	ctx.viper.SetDefault("port", "22")
+	ctx.viper.SetDefault("timeout", 300)
+	ctx.viper.SetDefault("private_key", "~/.ssh/id_rsa")
 
-	scpViper.SetDefault("port", "22")
-	scpViper.SetDefault("timeout", 300)
-	scpViper.SetDefault("private_key", "~/.ssh/id_rsa")
-
-	ctx.host = scpViper.GetString("host")
-	ctx.port = scpViper.GetString("port")
-	ctx.path = scpViper.GetString("path")
-	ctx.username = scpViper.GetString("username")
-	ctx.password = scpViper.GetString("password")
-	ctx.privateKey = helper.ExplandHome(scpViper.GetString("private_key"))
+	ctx.host = ctx.viper.GetString("host")
+	ctx.port = ctx.viper.GetString("port")
+	ctx.path = ctx.viper.GetString("path")
+	ctx.username = ctx.viper.GetString("username")
+	ctx.password = ctx.viper.GetString("password")
+	ctx.privateKey = helper.ExplandHome(ctx.viper.GetString("private_key"))
 
 	logger.Info("PrivateKey", ctx.privateKey)
 
@@ -52,7 +50,7 @@ func (ctx *SCP) perform(model config.ModelConfig, fileKey, archivePath string) e
 		ctx.privateKey,
 		ssh.InsecureIgnoreHostKey(),
 	)
-	clientConfig.Timeout = scpViper.GetDuration("timeout") * time.Second
+	clientConfig.Timeout = ctx.viper.GetDuration("timeout") * time.Second
 	if len(ctx.password) > 0 {
 		clientConfig.Auth = append(clientConfig.Auth, ssh.Password(ctx.password))
 	}
@@ -66,13 +64,13 @@ func (ctx *SCP) perform(model config.ModelConfig, fileKey, archivePath string) e
 	}
 	defer client.Session.Close()
 
-	file, err := os.Open(archivePath)
+	file, err := os.Open(ctx.archivePath)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	remotePath := path.Join(ctx.path, fileKey)
+	remotePath := path.Join(ctx.path, ctx.fileKey)
 
 	logger.Info("-> scp", remotePath)
 	client.CopyFromFile(*file, remotePath, "0655")

@@ -2,7 +2,6 @@ package storage
 
 import (
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
-	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/logger"
 	"path"
 )
@@ -18,6 +17,7 @@ import (
 // max_retries: 5
 // timeout: 300
 type OSS struct {
+	Base
 	endpoint        string
 	bucket          string
 	accessKeyID     string
@@ -32,20 +32,19 @@ var (
 	ossPartSize int64 = 4 * 1024 * 1024
 )
 
-func (ctx *OSS) perform(model config.ModelConfig, fileKey, archivePath string) error {
-	ossViper := model.StoreWith.Viper
-	ossViper.SetDefault("endpoint", "oss-cn-beijing.aliyuncs.com")
-	ossViper.SetDefault("max_retries", 3)
-	ossViper.SetDefault("path", "/")
-	ossViper.SetDefault("timeout", 300)
+func (ctx *OSS) perform() error {
+	ctx.viper.SetDefault("endpoint", "oss-cn-beijing.aliyuncs.com")
+	ctx.viper.SetDefault("max_retries", 3)
+	ctx.viper.SetDefault("path", "/")
+	ctx.viper.SetDefault("timeout", 300)
 
-	ctx.endpoint = ossViper.GetString("endpoint")
-	ctx.bucket = ossViper.GetString("bucket")
-	ctx.accessKeyID = ossViper.GetString("access_key_id")
-	ctx.accessKeySecret = ossViper.GetString("access_key_secret")
-	ctx.path = ossViper.GetString("path")
-	ctx.maxRetries = ossViper.GetInt("max_retries")
-	ctx.timeout = ossViper.GetInt("timeout")
+	ctx.endpoint = ctx.viper.GetString("endpoint")
+	ctx.bucket = ctx.viper.GetString("bucket")
+	ctx.accessKeyID = ctx.viper.GetString("access_key_id")
+	ctx.accessKeySecret = ctx.viper.GetString("access_key_secret")
+	ctx.path = ctx.viper.GetString("path")
+	ctx.maxRetries = ctx.viper.GetInt("max_retries")
+	ctx.timeout = ctx.viper.GetInt("timeout")
 
 	logger.Info("endpoint:", ctx.endpoint)
 	logger.Info("bucket:", ctx.bucket)
@@ -62,10 +61,10 @@ func (ctx *OSS) perform(model config.ModelConfig, fileKey, archivePath string) e
 		return err
 	}
 
-	remotePath := path.Join(ctx.path, fileKey)
+	remotePath := path.Join(ctx.path, ctx.fileKey)
 
 	logger.Info("-> Uploading OSS...")
-	err = bucket.UploadFile(remotePath, archivePath, ossPartSize, oss.Routines(4))
+	err = bucket.UploadFile(remotePath, ctx.archivePath, ossPartSize, oss.Routines(4))
 	if err != nil {
 		return err
 	}

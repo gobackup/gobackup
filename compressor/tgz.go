@@ -1,7 +1,6 @@
 package compressor
 
 import (
-	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/helper"
 )
 
@@ -9,14 +8,15 @@ import (
 //
 // type: tgz
 type Tgz struct {
+	Base
 }
 
-func (ctx *Tgz) perform(model config.ModelConfig) (archivePath string, err error) {
-	filePath := archiveFilePath(".tar.gz")
+func (ctx *Tgz) perform() (archivePath string, err error) {
+	filePath := ctx.archiveFilePath(".tar.gz")
 
 	opts := ctx.options()
 	opts = append(opts, filePath)
-	opts = append(opts, model.Name)
+	opts = append(opts, ctx.name)
 
 	_, err = helper.Exec("tar", opts...)
 	if err == nil {

@@ -4,7 +4,6 @@ import (
 	"os"
 	"path"
 	// "crypto/tls"
-	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/logger"
 	"github.com/secsy/goftp"
 	"time"
@@ -20,6 +19,7 @@ import (
 // username:
 // password:
 type FTP struct {
+	Base
 	path     string
 	host     string
 	port     string
@@ -27,25 +27,26 @@ type FTP struct {
 	password string
 }
 
-func (ctx *FTP) perform(model config.ModelConfig, fileKey, archivePath string) error {
-	ftpViper := model.StoreWith.Viper
+func (ctx *FTP) perform() error {
+	ctx.viper.SetDefault("port", "21")
+	ctx.viper.SetDefault("timeout", 300)
 
-	ftpViper.SetDefault("port", "21")
-	ftpViper.SetDefault("timeout", 300)
-
-	ctx.host = ftpViper.GetString("host")
-	ctx.port = ftpViper.GetString("port")
-	ctx.path = ftpViper.GetString("path")
-	ctx.username = ftpViper.GetString("username")
-	ctx.password = ftpViper.GetString("password")
+	ctx.host = ctx.viper.GetString("host")
+	ctx.port = ctx.viper.GetString("port")
+	ctx.path = ctx.viper.GetString("path")
+	ctx.username = ctx.viper.GetString("username")
+	ctx.password = ctx.viper.GetString("password")
 
 	ftpConfig := goftp.Config{
-		User:     ftpViper.GetString("username"),
-		Password: ftpViper.GetString("password"),
-		Timeout:  ftpViper.GetDuration("timeout") * time.Second,
+		User:     ctx.viper.GetString("username"),
+		Password: ctx.viper.GetString("password"),
+		Timeout:  ctx.viper.GetDuration("timeout") * time.Second,
 	}
 
-	ftp, err := goftp.DialConfig(ftpConfig, ftpViper.GetString("host")+":"+ftpViper.GetString("port"))
+	ftp, err := goftp.DialConfig(
+		ftpConfig,
+		ctx.viper.GetString("host")+":"+ctx.viper.GetString("port"),
+	)
 	if err != nil {
 		return err
 	}
@@ -59,13 +60,13 @@ func (ctx *FTP) perform(model config.ModelConfig, fileKey, archivePath string) e
 		}
 	}
 
-	file, err := os.Open(archivePath)
+	file, err := os.Open(ctx.archivePath)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	remotePath := path.Join(ctx.path, fileKey)
+	remotePath := path.Join(ctx.path, ctx.fileKey)
 	logger.Info("-> upload", remotePath)
 	err = ftp.Store(remotePath, file)
 	if err != nil {

@@ -8,27 +8,46 @@ import (
 )
 
 type Monkey struct {
+	Base
 }
 
-func (ctx Monkey) perform(model config.ModelConfig, dbConfig config.SubConfig) error {
-	if model.Name != "TestMonkey" {
+func (ctx Monkey) perform() error {
+	if ctx.model.Name != "TestMonkey" {
 		return fmt.Errorf("Error")
 	}
-	if dbConfig.Name != "mysql1" {
+	if ctx.dbConfig.Name != "mysql1" {
 		return fmt.Errorf("Error")
 	}
 	return nil
 }
 
 func TestBaseInterface(t *testing.T) {
-	var ctx Base
-	ctx = Monkey{}
+	base := Base{
+		model: config.ModelConfig{
+			Name: "TestMonkey",
+		},
+		dbConfig: config.SubConfig{
+			Name: "mysql1",
+		},
+	}
+	ctx := Monkey{Base: base}
+	err := ctx.perform()
+	assert.Nil(t, err)
+}
+
+func TestBase_newBase(t *testing.T) {
 	model := config.ModelConfig{
-		Name: "TestMonkey",
+		DumpPath: "/tmp/gobackup/test",
 	}
 	dbConfig := config.SubConfig{
-		Name: "mysql1",
+		Type: "mysql",
+		Name: "mysql-master",
 	}
-	err := ctx.perform(model, dbConfig)
-	assert.Nil(t, err)
+	base := newBase(model, dbConfig)
+
+	assert.Equal(t, base.model, model)
+	assert.Equal(t, base.dbConfig, dbConfig)
+	assert.Equal(t, base.viper, dbConfig.Viper)
+	assert.Equal(t, base.name, "mysql-master")
+	assert.Equal(t, base.dumpPath, "/tmp/gobackup/test/mysql/mysql-master")
 }

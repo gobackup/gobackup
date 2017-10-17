@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
 	"path"
@@ -18,51 +17,35 @@ import (
 // password:
 // additionalOptions:
 type MySQL struct {
-	Name              string
+	Base
 	host              string
 	port              string
 	database          string
 	username          string
 	password          string
-	dumpPath          string
 	additionalOptions string
-	model             config.ModelConfig
 }
 
-func (ctx *MySQL) perform(model config.ModelConfig, dbCfg config.SubConfig) (err error) {
-	viper := dbCfg.Viper
+func (ctx *MySQL) perform() (err error) {
+	viper := ctx.viper
 	viper.SetDefault("host", "127.0.0.1")
 	viper.SetDefault("username", "root")
 	viper.SetDefault("port", 3306)
 
-	ctx.Name = dbCfg.Name
 	ctx.host = viper.GetString("host")
 	ctx.port = viper.GetString("port")
 	ctx.database = viper.GetString("database")
 	ctx.username = viper.GetString("username")
 	ctx.password = viper.GetString("password")
 	ctx.additionalOptions = viper.GetString("additional_options")
-	ctx.model = model
-
-	if err = ctx.prepare(); err != nil {
-		return
-	}
-
-	logger.Info("=> database | MySQL:", ctx.Name)
-	err = ctx.dump()
-	return
-}
-
-func (ctx *MySQL) prepare() (err error) {
-	ctx.dumpPath = path.Join(ctx.model.DumpPath, "mysql", ctx.Name)
-	helper.MkdirP(ctx.dumpPath)
 
 	// mysqldump command
 	if len(ctx.database) == 0 {
 		return fmt.Errorf("mysql database config is required")
 	}
 
-	return nil
+	err = ctx.dump()
+	return
 }
 
 func (ctx *MySQL) dumpArgs() []string {

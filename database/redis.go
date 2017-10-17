@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
 	"path"
@@ -27,32 +26,28 @@ const (
 // password:
 // rdb_path: /var/db/redis/dump.rdb
 type Redis struct {
-	Name       string
+	Base
 	host       string
 	port       string
 	password   string
 	mode       redisMode
 	invokeSave bool
 	// path of rdb file, example: /var/lib/redis/dump.rdb
-	rdbPath  string
-	dumpPath string
-	model    config.ModelConfig
+	rdbPath string
 }
 
 var (
 	redisCliCommand = "redis-cli"
 )
 
-func (ctx *Redis) perform(model config.ModelConfig, dbCfg config.SubConfig) (err error) {
-	viper := dbCfg.Viper
+func (ctx *Redis) perform() (err error) {
+	viper := ctx.viper
 	viper.SetDefault("rdb_path", "/var/db/redis/dump.rdb")
 	viper.SetDefault("host", "127.0.0.1")
 	viper.SetDefault("port", "6379")
 	viper.SetDefault("invoke_save", true)
 	viper.SetDefault("mode", "copy")
 
-	ctx.model = model
-	ctx.Name = dbCfg.Name
 	ctx.host = viper.GetString("host")
 	ctx.port = viper.GetString("port")
 	ctx.password = viper.GetString("password")
@@ -69,14 +64,11 @@ func (ctx *Redis) perform(model config.ModelConfig, dbCfg config.SubConfig) (err
 		}
 	}
 
-	ctx.dumpPath = path.Join(ctx.model.DumpPath, "redis", ctx.Name)
-	helper.MkdirP(ctx.dumpPath)
 	if err = ctx.prepare(); err != nil {
 		return
 	}
 
-	logger.Info("=> database | Redis:", ctx.Name)
-
+	logger.Info("-> Invoke save...")
 	if err = ctx.save(); err != nil {
 		return
 	}

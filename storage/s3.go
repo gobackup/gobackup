@@ -6,7 +6,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/logger"
 	"os"
 	"path"
@@ -23,39 +22,39 @@ import (
 // max_retries: 5
 // timeout: 300
 type S3 struct {
+	Base
 	bucket string
 	path   string
 }
 
-func (ctx *S3) perform(model config.ModelConfig, fileKey, archivePath string) error {
-	s3Viper := model.StoreWith.Viper
-	s3Viper.SetDefault("region", "us-east-1")
+func (ctx *S3) perform() error {
+	ctx.viper.SetDefault("region", "us-east-1")
 
 	cfg := aws.NewConfig()
-	endpoint := s3Viper.GetString("endpoint")
+	endpoint := ctx.viper.GetString("endpoint")
 	if len(endpoint) > 0 {
 		cfg.Endpoint = aws.String(endpoint)
 	}
 	cfg.Credentials = credentials.NewStaticCredentials(
-		s3Viper.GetString("access_key_id"),
-		s3Viper.GetString("secret_access_key"),
-		s3Viper.GetString("token"),
+		ctx.viper.GetString("access_key_id"),
+		ctx.viper.GetString("secret_access_key"),
+		ctx.viper.GetString("token"),
 	)
-	cfg.Region = aws.String(s3Viper.GetString("region"))
-	cfg.MaxRetries = aws.Int(s3Viper.GetInt("max_retries"))
+	cfg.Region = aws.String(ctx.viper.GetString("region"))
+	cfg.MaxRetries = aws.Int(ctx.viper.GetInt("max_retries"))
 
-	ctx.bucket = s3Viper.GetString("bucket")
-	ctx.path = s3Viper.GetString("path")
+	ctx.bucket = ctx.viper.GetString("bucket")
+	ctx.path = ctx.viper.GetString("path")
 
 	sess := session.Must(session.NewSession(cfg))
 	uploader := s3manager.NewUploader(sess)
 
-	f, err := os.Open(archivePath)
+	f, err := os.Open(ctx.archivePath)
 	if err != nil {
-		return fmt.Errorf("failed to open file %q, %v", archivePath, err)
+		return fmt.Errorf("failed to open file %q, %v", ctx.archivePath, err)
 	}
 
-	remotePath := path.Join(ctx.path, fileKey)
+	remotePath := path.Join(ctx.path, ctx.fileKey)
 
 	input := &s3manager.UploadInput{
 		Bucket: aws.String(ctx.bucket),

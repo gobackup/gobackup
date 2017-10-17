@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
 	"os"
@@ -19,43 +18,35 @@ import (
 // username:
 // password:
 type PostgreSQL struct {
-	Name        string
+	Base
 	host        string
 	port        string
 	database    string
 	username    string
 	password    string
 	dumpCommand string
-	dumpPath    string
-	model       config.ModelConfig
 }
 
-func (ctx PostgreSQL) perform(model config.ModelConfig, dbCfg config.SubConfig) (err error) {
-	viper := dbCfg.Viper
+func (ctx PostgreSQL) perform() (err error) {
+	viper := ctx.viper
 	viper.SetDefault("host", "localhost")
 	viper.SetDefault("port", 5432)
 
-	ctx.Name = dbCfg.Name
 	ctx.host = viper.GetString("host")
 	ctx.port = viper.GetString("port")
 	ctx.database = viper.GetString("database")
 	ctx.username = viper.GetString("username")
 	ctx.password = viper.GetString("password")
-	ctx.model = model
 
 	if err = ctx.prepare(); err != nil {
 		return
 	}
 
-	logger.Info("=> database | PostgreSQL:", ctx.Name)
 	err = ctx.dump()
 	return
 }
 
 func (ctx *PostgreSQL) prepare() (err error) {
-	ctx.dumpPath = path.Join(ctx.model.DumpPath, "postgresql", ctx.Name)
-	helper.MkdirP(ctx.dumpPath)
-
 	// mysqldump command
 	dumpArgs := []string{}
 	if len(ctx.database) == 0 {
