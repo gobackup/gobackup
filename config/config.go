@@ -14,6 +14,10 @@ var (
 	Exist bool
 	// Models configs
 	Models []ModelConfig
+	// IsTest env
+	IsTest bool
+	// HomeDir of user
+	HomeDir string
 )
 
 // ModelConfig for special case
@@ -43,17 +47,19 @@ type SubConfig struct {
 func init() {
 	viper.SetConfigType("yaml")
 
-	isTest := os.Getenv("GO_ENV") == "test"
+	IsTest = os.Getenv("GO_ENV") == "test"
+	HomeDir = os.Getenv("HOME")
 
-	if isTest {
+	if IsTest {
 		viper.SetConfigName("gobackup_test")
+		HomeDir = "../"
 	} else {
 		viper.SetConfigName("gobackup")
 	}
 
 	// ./gobackup.yml
 	viper.AddConfigPath(".")
-	if isTest {
+	if IsTest {
 		viper.AddConfigPath("../")
 	} else {
 		// ~/.gobackup/gobackup.yml

@@ -14,6 +14,7 @@ type Base struct {
 	fileKey     string
 	archivePath string
 	viper       *viper.Viper
+	keep        int
 }
 
 // Context storage interface
@@ -28,6 +29,11 @@ func newBase(model config.ModelConfig, archivePath string) (base Base) {
 		viper:       model.StoreWith.Viper,
 		fileKey:     filepath.Base(archivePath),
 	}
+
+	if base.viper != nil {
+		base.keep = base.viper.GetInt("keep")
+	}
+
 	return
 }
 
@@ -58,6 +64,8 @@ func Run(model config.ModelConfig, archivePath string) error {
 	if err != nil {
 		return err
 	}
+
+	runCycler(base.fileKey)
 
 	logger.Info("------------- Storage --------------\n")
 	return nil
