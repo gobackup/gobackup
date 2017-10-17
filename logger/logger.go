@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	logFlag = log.Ldate | log.Ltime | log.LUTC
+	logFlag = log.Ldate | log.Ltime
 	myLog   = log.New(os.Stdout, "", logFlag)
 )
 
