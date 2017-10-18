@@ -25,6 +25,7 @@ type OSS struct {
 	path            string
 	maxRetries      int
 	timeout         int
+	client          *oss.Bucket
 }
 
 var (
@@ -32,7 +33,7 @@ var (
 	ossPartSize int64 = 4 * 1024 * 1024
 )
 
-func (ctx *OSS) perform() error {
+func (ctx *OSS) init() (err error) {
 	ctx.viper.SetDefault("endpoint", "oss-cn-beijing.aliyuncs.com")
 	ctx.viper.SetDefault("max_retries", 3)
 	ctx.viper.SetDefault("path", "/")
@@ -49,26 +50,37 @@ func (ctx *OSS) perform() error {
 	logger.Info("endpoint:", ctx.endpoint)
 	logger.Info("bucket:", ctx.bucket)
 
-	client, err := oss.New(ctx.endpoint, ctx.accessKeyID, ctx.accessKeySecret)
+	ossClient, err := oss.New(ctx.endpoint, ctx.accessKeyID, ctx.accessKeySecret)
 	if err != nil {
 		return err
 	}
-	client.Config.Timeout = uint(ctx.timeout)
-	client.Config.RetryTimes = uint(ctx.maxRetries)
+	ossClient.Config.Timeout = uint(ctx.timeout)
+	ossClient.Config.RetryTimes = uint(ctx.maxRetries)
 
-	bucket, err := client.Bucket(ctx.bucket)
+	ctx.client, err = ossClient.Bucket(ctx.bucket)
 	if err != nil {
 		return err
 	}
 
-	remotePath := path.Join(ctx.path, ctx.fileKey)
+	return
+}
+
+func (ctx *OSS) upload(fileKey string) (err error) {
+	remotePath := path.Join(ctx.path, fileKey)
 
 	logger.Info("-> Uploading OSS...")
-	err = bucket.UploadFile(remotePath, ctx.archivePath, ossPartSize, oss.Routines(4))
+	err = ctx.client.UploadFile(remotePath, ctx.archivePath, ossPartSize, oss.Routines(4))
+
 	if err != nil {
 		return err
 	}
 	logger.Info("Success")
 
 	return nil
+}
+
+func (ctx *OSS) delete(fileKey string) (err error) {
+	remotePath := path.Join(ctx.path, fileKey)
+	err = ctx.client.DeleteObject(remotePath)
+	return
 }

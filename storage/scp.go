@@ -29,9 +29,10 @@ type SCP struct {
 	privateKey string
 	username   string
 	password   string
+	client     scp.Client
 }
 
-func (ctx *SCP) perform() error {
+func (ctx *SCP) init() (err error) {
 	ctx.viper.SetDefault("port", "22")
 	ctx.viper.SetDefault("timeout", 300)
 	ctx.viper.SetDefault("private_key", "~/.ssh/id_rsa")
@@ -55,14 +56,23 @@ func (ctx *SCP) perform() error {
 		clientConfig.Auth = append(clientConfig.Auth, ssh.Password(ctx.password))
 	}
 
-	client := scp.NewClient(ctx.host+":"+ctx.port, &clientConfig)
+	ctx.client = scp.NewClient(ctx.host+":"+ctx.port, &clientConfig)
 
-	logger.Info("-> Connecting...")
-	err := client.Connect()
+	err = ctx.client.Connect()
 	if err != nil {
 		return err
 	}
-	defer client.Session.Close()
+	defer ctx.client.Session.Close()
+	ctx.client.Session.Run("mkdir -p " + ctx.path)
+	return
+}
+
+func (ctx *SCP) upload(fileKey string) (err error) {
+	err = ctx.client.Connect()
+	if err != nil {
+		return err
+	}
+	defer ctx.client.Session.Close()
 
 	file, err := os.Open(ctx.archivePath)
 	if err != nil {
@@ -70,11 +80,23 @@ func (ctx *SCP) perform() error {
 	}
 	defer file.Close()
 
-	remotePath := path.Join(ctx.path, ctx.fileKey)
-
+	remotePath := path.Join(ctx.path, fileKey)
 	logger.Info("-> scp", remotePath)
-	client.CopyFromFile(*file, remotePath, "0655")
+	ctx.client.CopyFromFile(*file, remotePath, "0655")
 
 	logger.Info("Store successed")
 	return nil
+}
+
+func (ctx *SCP) delete(fileKey string) (err error) {
+	err = ctx.client.Connect()
+	if err != nil {
+		return
+	}
+	defer ctx.client.Session.Close()
+
+	remotePath := path.Join(ctx.path, fileKey)
+	logger.Info("-> remove", remotePath)
+	err = ctx.client.Session.Run("rm " + remotePath)
+	return
 }

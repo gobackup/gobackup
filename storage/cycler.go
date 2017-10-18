@@ -8,14 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"sort"
 	"time"
-)
-
-var (
-	packages       PackageList
-	cyclerFileName = path.Join(config.HomeDir, ".gobackup", "cycler.json")
-	isLoaded       = false
 )
 
 type PackageList []Package
@@ -25,35 +18,55 @@ type Package struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-func (s PackageList) Len() int {
-	return len(s)
-}
-func (s PackageList) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
-func (s PackageList) Less(i, j int) bool {
-	return s[i].CreatedAt.Unix() < s[j].CreatedAt.Unix()
+var (
+	cyclerFileName = path.Join(config.HomeDir, ".gobackup", "cycler.json")
+)
+
+type Cycler struct {
+	packages PackageList
+	isLoaded bool
 }
 
-func addPackage(fileKey string) {
-	packages = append(packages, Package{
+func (c *Cycler) add(fileKey string) {
+	c.packages = append(c.packages, Package{
 		FileKey:   fileKey,
 		CreatedAt: time.Now(),
 	})
 }
 
-func runCycler(fileKey string) {
-	loadCycler()
+func (c *Cycler) shiftByKeep(keep int) (first *Package) {
+	total := len(c.packages)
+	if total <= keep {
+		return nil
+	}
 
-	addPackage(fileKey)
-
-	logger.Info("Cycler run...")
-	sort.Sort(&packages)
-
-	dumpCycler()
+	first, c.packages = &c.packages[0], c.packages[1:]
+	return
 }
 
-func loadCycler() {
+func (c *Cycler) run(fileKey string, keep int, deletePackage func(fileKey string) error) {
+	c.load()
+	c.add(fileKey)
+	defer c.save()
+
+	if keep == 0 {
+		return
+	}
+
+	for {
+		pkg := c.shiftByKeep(keep)
+		if pkg == nil {
+			break
+		}
+
+		err := deletePackage(pkg.FileKey)
+		if err != nil {
+			logger.Warn("remove failed: ", err)
+		}
+	}
+}
+
+func (c *Cycler) load() {
 	if !helper.IsExistsPath(cyclerFileName) {
 		helper.Exec("touch", cyclerFileName)
 	}
@@ -63,22 +76,20 @@ func loadCycler() {
 		logger.Error("Load cycler.json failed:", err)
 		return
 	}
-	err = json.Unmarshal(f, &packages)
+	err = json.Unmarshal(f, &c.packages)
 	if err != nil {
 		logger.Error("Unmarshal cycler.json failed:", err)
 	}
-	isLoaded = true
+	c.isLoaded = true
 }
 
-func dumpCycler() {
-	if !isLoaded {
+func (c *Cycler) save() {
+	if !c.isLoaded {
 		logger.Warn("Skip save cycler.json because it not loaded")
 		return
 	}
 
-	logger.Info("Current packages: ", len(packages))
-
-	data, err := json.Marshal(&packages)
+	data, err := json.Marshal(&c.packages)
 	if err != nil {
 		logger.Error("Marshal packages to cycler.json failed: ", err)
 		return

@@ -11,7 +11,6 @@ import (
 // Base storage
 type Base struct {
 	model       config.ModelConfig
-	fileKey     string
 	archivePath string
 	viper       *viper.Viper
 	keep        int
@@ -19,7 +18,9 @@ type Base struct {
 
 // Context storage interface
 type Context interface {
-	perform() error
+	init() error
+	upload(fileKey string) error
+	delete(fileKey string) error
 }
 
 func newBase(model config.ModelConfig, archivePath string) (base Base) {
@@ -27,7 +28,6 @@ func newBase(model config.ModelConfig, archivePath string) (base Base) {
 		model:       model,
 		archivePath: archivePath,
 		viper:       model.StoreWith.Viper,
-		fileKey:     filepath.Base(archivePath),
 	}
 
 	if base.viper != nil {
@@ -38,9 +38,9 @@ func newBase(model config.ModelConfig, archivePath string) (base Base) {
 }
 
 // Run storage
-func Run(model config.ModelConfig, archivePath string) error {
+func Run(model config.ModelConfig, archivePath string) (err error) {
 	logger.Info("------------- Storage --------------")
-
+	newFileKey := filepath.Base(archivePath)
 	base := newBase(model, archivePath)
 	var ctx Context
 	switch model.StoreWith.Type {
@@ -59,13 +59,18 @@ func Run(model config.ModelConfig, archivePath string) error {
 	}
 
 	logger.Info("=> Storage | " + model.StoreWith.Type)
-
-	err := ctx.perform()
+	err = ctx.init()
 	if err != nil {
 		return err
 	}
 
-	runCycler(base.fileKey)
+	err = ctx.upload(newFileKey)
+	if err != nil {
+		return err
+	}
+
+	cycler := Cycler{}
+	cycler.run(newFileKey, base.keep, ctx.delete)
 
 	logger.Info("------------- Storage --------------\n")
 	return nil

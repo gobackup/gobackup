@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/huacnlee/gobackup/logger"
 	"os"
@@ -25,11 +26,11 @@ type S3 struct {
 	Base
 	bucket string
 	path   string
+	client *s3manager.Uploader
 }
 
-func (ctx *S3) perform() error {
+func (ctx *S3) init() (err error) {
 	ctx.viper.SetDefault("region", "us-east-1")
-
 	cfg := aws.NewConfig()
 	endpoint := ctx.viper.GetString("endpoint")
 	if len(endpoint) > 0 {
@@ -47,14 +48,18 @@ func (ctx *S3) perform() error {
 	ctx.path = ctx.viper.GetString("path")
 
 	sess := session.Must(session.NewSession(cfg))
-	uploader := s3manager.NewUploader(sess)
+	ctx.client = s3manager.NewUploader(sess)
 
+	return
+}
+
+func (ctx *S3) upload(fileKey string) (err error) {
 	f, err := os.Open(ctx.archivePath)
 	if err != nil {
 		return fmt.Errorf("failed to open file %q, %v", ctx.archivePath, err)
 	}
 
-	remotePath := path.Join(ctx.path, ctx.fileKey)
+	remotePath := path.Join(ctx.path, fileKey)
 
 	input := &s3manager.UploadInput{
 		Bucket: aws.String(ctx.bucket),
@@ -63,11 +68,21 @@ func (ctx *S3) perform() error {
 	}
 
 	logger.Info("-> S3 Uploading...")
-	result, err := uploader.Upload(input)
+	result, err := ctx.client.Upload(input)
 	if err != nil {
 		return fmt.Errorf("failed to upload file, %v", err)
 	}
 
 	logger.Info("=>", result.Location)
 	return nil
+}
+
+func (ctx *S3) delete(fileKey string) (err error) {
+	remotePath := path.Join(ctx.path, fileKey)
+	input := &s3.DeleteObjectInput{
+		Bucket: aws.String(ctx.bucket),
+		Key:    aws.String(remotePath),
+	}
+	_, err = ctx.client.S3.DeleteObject(input)
+	return
 }
