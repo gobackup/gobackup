@@ -13,6 +13,7 @@ models:
       openssl: true
     store_with:
       type: local
+      keep: 10
       path: /Users/jason/Downloads/backup1
     databases:
       dummy_test:
@@ -43,6 +44,7 @@ models:
   normal_files:
     store_with:
       type: scp
+      keep: 10
       path: ~/backup
       host: your-host.com
       private_key: ~/.ssh/id_rsa
@@ -54,6 +56,7 @@ models:
       type: tgz
     store_with:
       type: ftp
+      keep: 15
       path: /backup1/foo
       host: your-host.com
       port: 21
@@ -65,6 +68,7 @@ models:
       type: tgz
     store_with:
       type: s3
+      keep: 20
       bucket: gobackup-test
       region: ap-southeast-1
       path: backups
