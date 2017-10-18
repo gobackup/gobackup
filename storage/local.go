@@ -15,11 +15,13 @@ type Local struct {
 	destPath string
 }
 
-func (ctx *Local) init() (err error) {
+func (ctx *Local) open() (err error) {
 	ctx.destPath = ctx.model.StoreWith.Viper.GetString("path")
 	helper.MkdirP(ctx.destPath)
 	return
 }
+
+func (ctx *Local) close() {}
 
 func (ctx *Local) upload(fileKey string) (err error) {
 	_, err = helper.Exec("cp", ctx.archivePath, ctx.destPath)

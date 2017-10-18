@@ -26,11 +26,10 @@ type FTP struct {
 	username string
 	password string
 
-	hosts     string
-	ftpConfig goftp.Config
+	client *goftp.Client
 }
 
-func (ctx *FTP) init() (err error) {
+func (ctx *FTP) open() (err error) {
 	ctx.viper.SetDefault("port", "21")
 	ctx.viper.SetDefault("timeout", 300)
 
@@ -40,26 +39,27 @@ func (ctx *FTP) init() (err error) {
 	ctx.username = ctx.viper.GetString("username")
 	ctx.password = ctx.viper.GetString("password")
 
-	ctx.ftpConfig = goftp.Config{
+	ftpConfig := goftp.Config{
 		User:     ctx.viper.GetString("username"),
 		Password: ctx.viper.GetString("password"),
 		Timeout:  ctx.viper.GetDuration("timeout") * time.Second,
 	}
-	ctx.hosts = ctx.host + ":" + ctx.port
-	return
-}
-
-func (ctx *FTP) upload(fileKey string) (err error) {
-	client, err := goftp.DialConfig(ctx.ftpConfig, ctx.hosts)
+	ctx.client, err = goftp.DialConfig(ftpConfig, ctx.host+":"+ctx.port)
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	return
+}
 
+func (ctx *FTP) close() {
+	ctx.client.Close()
+}
+
+func (ctx *FTP) upload(fileKey string) (err error) {
 	logger.Info("-> Uploading...")
-	_, err = client.Stat(ctx.path)
+	_, err = ctx.client.Stat(ctx.path)
 	if os.IsNotExist(err) {
-		if _, err := client.Mkdir(ctx.path); err != nil {
+		if _, err := ctx.client.Mkdir(ctx.path); err != nil {
 			return err
 		}
 	}
@@ -71,7 +71,7 @@ func (ctx *FTP) upload(fileKey string) (err error) {
 	defer file.Close()
 
 	remotePath := path.Join(ctx.path, fileKey)
-	err = client.Store(remotePath, file)
+	err = ctx.client.Store(remotePath, file)
 	if err != nil {
 		return err
 	}
@@ -81,13 +81,7 @@ func (ctx *FTP) upload(fileKey string) (err error) {
 }
 
 func (ctx *FTP) delete(fileKey string) (err error) {
-	client, err := goftp.DialConfig(ctx.ftpConfig, ctx.hosts)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-
 	remotePath := path.Join(ctx.path, fileKey)
-	err = client.Delete(remotePath)
+	err = ctx.client.Delete(remotePath)
 	return
 }

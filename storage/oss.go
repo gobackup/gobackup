@@ -33,7 +33,7 @@ var (
 	ossPartSize int64 = 4 * 1024 * 1024
 )
 
-func (ctx *OSS) init() (err error) {
+func (ctx *OSS) open() (err error) {
 	ctx.viper.SetDefault("endpoint", "oss-cn-beijing.aliyuncs.com")
 	ctx.viper.SetDefault("max_retries", 3)
 	ctx.viper.SetDefault("path", "/")
@@ -63,6 +63,9 @@ func (ctx *OSS) init() (err error) {
 	}
 
 	return
+}
+
+func (ctx *OSS) close() {
 }
 
 func (ctx *OSS) upload(fileKey string) (err error) {

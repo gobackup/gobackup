@@ -18,7 +18,8 @@ type Base struct {
 
 // Context storage interface
 type Context interface {
-	init() error
+	open() error
+	close()
 	upload(fileKey string) error
 	delete(fileKey string) error
 }
@@ -59,10 +60,11 @@ func Run(model config.ModelConfig, archivePath string) (err error) {
 	}
 
 	logger.Info("=> Storage | " + model.StoreWith.Type)
-	err = ctx.init()
+	err = ctx.open()
 	if err != nil {
 		return err
 	}
+	defer ctx.close()
 
 	err = ctx.upload(newFileKey)
 	if err != nil {

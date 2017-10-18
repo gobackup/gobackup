@@ -32,7 +32,7 @@ type SCP struct {
 	client     scp.Client
 }
 
-func (ctx *SCP) init() (err error) {
+func (ctx *SCP) open() (err error) {
 	ctx.viper.SetDefault("port", "22")
 	ctx.viper.SetDefault("timeout", 300)
 	ctx.viper.SetDefault("private_key", "~/.ssh/id_rsa")
@@ -66,6 +66,8 @@ func (ctx *SCP) init() (err error) {
 	ctx.client.Session.Run("mkdir -p " + ctx.path)
 	return
 }
+
+func (ctx *SCP) close() {}
 
 func (ctx *SCP) upload(fileKey string) (err error) {
 	err = ctx.client.Connect()

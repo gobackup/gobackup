@@ -29,7 +29,7 @@ type S3 struct {
 	client *s3manager.Uploader
 }
 
-func (ctx *S3) init() (err error) {
+func (ctx *S3) open() (err error) {
 	ctx.viper.SetDefault("region", "us-east-1")
 	cfg := aws.NewConfig()
 	endpoint := ctx.viper.GetString("endpoint")
@@ -52,6 +52,8 @@ func (ctx *S3) init() (err error) {
 
 	return
 }
+
+func (ctx *S3) close() {}
 
 func (ctx *S3) upload(fileKey string) (err error) {
 	f, err := os.Open(ctx.archivePath)
