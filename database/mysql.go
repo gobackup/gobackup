@@ -5,6 +5,7 @@ import (
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
 	"path"
+	"strings"
 )
 
 // MySQL database
@@ -15,7 +16,7 @@ import (
 // database:
 // username: root
 // password:
-// additionalOptions:
+// additional_options:
 type MySQL struct {
 	Base
 	host              string
@@ -23,7 +24,7 @@ type MySQL struct {
 	database          string
 	username          string
 	password          string
-	additionalOptions string
+	additionalOptions []string
 }
 
 func (ctx *MySQL) perform() (err error) {
@@ -37,7 +38,10 @@ func (ctx *MySQL) perform() (err error) {
 	ctx.database = viper.GetString("database")
 	ctx.username = viper.GetString("username")
 	ctx.password = viper.GetString("password")
-	ctx.additionalOptions = viper.GetString("additional_options")
+	addOpts := viper.GetString("additional_options")
+	if len(addOpts) > 0 {
+		ctx.additionalOptions = strings.Split(addOpts, " ")
+	}
 
 	// mysqldump command
 	if len(ctx.database) == 0 {
@@ -63,7 +67,7 @@ func (ctx *MySQL) dumpArgs() []string {
 		dumpArgs = append(dumpArgs, `-p`+ctx.password)
 	}
 	if len(ctx.additionalOptions) > 0 {
-		dumpArgs = append(dumpArgs, ctx.additionalOptions)
+		dumpArgs = append(dumpArgs, ctx.additionalOptions...)
 	}
 
 	dumpArgs = append(dumpArgs, ctx.database)
