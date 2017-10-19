@@ -1,4 +1,4 @@
-version='0.6.0'
+version='0.6.1'
 platform='linux'
 os_uname=`uname`
 if [[ "$os_uname" == 'Linux' ]]; then
