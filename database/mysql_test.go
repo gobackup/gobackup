@@ -49,12 +49,15 @@ func TestMySQL_dumpArgsWithAdditionalOptions(t *testing.T) {
 		},
 	)
 	mysql := &MySQL{
-		Base:              base,
-		database:          "dummy_test",
-		host:              "127.0.0.2",
-		port:              "6378",
-		password:          "*&^92'",
-		additionalOptions: "--single-transaction --quick",
+		Base:     base,
+		database: "dummy_test",
+		host:     "127.0.0.2",
+		port:     "6378",
+		password: "*&^92'",
+		additionalOptions: []string{
+			"--single-transaction",
+			"--quick",
+		},
 	}
 
 	dumpArgs := mysql.dumpArgs()
@@ -64,7 +67,8 @@ func TestMySQL_dumpArgsWithAdditionalOptions(t *testing.T) {
 		"--port",
 		"6378",
 		"-p*&^92'",
-		"--single-transaction --quick",
+		"--single-transaction",
+		"--quick",
 		"dummy_test",
 		"--result-file=/tmp/gobackup/test/mysql/mysql1/dummy_test.sql",
 	})
