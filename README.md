@@ -5,6 +5,7 @@
 <p align="center">Simple tool for backup your databases, files to cloud storages.</p>
 <p align="center">
    <a href="https://travis-ci.org/huacnlee/gobackup"><img src="https://travis-ci.org/huacnlee/gobackup.svg?branch=master" alt="Build Status" /></a>
+   <a href="https://app.fossa.io/projects/git%2Bgithub.com%2Fhuacnlee%2Fgobackup?ref=badge_shield"><img src="https://app.fossa.io/api/projects/git%2Bgithub.com%2Fhuacnlee%2Fgobackup.svg?type=shield" /></a>
 </p>
 </p>
 
@@ -13,10 +14,6 @@ GoBackup 是一个类似 [backup/backup](https://github.com/backup/backup) 的�
 使用 GoBackup 你可以通过一个简单的配置文件，一次（执行一个命令）将服务器上重要的（数据库、配置文件）东西导出、打包压缩，并备份到指定目的地（如：本地路径、FTP、云存储...）。
 
 详细中文介绍： https://ruby-china.org/topics/34094
-
-## Documentation
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fhuacnlee%2Fgobackup.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fhuacnlee%2Fgobackup?ref=badge_shield)
-
 
 https://gobackup.github.io/
 
