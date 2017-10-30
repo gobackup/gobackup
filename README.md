@@ -15,6 +15,8 @@ GoBackup 是一个类似 [backup/backup](https://github.com/backup/backup) 的�
 详细中文介绍： https://ruby-china.org/topics/34094
 
 ## Documentation
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fhuacnlee%2Fgobackup.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fhuacnlee%2Fgobackup?ref=badge_shield)
+
 
 https://gobackup.github.io/
 
@@ -179,3 +181,7 @@ $ crontab -l
 > `0 0 * * *` means run at 0:00 AM, every day.
 
 And after a day, you can check up the execute status by `~/.gobackup/gobackup.log`.
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fhuacnlee%2Fgobackup.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fhuacnlee%2Fgobackup?ref=badge_large)
