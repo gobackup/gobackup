@@ -25,7 +25,7 @@ https://gobackup.github.io/
 
 ## Features
 
-- No deprecations.
+- No dependencies.
 - Multiple Databases source support.
 - Multiple Storage type support.
 - Archive paths or files into a tar.
