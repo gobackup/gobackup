@@ -1,9 +1,10 @@
 package main
 
 import (
+	"os"
+
 	"github.com/huacnlee/gobackup/config"
 	"gopkg.in/urfave/cli.v1"
-	"os"
 )
 
 const (

@@ -1,12 +1,13 @@
 package main
 
 import (
+	"os"
+
 	"github.com/huacnlee/gobackup/archive"
 	"github.com/huacnlee/gobackup/compressor"
 	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/database"
 	"github.com/huacnlee/gobackup/encryptor"
-	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
 	"github.com/huacnlee/gobackup/storage"
 )
@@ -58,10 +59,10 @@ func (ctx Model) perform() {
 
 // Cleanup model temp files
 func (ctx Model) cleanup() {
-	logger.Info("Cleanup temp dir...\n")
-	_, err := helper.Exec("rm", "-rf", ctx.Config.DumpPath)
+	logger.Info("Cleanup temp dir:" + config.TempPath + "...\n")
+	err := os.RemoveAll(config.TempPath)
 	if err != nil {
-		logger.Error("Cleanup temp dir "+ctx.Config.DumpPath+" error:", err)
+		logger.Error("Cleanup temp dir "+config.TempPath+" error:", err)
 	}
 	logger.Info("======= End " + ctx.Config.Name + " =======\n\n")
 }
