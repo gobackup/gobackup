@@ -59,6 +59,9 @@ func (ctx Model) perform() {
 // Cleanup model temp files
 func (ctx Model) cleanup() {
 	logger.Info("Cleanup temp dir...\n")
-	helper.Exec("rm", "-rf", ctx.Config.DumpPath)
+	_, err := helper.Exec("rm", "-rf", ctx.Config.DumpPath)
+	if err != nil {
+		logger.Error("Cleanup temp dir "+ctx.Config.DumpPath+" error:", err)
+	}
 	logger.Info("======= End " + ctx.Config.Name + " =======\n\n")
 }
