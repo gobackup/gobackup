@@ -72,7 +72,7 @@ func Run(model config.ModelConfig, archivePath string) (err error) {
 	}
 
 	cycler := Cycler{}
-	cycler.run(newFileKey, base.keep, ctx.delete)
+	cycler.run(model.Name, newFileKey, base.keep, ctx.delete)
 
 	logger.Info("------------- Storage --------------\n")
 	return nil
