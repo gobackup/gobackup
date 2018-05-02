@@ -19,7 +19,7 @@ type Package struct {
 }
 
 var (
-	cyclerFileName = path.Join(config.HomeDir, ".gobackup", "cycler.json")
+	cyclerPath = path.Join(config.HomeDir, ".gobackup")
 )
 
 type Cycler struct {
@@ -44,10 +44,12 @@ func (c *Cycler) shiftByKeep(keep int) (first *Package) {
 	return
 }
 
-func (c *Cycler) run(fileKey string, keep int, deletePackage func(fileKey string) error) {
-	c.load()
+func (c *Cycler) run(model string, fileKey string, keep int, deletePackage func(fileKey string) error) {
+	cyclerFileName := path.Join(cyclerPath, model + ".cycler.json")
+
+	c.load(cyclerFileName)
 	c.add(fileKey)
-	defer c.save()
+	defer c.save(cyclerFileName)
 
 	if keep == 0 {
 		return
@@ -66,7 +68,11 @@ func (c *Cycler) run(fileKey string, keep int, deletePackage func(fileKey string
 	}
 }
 
-func (c *Cycler) load() {
+func (c *Cycler) load(cyclerFileName string) {
+	if !helper.IsExistsPath(cyclerPath) {
+		helper.Exec("mkdir", cyclerPath)
+	}
+
 	if !helper.IsExistsPath(cyclerFileName) {
 		helper.Exec("touch", cyclerFileName)
 	}
@@ -83,7 +89,7 @@ func (c *Cycler) load() {
 	c.isLoaded = true
 }
 
-func (c *Cycler) save() {
+func (c *Cycler) save(cyclerFileName string) {
 	if !c.isLoaded {
 		logger.Warn("Skip save cycler.json because it not loaded")
 		return
