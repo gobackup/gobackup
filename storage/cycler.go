@@ -19,7 +19,7 @@ type Package struct {
 }
 
 var (
-	cyclerPath = path.Join(config.HomeDir, ".gobackup")
+	cyclerPath = path.Join(config.HomeDir, ".gobackup/cycler")
 )
 
 type Cycler struct {
@@ -45,7 +45,7 @@ func (c *Cycler) shiftByKeep(keep int) (first *Package) {
 }
 
 func (c *Cycler) run(model string, fileKey string, keep int, deletePackage func(fileKey string) error) {
-	cyclerFileName := path.Join(cyclerPath, model + ".cycler.json")
+	cyclerFileName := path.Join(cyclerPath, model + ".json")
 
 	c.load(cyclerFileName)
 	c.add(fileKey)
@@ -70,7 +70,7 @@ func (c *Cycler) run(model string, fileKey string, keep int, deletePackage func(
 
 func (c *Cycler) load(cyclerFileName string) {
 	if !helper.IsExistsPath(cyclerPath) {
-		helper.Exec("mkdir", cyclerPath)
+		helper.Exec("mkdir", "-p", cyclerPath)
 	}
 
 	if !helper.IsExistsPath(cyclerFileName) {
