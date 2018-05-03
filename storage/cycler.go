@@ -69,7 +69,7 @@ func (c *Cycler) run(model string, fileKey string, keep int, deletePackage func(
 }
 
 func (c *Cycler) load(cyclerFileName string) {
-  helper.MkdirP(cyclerPath)
+	helper.MkdirP(cyclerPath)
 
 	if !helper.IsExistsPath(cyclerFileName) {
 		helper.Exec("touch", cyclerFileName)
