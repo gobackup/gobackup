@@ -1,7 +1,7 @@
 language: go
 sudo: required
 go:
-  - 1.8
+  - 1.10
 before_script: go get -t ./...
 script:
   - make test
