@@ -2,13 +2,14 @@ package storage
 
 import (
 	"encoding/json"
-	"github.com/huacnlee/gobackup/config"
-	"github.com/huacnlee/gobackup/helper"
-	"github.com/huacnlee/gobackup/logger"
 	"io/ioutil"
 	"os"
 	"path"
 	"time"
+
+	"github.com/huacnlee/gobackup/config"
+	"github.com/huacnlee/gobackup/helper"
+	"github.com/huacnlee/gobackup/logger"
 )
 
 type PackageList []Package
@@ -45,7 +46,7 @@ func (c *Cycler) shiftByKeep(keep int) (first *Package) {
 }
 
 func (c *Cycler) run(model string, fileKey string, keep int, deletePackage func(fileKey string) error) {
-	cyclerFileName := path.Join(cyclerPath, model + ".json")
+	cyclerFileName := path.Join(cyclerPath, model+".json")
 
 	c.load(cyclerFileName)
 	c.add(fileKey)
@@ -71,8 +72,9 @@ func (c *Cycler) run(model string, fileKey string, keep int, deletePackage func(
 func (c *Cycler) load(cyclerFileName string) {
 	helper.MkdirP(cyclerPath)
 
+	// write example JSON if not exist
 	if !helper.IsExistsPath(cyclerFileName) {
-		helper.Exec("touch", cyclerFileName)
+		ioutil.WriteFile(cyclerFileName, []byte("[{}]"), os.ModePerm)
 	}
 
 	f, err := ioutil.ReadFile(cyclerFileName)
