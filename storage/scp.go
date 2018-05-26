@@ -43,14 +43,20 @@ func (ctx *SCP) open() (err error) {
 	ctx.username = ctx.viper.GetString("username")
 	ctx.password = ctx.viper.GetString("password")
 	ctx.privateKey = helper.ExplandHome(ctx.viper.GetString("private_key"))
-
+	var clientConfig ssh.ClientConfig
 	logger.Info("PrivateKey", ctx.privateKey)
-
-	clientConfig, _ := auth.PrivateKey(
+	clientConfig, err = auth.PrivateKey(
 		ctx.username,
 		ctx.privateKey,
 		ssh.InsecureIgnoreHostKey(),
 	)
+	if err != nil {
+		logger.Info("PrivateKey fail, Try User@Host with Password")
+		clientConfig = ssh.ClientConfig{
+			User:            ctx.username,
+			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		}
+	}
 	clientConfig.Timeout = ctx.viper.GetDuration("timeout") * time.Second
 	if len(ctx.password) > 0 {
 		clientConfig.Auth = append(clientConfig.Auth, ssh.Password(ctx.password))
