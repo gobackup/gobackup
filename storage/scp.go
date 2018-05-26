@@ -35,8 +35,7 @@ type SCP struct {
 func (ctx *SCP) open() (err error) {
 	ctx.viper.SetDefault("port", "22")
 	ctx.viper.SetDefault("timeout", 300)
-	ctx.viper.SetDefault("private_key", "~/.ssh/id_rsa")
-
+	//ctx.viper.SetDefault("private_key", "~/.ssh/id_rsa")
 	ctx.host = ctx.viper.GetString("host")
 	ctx.port = ctx.viper.GetString("port")
 	ctx.path = ctx.viper.GetString("path")
@@ -44,17 +43,26 @@ func (ctx *SCP) open() (err error) {
 	ctx.password = ctx.viper.GetString("password")
 	ctx.privateKey = helper.ExplandHome(ctx.viper.GetString("private_key"))
 
-	logger.Info("PrivateKey", ctx.privateKey)
-
-	clientConfig, _ := auth.PrivateKey(
-		ctx.username,
-		ctx.privateKey,
-		ssh.InsecureIgnoreHostKey(),
-	)
-	clientConfig.Timeout = ctx.viper.GetDuration("timeout") * time.Second
-	if len(ctx.password) > 0 {
-		clientConfig.Auth = append(clientConfig.Auth, ssh.Password(ctx.password))
+	var clientConfig ssh.ClientConfig
+	if len(ctx.privateKey) == 0 {
+		clientConfig = ssh.ClientConfig{
+			User: ctx.username,
+			Auth: []ssh.AuthMethod{
+				ssh.Password(ctx.password),
+			},
+			// Don't check server's security
+			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		}
+		logger.Info("UseUserAndPassword", ctx.username)
+	} else {
+		clientConfig, _ = auth.PrivateKey(
+			ctx.username,
+			ctx.privateKey,
+			ssh.InsecureIgnoreHostKey(),
+		)
+		logger.Info("PrivateKey", ctx.privateKey)
 	}
+	clientConfig.Timeout = ctx.viper.GetDuration("timeout") * time.Second
 
 	ctx.client = scp.NewClient(ctx.host+":"+ctx.port, &clientConfig)
 
