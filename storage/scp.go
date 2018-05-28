@@ -51,6 +51,7 @@ func (ctx *SCP) open() (err error) {
 		ssh.InsecureIgnoreHostKey(),
 	)
 	if err != nil {
+		logger.warn(err)
 		logger.Info("PrivateKey fail, Try User@Host with Password")
 		clientConfig = ssh.ClientConfig{
 			User:            ctx.username,
