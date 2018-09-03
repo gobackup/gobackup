@@ -55,8 +55,8 @@ Use `tar` command to archive many file or path into a `.tar` file.
 - Local
 - FTP
 - SCP - Upload via SSH copy
-- [Amazon S3](https://aws.amazon.com/s3/)
-- [Aliyun OSS](https://www.aliyun.com/product/oss)
+- [Amazon S3](https://aws.amazon.com/s3)
+- [Alibaba Cloud Object Storage Service (OSS)](https://www.alibabacloud.com/product/oss)
 
 ## Install (macOS / Linux)
 
