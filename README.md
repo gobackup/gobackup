@@ -5,7 +5,6 @@
 <p align="center">Simple tool for backup your databases, files to cloud storages.</p>
 <p align="center">
    <a href="https://travis-ci.org/huacnlee/gobackup"><img src="https://travis-ci.org/huacnlee/gobackup.svg?branch=master" alt="Build Status" /></a>
-   <a href="https://app.fossa.io/projects/git%2Bgithub.com%2Fhuacnlee%2Fgobackup?ref=badge_shield"><img src="https://app.fossa.io/api/projects/git%2Bgithub.com%2Fhuacnlee%2Fgobackup.svg?type=shield" /></a>
 </p>
 </p>
 
@@ -187,4 +186,5 @@ And after a day, you can check up the execute status by `~/.gobackup/gobackup.lo
 
 
 ## License
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fhuacnlee%2Fgobackup.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fhuacnlee%2Fgobackup?ref=badge_large)
+
+MIT
