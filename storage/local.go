@@ -1,9 +1,10 @@
 package storage
 
 import (
+	"path"
+
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
-	"path"
 )
 
 // Local storage
