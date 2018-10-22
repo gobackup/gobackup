@@ -2,8 +2,9 @@ package database
 
 import (
 	// "github.com/spf13/viper"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMongoDB_credentialOptions(t *testing.T) {
@@ -14,6 +15,16 @@ func TestMongoDB_credentialOptions(t *testing.T) {
 	}
 
 	assert.Equal(t, ctx.credentialOptions(), "--username=foo --password=bar --authenticationDatabase=sssbbb")
+}
+
+func TestMongoDB_noCredentialOptions(t *testing.T) {
+	ctx := &MongoDB{
+		username: "null",
+		password: "",
+		authdb:   "",
+	}
+
+	assert.Equal(t, ctx.credentialOptions(), "")
 }
 
 func TestMongoDB_connectivityOptions(t *testing.T) {

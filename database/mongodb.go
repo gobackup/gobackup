@@ -2,9 +2,10 @@ package database
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
-	"strings"
 )
 
 // MongoDB database
@@ -13,7 +14,7 @@ import (
 // host: 127.0.0.1
 // port: 27017
 // database:
-// username:
+// username: null, means no auth is needed.
 // password:
 // authdb:
 // oplog: false
@@ -69,6 +70,9 @@ func (ctx *MongoDB) nameOption() string {
 
 func (ctx *MongoDB) credentialOptions() string {
 	opts := []string{}
+	if len(ctx.username) > 0 && strings.ToLower(ctx.username) == strings.ToLower("null") {
+		return ""
+	}
 	if len(ctx.username) > 0 {
 		opts = append(opts, "--username="+ctx.username)
 	}
