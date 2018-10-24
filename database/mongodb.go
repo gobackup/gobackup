@@ -14,9 +14,9 @@ import (
 // host: 127.0.0.1
 // port: 27017
 // database:
-// username: null, means no auth is needed.
-// password:
-// authdb:
+// username: nil, means no auth is needed.
+// password: nil
+// authdb: nil
 // oplog: false
 type MongoDB struct {
 	Base
@@ -70,7 +70,7 @@ func (ctx *MongoDB) nameOption() string {
 
 func (ctx *MongoDB) credentialOptions() string {
 	opts := []string{}
-	if len(ctx.username) > 0 && strings.ToLower(ctx.username) == strings.ToLower("null") {
+	if len(ctx.username) > 0 && strings.ToLower(ctx.username) == strings.ToLower("nil") {
 		return ""
 	}
 	if len(ctx.username) > 0 {
