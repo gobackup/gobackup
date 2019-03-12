@@ -1,4 +1,4 @@
-package main
+package model
 
 import (
 	"os"
@@ -18,7 +18,7 @@ type Model struct {
 }
 
 // Perform model
-func (ctx Model) perform() {
+func (ctx Model) Perform() {
 	logger.Info("======== " + ctx.Config.Name + " ========")
 	logger.Info("WorkDir:", ctx.Config.DumpPath+"\n")
 	defer ctx.cleanup()

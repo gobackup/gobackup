@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/huacnlee/gobackup/config"
+	"github.com/huacnlee/gobackup/model"
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -49,20 +50,20 @@ func main() {
 
 func performAll() {
 	for _, modelConfig := range config.Models {
-		model := Model{
+		m := model.Model{
 			Config: modelConfig,
 		}
-		model.perform()
+		m.Perform()
 	}
 }
 
 func performOne(modelName string) {
 	for _, modelConfig := range config.Models {
 		if modelConfig.Name == modelName {
-			model := Model{
+			m := model.Model{
 				Config: modelConfig,
 			}
-			model.perform()
+			m.Perform()
 			return
 		}
 	}
