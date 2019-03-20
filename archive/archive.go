@@ -46,7 +46,7 @@ func options(dumpPath string, excludes, includes []string) (opts []string) {
 	opts = append(opts, "-cPf", tarPath)
 
 	for _, exclude := range excludes {
-		opts = append(opts, "--exclude='"+filepath.Clean(exclude)+"'")
+		opts = append(opts, "--exclude="+filepath.Clean(exclude))
 	}
 
 	opts = append(opts, includes...)
