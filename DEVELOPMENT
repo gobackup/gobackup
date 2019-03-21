@@ -4,7 +4,7 @@
 - Install [dep](https://golang.github.io/dep/docs/installation.html)
 
 ```
-$ brew install goreleaser/tap/goreleaser
+$ brew install goreleaser
 $ brew install dep
 ```
 
