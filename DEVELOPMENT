@@ -1,0 +1,30 @@
+## Install
+
+- Install Go
+- Install [dep](https://golang.github.io/dep/docs/installation.html)
+
+```
+$ brew install goreleaser/tap/goreleaser
+$ brew install dep
+```
+
+## Get Source
+
+```
+$ go get github.com/huacnlee/gobackup
+$ cd $GOPATH/src/github.com/huacnlee/gobackup/
+$ dep ensure
+```
+
+## Test
+
+```
+$ make test
+```
+
+## Release new version
+
+```
+$ git tag 0.7.3
+$ make release
+```
