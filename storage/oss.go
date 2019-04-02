@@ -17,7 +17,7 @@ import (
 // access_key_secret: your-access-key-secret
 // max_retries: 5
 // timeout: 300
-// threads: 1 (1 .. 10)
+// threads: 1 (1 .. 100)
 type OSS struct {
 	Base
 	endpoint        string
@@ -52,12 +52,12 @@ func (ctx *OSS) open() (err error) {
 	ctx.timeout = ctx.viper.GetInt("timeout")
 	ctx.threads = ctx.viper.GetInt("threads")
 
-	// limit thread in 1..10
+	// limit thread in 1..100
 	if ctx.threads < 1 {
 		ctx.threads = 1
 	}
-	if ctx.threads > 10 {
-		ctx.threads = 10
+	if ctx.threads > 100 {
+		ctx.threads = 100
 	}
 
 	logger.Info("endpoint:", ctx.endpoint)
