@@ -1,9 +1,10 @@
 package storage
 
 import (
+	"path"
+
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/huacnlee/gobackup/logger"
-	"path"
 )
 
 // OSS - Aliyun OSS storage
@@ -16,6 +17,7 @@ import (
 // access_key_secret: your-access-key-secret
 // max_retries: 5
 // timeout: 300
+// threads: 1 (1 .. 10)
 type OSS struct {
 	Base
 	endpoint        string
@@ -26,11 +28,12 @@ type OSS struct {
 	maxRetries      int
 	timeout         int
 	client          *oss.Bucket
+	threads         int
 }
 
 var (
-	// 4 Mb
-	ossPartSize int64 = 4 * 1024 * 1024
+	// 1 Mb one part
+	ossPartSize int64 = 1024 * 1024
 )
 
 func (ctx *OSS) open() (err error) {
@@ -38,6 +41,7 @@ func (ctx *OSS) open() (err error) {
 	ctx.viper.SetDefault("max_retries", 3)
 	ctx.viper.SetDefault("path", "/")
 	ctx.viper.SetDefault("timeout", 300)
+	ctx.viper.SetDefault("threads", 1)
 
 	ctx.endpoint = ctx.viper.GetString("endpoint")
 	ctx.bucket = ctx.viper.GetString("bucket")
@@ -46,6 +50,15 @@ func (ctx *OSS) open() (err error) {
 	ctx.path = ctx.viper.GetString("path")
 	ctx.maxRetries = ctx.viper.GetInt("max_retries")
 	ctx.timeout = ctx.viper.GetInt("timeout")
+	ctx.threads = ctx.viper.GetInt("threads")
+
+	// limit thread in 1..10
+	if ctx.threads < 1 {
+		ctx.threads = 1
+	}
+	if ctx.threads > 10 {
+		ctx.threads = 10
+	}
 
 	logger.Info("endpoint:", ctx.endpoint)
 	logger.Info("bucket:", ctx.bucket)
@@ -72,7 +85,7 @@ func (ctx *OSS) upload(fileKey string) (err error) {
 	remotePath := path.Join(ctx.path, fileKey)
 
 	logger.Info("-> Uploading OSS...")
-	err = ctx.client.UploadFile(remotePath, ctx.archivePath, ossPartSize, oss.Routines(4))
+	err = ctx.client.UploadFile(remotePath, ctx.archivePath, ossPartSize, oss.Routines(ctx.threads))
 
 	if err != nil {
 		return err
