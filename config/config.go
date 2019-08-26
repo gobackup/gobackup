@@ -51,7 +51,7 @@ func init() {
 
 	IsTest = os.Getenv("GO_ENV") == "test"
 	HomeDir = os.Getenv("HOME")
-	TempPath = path.Join(os.TempDir(), "gobackup")
+	TempPath = path.Join(os.TempDir(), "gobackup", fmt.Sprintf("%d", time.Now().UnixNano()))
 
 	if IsTest {
 		viper.SetConfigName("gobackup_test")
@@ -87,7 +87,7 @@ func init() {
 
 func loadModel(key string) (model ModelConfig) {
 	model.Name = key
-	model.DumpPath = path.Join(TempPath, fmt.Sprintf("%d", time.Now().UnixNano()), key)
+	model.DumpPath = path.Join(TempPath, key)
 	model.Viper = viper.Sub("models." + key)
 
 	model.CompressWith = SubConfig{
