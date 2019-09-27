@@ -12,7 +12,7 @@ import (
 // type: oss
 // bucket: gobackup-test
 // endpoint: oss-cn-beijing.aliyuncs.com
-// path: /
+// path: db/
 // access_key_id: your-access-key-id
 // access_key_secret: your-access-key-secret
 // max_retries: 5
