@@ -3,10 +3,14 @@ package storage
 import (
 	"os"
 	"path"
+
+	"github.com/huacnlee/gobackup/helper"
+
 	// "crypto/tls"
+	"time"
+
 	"github.com/huacnlee/gobackup/logger"
 	"github.com/secsy/goftp"
-	"time"
 )
 
 // FTP storage
@@ -33,7 +37,7 @@ func (ctx *FTP) open() (err error) {
 	ctx.viper.SetDefault("port", "21")
 	ctx.viper.SetDefault("timeout", 300)
 
-	ctx.host = ctx.viper.GetString("host")
+	ctx.host = helper.CleanHost(ctx.viper.GetString("host"))
 	ctx.port = ctx.viper.GetString("port")
 	ctx.path = ctx.viper.GetString("path")
 	ctx.username = ctx.viper.GetString("username")
