@@ -45,7 +45,7 @@ Use `tar` command to archive many file or path into a `.tar` file.
 ### Compressor
 
 - Tgz - `.tar.gz`
-- uncompressed - `.tar`
+- Uncompressed - `.tar`
 
 ### Encryptor
 
