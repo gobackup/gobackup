@@ -91,6 +91,7 @@ GLOBAL OPTIONS:
 
 GoBackup will seek config files in:
 
+- ./gobackup.yml
 - ~/.gobackup/gobackup.yml
 - /etc/gobackup/gobackup.yml
 
