@@ -4,7 +4,7 @@
 <h1 align="center">GoBackup</h1>
 <p align="center">Simple tool for backup your databases, files to cloud storages.</p>
 <p align="center">
-   <a href="https://travis-ci.org/huacnlee/gobackup"><img src="https://travis-ci.org/huacnlee/gobackup.svg?branch=master" alt="Build Status" /></a>
+   <a href="https://github.com/huacnlee/gobackup/actions?query=workflow%3AGo"><img src="https://github.com/huacnlee/gobackup/workflows/Go/badge.svg" alt="Build Status" /></a>
 </p>
 </p>
 
@@ -184,7 +184,6 @@ $ crontab -l
 > `0 0 * * *` means run at 0:00 AM, every day.
 
 And after a day, you can check up the execute status by `~/.gobackup/gobackup.log`.
-
 
 ## License
 
