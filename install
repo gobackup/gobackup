@@ -4,7 +4,7 @@ if [[ `uname` == 'Darwin' ]]; then
 else
    platform='linux'
 fi
-curl -Lo gobackup.tar.gz https://github.com/huacnlee/gobackup/releases/download/$version/gobackup-$platform-amd64.tar.gz
+curl -sSLo gobackup.tar.gz https://github.com/huacnlee/gobackup/releases/download/$version/gobackup-$platform-amd64.tar.gz
 tar zxf gobackup.tar.gz
 
 if [[ `whoami` == 'root' ]]; then
