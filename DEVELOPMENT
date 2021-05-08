@@ -1,7 +1,6 @@
 ## Install
 
-- Install Go
-- Install [dep](https://golang.github.io/dep/docs/installation.html)
+- Install Go 1.16.x
 
 ```
 $ brew install goreleaser
@@ -11,9 +10,9 @@ $ brew install dep
 ## Get Source
 
 ```
-$ go get github.com/huacnlee/gobackup
-$ cd $GOPATH/src/github.com/huacnlee/gobackup/
-$ dep ensure
+$ git clone https://github.com/huacnlee/gobackup.git
+$ cd gobackup
+$ go get
 ```
 
 ## Test

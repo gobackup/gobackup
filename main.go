@@ -24,7 +24,7 @@ func main() {
 	app.Usage = usage
 
 	app.Commands = []cli.Command{
-		cli.Command{
+		{
 			Name: "perform",
 			Flags: []cli.Flag{
 				cli.StringFlag{
