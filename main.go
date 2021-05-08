@@ -5,7 +5,7 @@ import (
 
 	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/model"
-	"gopkg.in/urfave/cli.v1"
+	"github.com/urfave/cli"
 )
 
 const (
@@ -13,8 +13,9 @@ const (
 )
 
 var (
-	modelName = ""
-	version   = "master"
+	modelName  = ""
+	configFile = ""
+	version    = "master"
 )
 
 func main() {
@@ -32,8 +33,15 @@ func main() {
 					Usage:       "Model name that you want execute",
 					Destination: &modelName,
 				},
+				cli.StringFlag{
+					Name:        "config, c",
+					Usage:       "Special a config file",
+					Destination: &configFile,
+				},
 			},
 			Action: func(c *cli.Context) error {
+				config.Init(configFile)
+
 				if len(modelName) == 0 {
 					performAll()
 				} else {

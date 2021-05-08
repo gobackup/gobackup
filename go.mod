@@ -22,9 +22,9 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v0.0.0-20170723055207-25b30aa063fc
 	github.com/stretchr/testify v1.7.0
+	github.com/urfave/cli v1.22.5
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b // indirect
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba // indirect
-	gopkg.in/urfave/cli.v1 v1.0.0-20170811014203-cfb38830724c
 	gopkg.in/yaml.v2 v2.2.8
 )

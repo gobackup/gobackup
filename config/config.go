@@ -46,29 +46,35 @@ type SubConfig struct {
 // - ./gobackup.yml
 // - ~/.gobackup/gobackup.yml
 // - /etc/gobackup/gobackup.yml
-func init() {
+func Init(configFile string) {
 	viper.SetConfigType("yaml")
 
 	IsTest = os.Getenv("GO_ENV") == "test"
 	HomeDir = os.Getenv("HOME")
 
-	if IsTest {
-		viper.SetConfigName("gobackup_test")
-		HomeDir = "../"
+	// set config file directly
+	if len(configFile) > 0 {
+		viper.SetConfigFile(configFile)
 	} else {
-		viper.SetConfigName("gobackup")
+		if IsTest {
+			viper.SetConfigName("gobackup_test")
+			HomeDir = "../"
+		} else {
+			viper.SetConfigName("gobackup")
+		}
+
+		// ./gobackup.yml
+		viper.AddConfigPath(".")
+		if IsTest {
+			viper.AddConfigPath("../")
+		} else {
+			// ~/.gobackup/gobackup.yml
+			viper.AddConfigPath("$HOME/.gobackup") // call multiple times to add many search paths
+			// /etc/gobackup/gobackup.yml
+			viper.AddConfigPath("/etc/gobackup/") // path to look for the config file in
+		}
 	}
 
-	// ./gobackup.yml
-	viper.AddConfigPath(".")
-	if IsTest {
-		viper.AddConfigPath("../")
-	} else {
-		// ~/.gobackup/gobackup.yml
-		viper.AddConfigPath("$HOME/.gobackup") // call multiple times to add many search paths
-		// /etc/gobackup/gobackup.yml
-		viper.AddConfigPath("/etc/gobackup/") // path to look for the config file in
-	}
 	err := viper.ReadInConfig()
 	if err != nil {
 		logger.Error("Load gobackup config faild", err)

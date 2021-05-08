@@ -74,4 +74,31 @@ models:
       path: backups
       access_key_id: Ohsgwk86h2ks
       secret_access_key: Ojsiw729wujhKdhwsIIOw9173
-
+  demo:
+    compress_with:
+      type: tgz
+    encrypt_with:
+      type: openssl
+      password: 123456
+      salt: false
+      openssl: true
+    store_with:
+      type: local
+      keep: 10
+      path: /Users/jason/Downloads/backup1
+    databases:
+      redis1:
+        type: redis
+        mode: sync
+        rdb_path: /var/db/redis/dump.rdb
+        invoke_save: true
+        password: 456123
+    archive:
+      includes:
+        - /home/ubuntu/.ssh/
+        - /etc/nginx/nginx.conf
+        - /etc/redis/redis.conf
+        - /etc/logrotate.d/
+      excludes:
+        - /home/ubuntu/.ssh/known_hosts
+        - /etc/logrotate.d/syslog
