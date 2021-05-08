@@ -2,10 +2,15 @@ package database
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/huacnlee/gobackup/config"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
+
+func init() {
+	config.Init("../gobackup_test.yml")
+}
 
 type Monkey struct {
 	Base

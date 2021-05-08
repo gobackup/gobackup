@@ -15,10 +15,8 @@ var (
 	Exist bool
 	// Models configs
 	Models []ModelConfig
-	// IsTest env
-	IsTest bool
 	// HomeDir of user
-	HomeDir string
+	HomeDir = os.Getenv("HOME")
 )
 
 // ModelConfig for special case
@@ -49,30 +47,18 @@ type SubConfig struct {
 func Init(configFile string) {
 	viper.SetConfigType("yaml")
 
-	IsTest = os.Getenv("GO_ENV") == "test"
-	HomeDir = os.Getenv("HOME")
-
 	// set config file directly
 	if len(configFile) > 0 {
 		viper.SetConfigFile(configFile)
 	} else {
-		if IsTest {
-			viper.SetConfigName("gobackup_test")
-			HomeDir = "../"
-		} else {
-			viper.SetConfigName("gobackup")
-		}
+		viper.SetConfigName("gobackup")
 
 		// ./gobackup.yml
 		viper.AddConfigPath(".")
-		if IsTest {
-			viper.AddConfigPath("../")
-		} else {
-			// ~/.gobackup/gobackup.yml
-			viper.AddConfigPath("$HOME/.gobackup") // call multiple times to add many search paths
-			// /etc/gobackup/gobackup.yml
-			viper.AddConfigPath("/etc/gobackup/") // path to look for the config file in
-		}
+		// ~/.gobackup/gobackup.yml
+		viper.AddConfigPath("$HOME/.gobackup") // call multiple times to add many search paths
+		// /etc/gobackup/gobackup.yml
+		viper.AddConfigPath("/etc/gobackup/") // path to look for the config file in
 	}
 
 	err := viper.ReadInConfig()

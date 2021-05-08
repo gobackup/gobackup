@@ -1,13 +1,18 @@
 package config
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
+
+func init() {
+	Init("../gobackup_test.yml")
+}
 
 func TestModelsLength(t *testing.T) {
 	assert.Equal(t, Exist, true)
-	assert.Len(t, Models, 4)
+	assert.Len(t, Models, 5)
 }
 
 func TestModel(t *testing.T) {
