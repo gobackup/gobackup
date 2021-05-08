@@ -18,13 +18,13 @@ var (
 	// IsTest env
 	IsTest bool
 	// HomeDir of user
-	HomeDir  string
-	TempPath string
+	HomeDir string
 )
 
 // ModelConfig for special case
 type ModelConfig struct {
 	Name         string
+	TempPath     string
 	DumpPath     string
 	CompressWith SubConfig
 	EncryptWith  SubConfig
@@ -51,7 +51,6 @@ func init() {
 
 	IsTest = os.Getenv("GO_ENV") == "test"
 	HomeDir = os.Getenv("HOME")
-	TempPath = path.Join(os.TempDir(), "gobackup", fmt.Sprintf("%d", time.Now().UnixNano()))
 
 	if IsTest {
 		viper.SetConfigName("gobackup_test")
@@ -81,13 +80,12 @@ func init() {
 	for key := range viper.GetStringMap("models") {
 		Models = append(Models, loadModel(key))
 	}
-
-	return
 }
 
 func loadModel(key string) (model ModelConfig) {
 	model.Name = key
-	model.DumpPath = path.Join(TempPath, key)
+	model.TempPath = path.Join(os.TempDir(), "gobackup", fmt.Sprintf("%d", time.Now().UnixNano()))
+	model.DumpPath = path.Join(model.TempPath, key)
 	model.Viper = viper.Sub("models." + key)
 
 	model.CompressWith = SubConfig{

@@ -1,12 +1,13 @@
 package compressor
 
 import (
-	"github.com/huacnlee/gobackup/config"
-	"github.com/huacnlee/gobackup/logger"
-	"github.com/spf13/viper"
 	"os"
 	"path"
 	"time"
+
+	"github.com/huacnlee/gobackup/config"
+	"github.com/huacnlee/gobackup/logger"
+	"github.com/spf13/viper"
 )
 
 // Base compressor
@@ -22,7 +23,7 @@ type Context interface {
 }
 
 func (ctx *Base) archiveFilePath(ext string) string {
-	return path.Join(os.TempDir(), "gobackup", time.Now().Format("2006.01.02.15.04.05")+ext)
+	return path.Join(ctx.model.TempPath, time.Now().Format("2006.01.02.15.04.05")+ext)
 }
 
 func newBase(model config.ModelConfig) (base Base) {

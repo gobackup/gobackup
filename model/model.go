@@ -66,10 +66,10 @@ func (ctx Model) Perform() {
 
 // Cleanup model temp files
 func (ctx Model) cleanup() {
-	logger.Info("Cleanup temp dir:" + config.TempPath + "...\n")
-	err := os.RemoveAll(config.TempPath)
+	logger.Info("Cleanup temp: " + ctx.Config.TempPath + "/\n")
+	err := os.RemoveAll(ctx.Config.TempPath)
 	if err != nil {
-		logger.Error("Cleanup temp dir "+config.TempPath+" error:", err)
+		logger.Error("Cleanup temp dir "+ctx.Config.TempPath+" error:", err)
 	}
 	logger.Info("======= End " + ctx.Config.Name + " =======\n\n")
 }
