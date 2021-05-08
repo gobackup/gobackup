@@ -18,4 +18,3 @@ build/
 dist/
 vendor/
 log/
-go.sum
