@@ -21,7 +21,14 @@ type Model struct {
 func (ctx Model) Perform() {
 	logger.Info("======== " + ctx.Config.Name + " ========")
 	logger.Info("WorkDir:", ctx.Config.DumpPath+"\n")
-	defer ctx.cleanup()
+
+	defer func() {
+		if r := recover(); r != nil {
+			ctx.cleanup()
+		}
+
+		ctx.cleanup()
+	}()
 
 	err := database.Run(ctx.Config)
 	if err != nil {
