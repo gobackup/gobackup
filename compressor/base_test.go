@@ -1,13 +1,13 @@
 package compressor
 
 import (
-	"github.com/huacnlee/gobackup/config"
-	"github.com/stretchr/testify/assert"
-	"os"
 	"path"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/huacnlee/gobackup/config"
+	"github.com/stretchr/testify/assert"
 )
 
 type Monkey struct {
@@ -21,7 +21,7 @@ func (ctx Monkey) perform() (archivePath string, err error) {
 
 func TestBase_archiveFilePath(t *testing.T) {
 	base := Base{}
-	prefixPath := path.Join(os.TempDir(), "gobackup", time.Now().Format("2006.01.02.15.04"))
+	prefixPath := path.Join(base.model.TempPath, time.Now().Format("2006.01.02.15.04"))
 	assert.True(t, strings.HasPrefix(base.archiveFilePath(".tar"), prefixPath))
 	assert.True(t, strings.HasSuffix(base.archiveFilePath(".tar"), ".tar"))
 }
