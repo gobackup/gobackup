@@ -35,6 +35,7 @@ func (ctx *S3) open() (err error) {
 	endpoint := ctx.viper.GetString("endpoint")
 	if len(endpoint) > 0 {
 		cfg.Endpoint = aws.String(endpoint)
+		cfg.S3ForcePathStyle = aws.Bool(true)
 	}
 	cfg.Credentials = credentials.NewStaticCredentials(
 		ctx.viper.GetString("access_key_id"),
