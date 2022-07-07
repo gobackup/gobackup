@@ -6,6 +6,7 @@ on:
       - "*"
 jobs:
   goreleaser:
+    if: github.repository == 'huacnlee/gobackup'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
