@@ -36,7 +36,7 @@ type S3 struct {
 func (ctx *S3) open() (err error) {
 	ctx.viper.SetDefault("region", "us-east-1")
 	ctx.viper.SetDefault("max_retries", 3)
-	ctx.viper.SetDefault("upload_timeout", "30m")
+	ctx.viper.SetDefault("upload_timeout", "0")
 
 	cfg := aws.NewConfig()
 	endpoint := ctx.viper.GetString("endpoint")
