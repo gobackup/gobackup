@@ -18,3 +18,7 @@ build/
 dist/
 vendor/
 log/
+
+# JetBrains IDE
+.idea
+
