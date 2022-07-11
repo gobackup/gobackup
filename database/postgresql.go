@@ -25,18 +25,21 @@ type PostgreSQL struct {
 	username    string
 	password    string
 	dumpCommand string
+	args        string
 }
 
 func (ctx PostgreSQL) perform() (err error) {
 	viper := ctx.viper
 	viper.SetDefault("host", "localhost")
 	viper.SetDefault("port", 5432)
+	viper.SetDefault("params", "")
 
 	ctx.host = viper.GetString("host")
 	ctx.port = viper.GetString("port")
 	ctx.database = viper.GetString("database")
 	ctx.username = viper.GetString("username")
 	ctx.password = viper.GetString("password")
+	ctx.args = viper.GetString("args")
 
 	if err = ctx.prepare(); err != nil {
 		return
@@ -47,8 +50,8 @@ func (ctx PostgreSQL) perform() (err error) {
 }
 
 func (ctx *PostgreSQL) prepare() (err error) {
-	// mysqldump command
-	dumpArgs := []string{}
+	// pg_dump command
+	var dumpArgs []string
 	if len(ctx.database) == 0 {
 		return fmt.Errorf("PostgreSQL database config is required")
 	}
@@ -60,6 +63,9 @@ func (ctx *PostgreSQL) prepare() (err error) {
 	}
 	if len(ctx.username) > 0 {
 		dumpArgs = append(dumpArgs, "--username="+ctx.username)
+	}
+	if len(ctx.args) > 0 {
+		dumpArgs = append(dumpArgs, ctx.args)
 	}
 
 	ctx.dumpCommand = "pg_dump " + strings.Join(dumpArgs, " ") + " " + ctx.database

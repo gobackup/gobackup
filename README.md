@@ -38,6 +38,21 @@ https://gobackup.github.io/
 - Redis - `mode: sync/copy`
 - MongoDB
 
+#### Postgresql
+- additional parameters can be passed to the `pg_dump` command via the configuration parameter `params`
+
+Example:
+```yaml
+databases:
+  mydb:
+    type: postgresql
+    host: 192.168.22.10
+    port: 5432
+    database: mydb
+    username: myuser
+    password: mypass
+    args: -O -x
+
 ### Archive
 
 Use `tar` command to archive many file or path into a `.tar` file.
