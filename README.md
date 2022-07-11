@@ -51,7 +51,7 @@ databases:
     database: mydb
     username: myuser
     password: mypass
-    params: -O -x
+    args: -O -x
 
 ### Archive
 

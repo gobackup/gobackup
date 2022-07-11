@@ -25,7 +25,7 @@ type PostgreSQL struct {
 	username    string
 	password    string
 	dumpCommand string
-	params      string
+	args        string
 }
 
 func (ctx PostgreSQL) perform() (err error) {
@@ -39,7 +39,7 @@ func (ctx PostgreSQL) perform() (err error) {
 	ctx.database = viper.GetString("database")
 	ctx.username = viper.GetString("username")
 	ctx.password = viper.GetString("password")
-	ctx.params = viper.GetString("params")
+	ctx.args = viper.GetString("args")
 
 	if err = ctx.prepare(); err != nil {
 		return
@@ -64,8 +64,8 @@ func (ctx *PostgreSQL) prepare() (err error) {
 	if len(ctx.username) > 0 {
 		dumpArgs = append(dumpArgs, "--username="+ctx.username)
 	}
-	if len(ctx.params) > 0 {
-		dumpArgs = append(dumpArgs, ctx.params)
+	if len(ctx.args) > 0 {
+		dumpArgs = append(dumpArgs, ctx.args)
 	}
 
 	ctx.dumpCommand = "pg_dump " + strings.Join(dumpArgs, " ") + " " + ctx.database
