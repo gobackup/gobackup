@@ -5,7 +5,7 @@ import (
 	// "github.com/spf13/viper"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/longbridgeapp/assert"
 )
 
 func TestMySQL_dumpArgs(t *testing.T) {

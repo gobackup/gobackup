@@ -2,8 +2,9 @@ package database
 
 import (
 	// "github.com/spf13/viper"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/longbridgeapp/assert"
 )
 
 func TestMongoDB_credentialOptions(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/huacnlee/gobackup/config"
-	"github.com/stretchr/testify/assert"
+	"github.com/longbridgeapp/assert"
 )
 
 func init() {

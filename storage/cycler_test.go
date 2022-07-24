@@ -1,9 +1,10 @@
 package storage
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/longbridgeapp/assert"
 )
 
 func TestCycler_add(t *testing.T) {

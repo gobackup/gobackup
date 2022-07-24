@@ -1,8 +1,9 @@
 package helper
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/longbridgeapp/assert"
 )
 
 func TestExec(t *testing.T) {

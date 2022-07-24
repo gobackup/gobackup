@@ -1,10 +1,11 @@
 package helper
 
 import (
-	"github.com/stretchr/testify/assert"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/longbridgeapp/assert"
 )
 
 func TestIsExistsPath(t *testing.T) {

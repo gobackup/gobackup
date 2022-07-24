@@ -3,7 +3,7 @@ package config
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/longbridgeapp/assert"
 )
 
 func init() {
@@ -12,7 +12,7 @@ func init() {
 
 func TestModelsLength(t *testing.T) {
 	assert.Equal(t, Exist, true)
-	assert.Len(t, Models, 5)
+	assert.Equal(t, len(Models), 5)
 }
 
 func TestModel(t *testing.T) {

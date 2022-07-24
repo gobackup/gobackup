@@ -1,9 +1,10 @@
 package storage
 
 import (
-	"github.com/huacnlee/gobackup/config"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/huacnlee/gobackup/config"
+	"github.com/longbridgeapp/assert"
 )
 
 func TestBase_newBase(t *testing.T) {

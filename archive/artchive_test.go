@@ -1,11 +1,12 @@
 package archive
 
 import (
-	"github.com/huacnlee/gobackup/config"
-	"github.com/huacnlee/gobackup/helper"
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+
+	"github.com/huacnlee/gobackup/config"
+	"github.com/huacnlee/gobackup/helper"
+	"github.com/longbridgeapp/assert"
 )
 
 func TestRun(t *testing.T) {

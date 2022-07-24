@@ -1,9 +1,10 @@
 package compressor
 
 import (
-	"github.com/huacnlee/gobackup/helper"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/huacnlee/gobackup/helper"
+	"github.com/longbridgeapp/assert"
 )
 
 func TestTgz_options(t *testing.T) {

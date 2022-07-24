@@ -1,9 +1,10 @@
 package encryptor
 
 import (
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+
+	"github.com/longbridgeapp/assert"
 )
 
 func TestOpenSSL_options(t *testing.T) {
