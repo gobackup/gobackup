@@ -39,7 +39,8 @@ https://gobackup.github.io/
 - MongoDB
 
 #### Postgresql
-- additional parameters can be passed to the `pg_dump` command via the configuration parameter `params`
+
+- additional parameters can be passed to the `pg_dump` command via the configuration parameter `args`
 
 Example:
 ```yaml
