@@ -53,6 +53,7 @@ databases:
     username: myuser
     password: mypass
     args: -O -x
+```
 
 ### Archive
 
