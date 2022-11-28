@@ -1,6 +1,8 @@
 package compressor
 
 import (
+	"os/exec"
+
 	"github.com/huacnlee/gobackup/helper"
 )
 
@@ -30,7 +32,12 @@ func (ctx *Tgz) options() (opts []string) {
 	if helper.IsGnuTar {
 		opts = append(opts, "--ignore-failed-read")
 	}
-	opts = append(opts, "-zcf")
+	path, err := exec.LookPath("pigz")
+	if err == nil {
+		opts = append(opts, "--use-compress-program", path, "-cf")
+	} else {
+		opts = append(opts, "-zcf")
+	}
 
 	return
 }
