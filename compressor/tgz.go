@@ -34,7 +34,7 @@ func (ctx *Tgz) options() (opts []string) {
 	}
 	path, err := exec.LookPath("pigz")
 	if err == nil {
-		opts = append(opts, "-I", path, "-cf")
+		opts = append(opts, "--use-compress-program", path, "-cf")
 	} else {
 		opts = append(opts, "-zcf")
 	}
