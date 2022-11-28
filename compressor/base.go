@@ -46,7 +46,8 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 	case "tar":
 		ctx = &Tar{Base: base}
 	default:
-		ctx = &Tar{}
+		ctx = &Tar{Base: base}
+		model.CompressWith.Type = "tar"
 	}
 
 	logger.Info("------------ Compressor -------------")
