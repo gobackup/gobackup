@@ -32,9 +32,9 @@ func (ctx *Tgz) options() (opts []string) {
 	if helper.IsGnuTar {
 		opts = append(opts, "--ignore-failed-read")
 	}
-	_, err := exec.LookPath("pigz")
+	path, err := exec.LookPath("pigz")
 	if err == nil {
-		opts = append(opts, "-I", "pigz", "-cf")
+		opts = append(opts, "-I", path, "-cf")
 	} else {
 		opts = append(opts, "-zcf")
 	}
