@@ -63,6 +63,7 @@ func (c *Cycler) run(model string, fileKey string, keep int, deletePackage func(
 		}
 
 		err := deletePackage(pkg.FileKey)
+		logger.Info("Removed", pkg.FileKey)
 		if err != nil {
 			logger.Warn("remove failed: ", err)
 		}
