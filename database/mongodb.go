@@ -2,9 +2,10 @@ package database
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
-	"strings"
 )
 
 // MongoDB database
@@ -36,7 +37,6 @@ func (ctx *MongoDB) perform() (err error) {
 	viper := ctx.viper
 	viper.SetDefault("oplog", false)
 	viper.SetDefault("host", "127.0.0.1")
-	viper.SetDefault("username", "root")
 	viper.SetDefault("port", 27017)
 
 	ctx.host = viper.GetString("host")
