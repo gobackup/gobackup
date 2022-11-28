@@ -2,6 +2,12 @@ package storage
 
 import (
 	"fmt"
+	"math"
+	"net/http"
+	"os"
+	"path"
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -9,11 +15,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/hako/durafmt"
 	"github.com/huacnlee/gobackup/logger"
-	"math"
-	"net/http"
-	"os"
-	"path"
-	"time"
 )
 
 // S3 - Amazon S3 storage
@@ -125,6 +126,7 @@ func (ctx *S3) upload(fileKey string) (err error) {
 	elapsed := t.Sub(start)
 
 	logger.Info("=>", result.Location)
+	logger.Info("=>", fmt.Sprintf("s3://%s/%s", ctx.bucket, remotePath))
 	rate := math.Ceil(float64(info.Size()) / (elapsed.Seconds() * 1024 * 1024))
 
 	logger.Info(fmt.Sprintf("Duration %v, rate %.1f MiB/s", durafmt.Parse(elapsed).LimitFirstN(2).String(), rate))
