@@ -63,6 +63,7 @@ func (c *Cycler) run(model string, fileKey string, keep int, deletePackage func(
 		}
 
 		err := deletePackage(pkg.FileKey)
+		logger.Info("Removed", pkg.FileKey)
 		if err != nil {
 			logger.Warn("remove failed: ", err)
 		}
@@ -74,7 +75,7 @@ func (c *Cycler) load(cyclerFileName string) {
 
 	// write example JSON if not exist
 	if !helper.IsExistsPath(cyclerFileName) {
-		ioutil.WriteFile(cyclerFileName, []byte("[{}]"), os.ModePerm)
+		ioutil.WriteFile(cyclerFileName, []byte("[]"), os.ModePerm)
 	}
 
 	f, err := ioutil.ReadFile(cyclerFileName)
