@@ -35,6 +35,8 @@ type SCP struct {
 }
 
 func (s *SCP) open() (err error) {
+	logger := logger.Tag("SCP")
+
 	s.viper.SetDefault("port", "22")
 	s.viper.SetDefault("timeout", 300)
 	s.viper.SetDefault("private_key", "~/.ssh/id_rsa")
@@ -79,6 +81,8 @@ func (s *SCP) open() (err error) {
 func (s *SCP) close() {}
 
 func (s *SCP) upload(fileKey string) (err error) {
+	logger := logger.Tag("SCP")
+
 	err = s.client.Connect()
 	if err != nil {
 		return err

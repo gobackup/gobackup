@@ -1,9 +1,12 @@
 package storage
 
 import (
+	"fmt"
 	"path"
+	"time"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+	"github.com/hako/durafmt"
 	"github.com/huacnlee/gobackup/logger"
 )
 
@@ -37,6 +40,8 @@ var (
 )
 
 func (s *OSS) open() (err error) {
+	logger := logger.Tag("OSS")
+
 	s.viper.SetDefault("endpoint", "oss-cn-beijing.aliyuncs.com")
 	s.viper.SetDefault("max_retries", 3)
 	s.viper.SetDefault("path", "/")
@@ -82,15 +87,21 @@ func (s *OSS) close() {
 }
 
 func (s *OSS) upload(fileKey string) (err error) {
+	logger := logger.Tag("OSS")
+
 	remotePath := path.Join(s.path, fileKey)
 
-	logger.Info("-> Uploading OSS...")
+	start := time.Now()
+	logger.Info(fmt.Sprintf("-> Uploading %s...", remotePath))
 	err = s.client.UploadFile(remotePath, s.archivePath, ossPartSize, oss.Routines(s.threads))
 
 	if err != nil {
 		return err
 	}
-	logger.Info("Success")
+
+	t := time.Now()
+	elapsed := t.Sub(start)
+	logger.Info(fmt.Sprintf("Duration %v", durafmt.Parse(elapsed).LimitFirstN(2).String()))
 
 	return nil
 }
