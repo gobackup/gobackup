@@ -54,7 +54,9 @@ func Run(model config.ModelConfig, archivePath string) (err error) {
 	case "scp":
 		s = &SCP{Base: base}
 	case "s3":
-		s = &S3{Base: base}
+		s = &S3{Base: base, Provider: "S3"}
+	case "b2":
+		s = &S3{Base: base, Provider: "B2"}
 	case "oss":
 		s = &OSS{Base: base}
 	case "gcs":
@@ -78,6 +80,5 @@ func Run(model config.ModelConfig, archivePath string) (err error) {
 	cycler := Cycler{}
 	cycler.run(model.Name, newFileKey, base.keep, s.delete)
 
-	logger.Info("------------- Storage --------------\n")
 	return nil
 }
