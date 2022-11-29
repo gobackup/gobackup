@@ -61,6 +61,10 @@ func Run(model config.ModelConfig, archivePath string) (err error) {
 		s = &OSS{Base: base}
 	case "gcs":
 		s = &GCS{Base: base}
+	case "us3":
+		s = &S3{Base: base, Provider: "US3"}
+	case "cos":
+		s = &S3{Base: base, Provider: "COS"}
 	default:
 		return fmt.Errorf("[%s] storage type has not implement", model.StoreWith.Type)
 	}
