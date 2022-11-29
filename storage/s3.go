@@ -29,7 +29,7 @@ import (
 // timeout: 300
 type S3 struct {
 	Base
-	Provider string
+	Service string
 
 	bucket string
 	path   string
@@ -37,7 +37,7 @@ type S3 struct {
 }
 
 func (s S3) providerName() string {
-	switch s.Provider {
+	switch s.Service {
 	case "s3":
 		return "AWS S3"
 	case "b2":
@@ -50,13 +50,15 @@ func (s S3) providerName() string {
 		return "Qiniu Kodo"
 	case "r2":
 		return "Cloudflare R2"
+	case "spaces":
+		return "DigitalOcean Spaces"
 	}
 
 	return "AWS S3"
 }
 
 func (s S3) defaultRegion() string {
-	switch s.Provider {
+	switch s.Service {
 	case "s3":
 		return "us-east-1"
 	case "b2":
@@ -69,13 +71,15 @@ func (s S3) defaultRegion() string {
 		return "cn-east-1"
 	case "r2":
 		return "us-east-1"
+	case "spaces":
+		return "nyc1"
 	}
 
 	return "us-east-1"
 }
 
 func (s S3) defaultEndpoint() *string {
-	switch s.Provider {
+	switch s.Service {
 	case "b2":
 		return aws.String(fmt.Sprintf("%s.backblazeb2.com", s.viper.GetString("region")))
 	case "us3":
@@ -86,16 +90,22 @@ func (s S3) defaultEndpoint() *string {
 		return aws.String(fmt.Sprintf("s3-%s.qiniucs.com", s.viper.GetString("region")))
 	case "r2":
 		return aws.String(fmt.Sprintf("%s.r2.cloudflarestorage.com", s.viper.GetString("region")))
+	case "spaces":
+		return aws.String(fmt.Sprintf("%s.digitaloceanspaces.com", s.viper.GetString("region")))
 	}
 
 	return aws.String("")
 }
 
-func (s *S3) open() (err error) {
+func (s *S3) init() {
 	s.viper.SetDefault("region", s.defaultRegion())
 	s.viper.SetDefault("endpoint", s.defaultEndpoint())
 	s.viper.SetDefault("max_retries", 3)
-	s.viper.SetDefault("timeout", "0")
+	s.viper.SetDefault("timeout", "300")
+}
+
+func (s *S3) open() (err error) {
+	s.init()
 
 	cfg := aws.NewConfig()
 	endpoint := s.viper.GetString("endpoint")
@@ -184,7 +194,7 @@ func (s *S3) upload(fileKey string) (err error) {
 	elapsed := t.Sub(start)
 
 	logger.Info("=>", result.Location)
-	if s.Provider == "S3" {
+	if s.Service == "s3" {
 		logger.Info("=>", fmt.Sprintf("s3://%s/%s", s.bucket, remotePath))
 	}
 	rate := math.Ceil(float64(info.Size()) / (elapsed.Seconds() * 1024 * 1024))
