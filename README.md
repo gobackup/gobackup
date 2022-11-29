@@ -60,8 +60,9 @@ Use `tar` command to archive many file or path into a `.tar` file.
 - [Aliyun OSS](https://www.aliyun.com/product/oss)
 - [Google Cloud Storage](https://cloud.google.com/storage)
 - [Backblaze B2 Cloud Storage](https://www.backblaze.com/b2)
-- [UCloud US3](https://docs.ucloud.cn/ufile/introduction/concept)
 - [QCloud COS](https://cloud.tencent.com/product/cos)
+- [UCloud US3](https://docs.ucloud.cn/ufile/introduction/concept)
+- [Qiniu Kodo](https://www.qiniu.com/products/kodo)
 
 ## Install (macOS / Linux)
 

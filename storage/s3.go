@@ -46,6 +46,8 @@ func (s *S3) open() (err error) {
 		s.viper.SetDefault("region", "s3-cn-bj")
 	case "COS":
 		s.viper.SetDefault("region", "ap-nanjing")
+	case "Qiniu":
+		s.viper.SetDefault("region", "cn-east-1")
 	}
 
 	s.viper.SetDefault("max_retries", 3)
@@ -65,6 +67,8 @@ func (s *S3) open() (err error) {
 			cfg.Endpoint = aws.String(fmt.Sprintf("%s.ufileos.com", s.viper.GetString("region")))
 		case "COS":
 			cfg.Endpoint = aws.String(fmt.Sprintf("cos.%s.myqcloud.com", s.viper.GetString("region")))
+		case "Qiniu":
+			cfg.Endpoint = aws.String(fmt.Sprintf("s3-%s.qiniucs.com", s.viper.GetString("region")))
 		}
 		cfg.S3ForcePathStyle = aws.Bool(true)
 	}
