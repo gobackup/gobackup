@@ -57,9 +57,11 @@ Use `tar` command to archive many file or path into a `.tar` file.
 - FTP
 - SCP - Upload via SSH copy
 - [Amazon S3](https://aws.amazon.com/s3)
-- [Alibaba Cloud Object Storage Service (OSS)](https://www.alibabacloud.com/product/oss)
+- [Aliyun OSS](https://www.aliyun.com/product/oss)
 - [Google Cloud Storage](https://cloud.google.com/storage)
-- [B2 Cloud Storage](https://www.backblaze.com/b2) via S3 implement.
+- [Backblaze B2 Cloud Storage](https://www.backblaze.com/b2)
+- [UCloud US3](https://docs.ucloud.cn/ufile/introduction/concept)
+- [QCloud COS](https://cloud.tencent.com/product/cos)
 
 ## Install (macOS / Linux)
 

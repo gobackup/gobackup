@@ -37,7 +37,17 @@ type S3 struct {
 }
 
 func (s *S3) open() (err error) {
-	s.viper.SetDefault("region", "us-east-1")
+	switch s.Provider {
+	case "S3":
+		s.viper.SetDefault("region", "us-east-1")
+	case "B2":
+		s.viper.SetDefault("region", "us-east-001")
+	case "US3":
+		s.viper.SetDefault("region", "s3-cn-bj")
+	case "COS":
+		s.viper.SetDefault("region", "ap-nanjing")
+	}
+
 	s.viper.SetDefault("max_retries", 3)
 	s.viper.SetDefault("timeout", "0")
 
@@ -46,6 +56,16 @@ func (s *S3) open() (err error) {
 
 	if len(endpoint) > 0 {
 		cfg.Endpoint = aws.String(endpoint)
+		cfg.S3ForcePathStyle = aws.Bool(true)
+	} else {
+		switch s.Provider {
+		case "B2":
+			cfg.Endpoint = aws.String(fmt.Sprintf("%s.backblazeb2.com", s.viper.GetString("region")))
+		case "US3":
+			cfg.Endpoint = aws.String(fmt.Sprintf("%s.ufileos.com", s.viper.GetString("region")))
+		case "COS":
+			cfg.Endpoint = aws.String(fmt.Sprintf("cos.%s.myqcloud.com", s.viper.GetString("region")))
+		}
 		cfg.S3ForcePathStyle = aws.Bool(true)
 	}
 
