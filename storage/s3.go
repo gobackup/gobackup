@@ -36,20 +36,64 @@ type S3 struct {
 	client *s3manager.Uploader
 }
 
-func (s *S3) open() (err error) {
+func (s S3) providerName() string {
 	switch s.Provider {
-	case "S3":
-		s.viper.SetDefault("region", "us-east-1")
-	case "B2":
-		s.viper.SetDefault("region", "us-east-001")
-	case "US3":
-		s.viper.SetDefault("region", "s3-cn-bj")
-	case "COS":
-		s.viper.SetDefault("region", "ap-nanjing")
-	case "Qiniu":
-		s.viper.SetDefault("region", "cn-east-1")
+	case "s3":
+		return "AWS S3"
+	case "b2":
+		return "Backblaze B2"
+	case "us3":
+		return "UCloud US3"
+	case "cos":
+		return "QCloud COS"
+	case "kodo":
+		return "Qiniu Kodo"
+	case "r2":
+		return "Cloudflare R2"
 	}
 
+	return "AWS S3"
+}
+
+func (s S3) defaultRegion() string {
+	switch s.Provider {
+	case "s3":
+		return "us-east-1"
+	case "b2":
+		return "us-east-001"
+	case "us3":
+		return "s3-cn-bj"
+	case "cos":
+		return "ap-nanjing"
+	case "kodo":
+		return "cn-east-1"
+	case "r2":
+		return "us-east-1"
+	}
+
+	return "us-east-1"
+}
+
+func (s S3) defaultEndpoint() *string {
+	switch s.Provider {
+	case "b2":
+		return aws.String(fmt.Sprintf("%s.backblazeb2.com", s.viper.GetString("region")))
+	case "us3":
+		return aws.String(fmt.Sprintf("%s.ufileos.com", s.viper.GetString("region")))
+	case "cos":
+		return aws.String(fmt.Sprintf("cos.%s.myqcloud.com", s.viper.GetString("region")))
+	case "kodo":
+		return aws.String(fmt.Sprintf("s3-%s.qiniucs.com", s.viper.GetString("region")))
+	case "r2":
+		return aws.String(fmt.Sprintf("%s.r2.cloudflarestorage.com", s.viper.GetString("region")))
+	}
+
+	return aws.String("")
+}
+
+func (s *S3) open() (err error) {
+	s.viper.SetDefault("region", s.defaultRegion())
+	s.viper.SetDefault("endpoint", s.defaultEndpoint())
 	s.viper.SetDefault("max_retries", 3)
 	s.viper.SetDefault("timeout", "0")
 
@@ -58,18 +102,6 @@ func (s *S3) open() (err error) {
 
 	if len(endpoint) > 0 {
 		cfg.Endpoint = aws.String(endpoint)
-		cfg.S3ForcePathStyle = aws.Bool(true)
-	} else {
-		switch s.Provider {
-		case "B2":
-			cfg.Endpoint = aws.String(fmt.Sprintf("%s.backblazeb2.com", s.viper.GetString("region")))
-		case "US3":
-			cfg.Endpoint = aws.String(fmt.Sprintf("%s.ufileos.com", s.viper.GetString("region")))
-		case "COS":
-			cfg.Endpoint = aws.String(fmt.Sprintf("cos.%s.myqcloud.com", s.viper.GetString("region")))
-		case "Qiniu":
-			cfg.Endpoint = aws.String(fmt.Sprintf("s3-%s.qiniucs.com", s.viper.GetString("region")))
-		}
 		cfg.S3ForcePathStyle = aws.Bool(true)
 	}
 
@@ -97,10 +129,11 @@ func (s *S3) open() (err error) {
 	return
 }
 
-func (s *S3) close() {}
+func (s *S3) close() {
+}
 
 func (s *S3) upload(fileKey string) (err error) {
-	logger := logger.Tag(s.Provider)
+	logger := logger.Tag(s.providerName())
 
 	f, err := os.Open(s.archivePath)
 	if err != nil {

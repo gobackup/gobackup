@@ -54,19 +54,21 @@ func Run(model config.ModelConfig, archivePath string) (err error) {
 	case "scp":
 		s = &SCP{Base: base}
 	case "s3":
-		s = &S3{Base: base, Provider: "S3"}
+		s = &S3{Base: base, Provider: "s3"}
 	case "b2":
-		s = &S3{Base: base, Provider: "B2"}
+		s = &S3{Base: base, Provider: "b2"}
 	case "oss":
 		s = &OSS{Base: base}
 	case "gcs":
 		s = &GCS{Base: base}
 	case "us3":
-		s = &S3{Base: base, Provider: "US3"}
+		s = &S3{Base: base, Provider: "us3"}
 	case "cos":
-		s = &S3{Base: base, Provider: "COS"}
+		s = &S3{Base: base, Provider: "cos"}
 	case "kodo":
-		s = &S3{Base: base, Provider: "Qiniu"}
+		s = &S3{Base: base, Provider: "kodo"}
+	case "r2":
+		s = &S3{Base: base, Provider: "r2"}
 	default:
 		return fmt.Errorf("[%s] storage type has not implement", model.StoreWith.Type)
 	}
