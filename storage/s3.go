@@ -37,7 +37,7 @@ type S3 struct {
 func (s *S3) open() (err error) {
 	s.viper.SetDefault("region", "us-east-1")
 	s.viper.SetDefault("max_retries", 3)
-	s.viper.SetDefault("upload_timeout", "0")
+	s.viper.SetDefault("timeout", "0")
 
 	cfg := aws.NewConfig()
 	endpoint := s.viper.GetString("endpoint")
@@ -59,7 +59,7 @@ func (s *S3) open() (err error) {
 	s.bucket = s.viper.GetString("bucket")
 	s.path = s.viper.GetString("path")
 
-	timeout := s.viper.GetInt("upload_timeout")
+	timeout := s.viper.GetInt("timeout")
 	uploadTimeoutDuration := time.Duration(timeout) * time.Second
 
 	httpClient := &http.Client{Timeout: uploadTimeoutDuration}
