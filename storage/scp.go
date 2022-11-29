@@ -1,11 +1,13 @@
 package storage
 
 import (
-	"github.com/huacnlee/gobackup/helper"
-	"golang.org/x/crypto/ssh"
 	"os"
 	"path"
 	"time"
+
+	"github.com/huacnlee/gobackup/helper"
+	"golang.org/x/crypto/ssh"
+
 	// "crypto/tls"
 	"github.com/bramvdbogaerde/go-scp"
 	"github.com/bramvdbogaerde/go-scp/auth"
@@ -32,80 +34,80 @@ type SCP struct {
 	client     scp.Client
 }
 
-func (ctx *SCP) open() (err error) {
-	ctx.viper.SetDefault("port", "22")
-	ctx.viper.SetDefault("timeout", 300)
-	ctx.viper.SetDefault("private_key", "~/.ssh/id_rsa")
+func (s *SCP) open() (err error) {
+	s.viper.SetDefault("port", "22")
+	s.viper.SetDefault("timeout", 300)
+	s.viper.SetDefault("private_key", "~/.ssh/id_rsa")
 
-	ctx.host = ctx.viper.GetString("host")
-	ctx.port = ctx.viper.GetString("port")
-	ctx.path = ctx.viper.GetString("path")
-	ctx.username = ctx.viper.GetString("username")
-	ctx.password = ctx.viper.GetString("password")
-	ctx.privateKey = helper.ExplandHome(ctx.viper.GetString("private_key"))
+	s.host = s.viper.GetString("host")
+	s.port = s.viper.GetString("port")
+	s.path = s.viper.GetString("path")
+	s.username = s.viper.GetString("username")
+	s.password = s.viper.GetString("password")
+	s.privateKey = helper.ExplandHome(s.viper.GetString("private_key"))
 	var clientConfig ssh.ClientConfig
-	logger.Info("PrivateKey", ctx.privateKey)
+	logger.Info("PrivateKey", s.privateKey)
 	clientConfig, err = auth.PrivateKey(
-		ctx.username,
-		ctx.privateKey,
+		s.username,
+		s.privateKey,
 		ssh.InsecureIgnoreHostKey(),
 	)
 	if err != nil {
 		logger.Warn(err)
 		logger.Info("PrivateKey fail, Try User@Host with Password")
 		clientConfig = ssh.ClientConfig{
-			User:            ctx.username,
+			User:            s.username,
 			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		}
 	}
-	clientConfig.Timeout = ctx.viper.GetDuration("timeout") * time.Second
-	if len(ctx.password) > 0 {
-		clientConfig.Auth = append(clientConfig.Auth, ssh.Password(ctx.password))
+	clientConfig.Timeout = s.viper.GetDuration("timeout") * time.Second
+	if len(s.password) > 0 {
+		clientConfig.Auth = append(clientConfig.Auth, ssh.Password(s.password))
 	}
 
-	ctx.client = scp.NewClient(ctx.host+":"+ctx.port, &clientConfig)
+	s.client = scp.NewClient(s.host+":"+s.port, &clientConfig)
 
-	err = ctx.client.Connect()
+	err = s.client.Connect()
 	if err != nil {
 		return err
 	}
-	defer ctx.client.Session.Close()
-	ctx.client.Session.Run("mkdir -p " + ctx.path)
+	defer s.client.Session.Close()
+	s.client.Session.Run("mkdir -p " + s.path)
 	return
 }
 
-func (ctx *SCP) close() {}
+func (s *SCP) close() {}
 
-func (ctx *SCP) upload(fileKey string) (err error) {
-	err = ctx.client.Connect()
+func (s *SCP) upload(fileKey string) (err error) {
+	err = s.client.Connect()
 	if err != nil {
 		return err
 	}
-	defer ctx.client.Session.Close()
+	defer s.client.Session.Close()
 
-	file, err := os.Open(ctx.archivePath)
+	file, err := os.Open(s.archivePath)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	remotePath := path.Join(ctx.path, fileKey)
+	remotePath := path.Join(s.path, fileKey)
 	logger.Info("-> scp", remotePath)
-	ctx.client.CopyFromFile(*file, remotePath, "0655")
+	s.client.CopyFromFile(*file, remotePath, "0655")
 
 	logger.Info("Store successed")
 	return nil
 }
 
-func (ctx *SCP) delete(fileKey string) (err error) {
-	err = ctx.client.Connect()
+func (s *SCP) delete(fileKey string) (err error) {
+	err = s.client.Connect()
 	if err != nil {
 		return
 	}
-	defer ctx.client.Session.Close()
+	defer s.client.Session.Close()
 
-	remotePath := path.Join(ctx.path, fileKey)
+	remotePath := path.Join(s.path, fileKey)
 	logger.Info("-> remove", remotePath)
-	err = ctx.client.Session.Run("rm " + remotePath)
+	err = s.client.Session.Run("rm " + remotePath)
 	return
 }

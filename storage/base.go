@@ -41,7 +41,8 @@ func newBase(model config.ModelConfig, archivePath string) (base Base) {
 
 // Run storage
 func Run(model config.ModelConfig, archivePath string) (err error) {
-	logger.Info("------------- Storage --------------")
+	logger := logger.Tag("Storage")
+
 	newFileKey := filepath.Base(archivePath)
 	base := newBase(model, archivePath)
 	var s Service

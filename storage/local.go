@@ -1,9 +1,10 @@
 package storage
 
 import (
+	"path"
+
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
-	"path"
 )
 
 // Local storage
@@ -15,24 +16,24 @@ type Local struct {
 	destPath string
 }
 
-func (ctx *Local) open() (err error) {
-	ctx.destPath = ctx.model.StoreWith.Viper.GetString("path")
-	helper.MkdirP(ctx.destPath)
+func (s *Local) open() (err error) {
+	s.destPath = s.model.StoreWith.Viper.GetString("path")
+	helper.MkdirP(s.destPath)
 	return
 }
 
-func (ctx *Local) close() {}
+func (s *Local) close() {}
 
-func (ctx *Local) upload(fileKey string) (err error) {
-	_, err = helper.Exec("cp", ctx.archivePath, ctx.destPath)
+func (s *Local) upload(fileKey string) (err error) {
+	_, err = helper.Exec("cp", s.archivePath, s.destPath)
 	if err != nil {
 		return err
 	}
-	logger.Info("Store successed", ctx.destPath)
+	logger.Info("Store successed", s.destPath)
 	return nil
 }
 
-func (ctx *Local) delete(fileKey string) (err error) {
-	_, err = helper.Exec("rm", path.Join(ctx.destPath, fileKey))
+func (s *Local) delete(fileKey string) (err error) {
+	_, err = helper.Exec("rm", path.Join(s.destPath, fileKey))
 	return
 }

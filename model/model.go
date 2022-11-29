@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/huacnlee/gobackup/archive"
@@ -19,8 +20,9 @@ type Model struct {
 
 // Perform model
 func (ctx Model) Perform() {
-	logger.Info("======== " + ctx.Config.Name + " ========")
-	logger.Info("WorkDir:", ctx.Config.DumpPath+"\n")
+	logger := logger.Tag(fmt.Sprintf("Modal: %s", ctx.Config.Name))
+
+	logger.Info("WorkDir:", ctx.Config.DumpPath)
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -66,10 +68,11 @@ func (ctx Model) Perform() {
 
 // Cleanup model temp files
 func (ctx Model) cleanup() {
-	logger.Info("Cleanup temp: " + ctx.Config.TempPath + "/\n")
+	logger := logger.Tag("Modal")
+
+	logger.Info("Cleanup temp: " + ctx.Config.TempPath + "/")
 	err := os.RemoveAll(ctx.Config.TempPath)
 	if err != nil {
 		logger.Error("Cleanup temp dir "+ctx.Config.TempPath+" error:", err)
 	}
-	logger.Info("======= End " + ctx.Config.Name + " =======\n\n")
 }

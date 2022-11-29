@@ -2,11 +2,12 @@ package database
 
 import (
 	"fmt"
+	"path"
+
 	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
 	"github.com/spf13/viper"
-	"path"
 )
 
 // Base database
@@ -37,6 +38,8 @@ func newBase(model config.ModelConfig, dbConfig config.SubConfig) (base Base) {
 
 // New - initialize Database
 func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
+	logger := logger.Tag("Database")
+
 	base := newBase(model, dbConfig)
 	var ctx Context
 	switch dbConfig.Type {
@@ -71,14 +74,12 @@ func Run(model config.ModelConfig) error {
 		return nil
 	}
 
-	logger.Info("------------- Databases -------------")
 	for _, dbCfg := range model.Databases {
 		err := runModel(model, dbCfg)
 		if err != nil {
 			return err
 		}
 	}
-	logger.Info("------------- Databases -------------\n")
 
 	return nil
 }

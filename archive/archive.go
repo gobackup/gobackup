@@ -2,20 +2,21 @@ package archive
 
 import (
 	"fmt"
+	"path"
+	"path/filepath"
+
 	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
-	"path"
-	"path/filepath"
 )
 
 // Run archive
 func Run(model config.ModelConfig) (err error) {
+	logger := logger.Tag("Archive")
+
 	if model.Archive == nil {
 		return nil
 	}
-
-	logger.Info("------------- Archives -------------")
 
 	helper.MkdirP(model.DumpPath)
 
@@ -32,8 +33,6 @@ func Run(model config.ModelConfig) (err error) {
 
 	opts := options(model.DumpPath, excludes, includes)
 	helper.Exec("tar", opts...)
-
-	logger.Info("------------- Archives -------------\n")
 
 	return nil
 }

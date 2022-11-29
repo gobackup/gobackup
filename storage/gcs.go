@@ -54,11 +54,13 @@ func (s *GCS) close() {
 }
 
 func (s *GCS) upload(fileKey string) (err error) {
+	logger := logger.Tag("GCS")
+
 	var ctx = context.Background()
 	var cancel context.CancelFunc
 
 	if s.uploadTimeout.Seconds() > 0 {
-		logger.Info(fmt.Sprintf("-> GCS set upload timeout: %s", s.uploadTimeout))
+		logger.Info(fmt.Sprintf("upload timeout: %s", s.uploadTimeout))
 		ctx, cancel = context.WithTimeout(ctx, s.uploadTimeout)
 		defer cancel()
 	}
@@ -66,20 +68,20 @@ func (s *GCS) upload(fileKey string) (err error) {
 	// Open file
 	f, err := os.Open(s.archivePath)
 	if err != nil {
-		return fmt.Errorf("failed to open file %q, %v", s.archivePath, err)
+		return fmt.Errorf("GCS failed to open file %q, %v", s.archivePath, err)
 	}
 	defer f.Close()
 
 	info, err := f.Stat()
 	if err != nil {
-		return fmt.Errorf("failed to get size of file %q, %v", s.archivePath, err)
+		return fmt.Errorf("GCS failed to get size of file %q, %v", s.archivePath, err)
 	}
 
 	remotePath := path.Join(s.path, fileKey)
 	object := s.client.Bucket(s.bucket).Object(remotePath).If(storage.Conditions{DoesNotExist: true})
 	writer := object.NewWriter(ctx)
 
-	logger.Info(fmt.Sprintf("-> GCS Uploading %s (%d MiB)...", remotePath, info.Size()/(1024*1024)))
+	logger.Info(fmt.Sprintf("-> Uploading %s (%d MiB)...", remotePath, info.Size()/(1024*1024)))
 
 	start := time.Now()
 
@@ -93,8 +95,6 @@ func (s *GCS) upload(fileKey string) (err error) {
 	t := time.Now()
 	elapsed := t.Sub(start)
 
-	// logger.Info("=>", result.Location)
-	// logger.Info("=>", fmt.Sprintf("s3://%s/%s", ctx.bucket, remotePath))
 	rate := math.Ceil(float64(info.Size()) / (elapsed.Seconds() * 1024 * 1024))
 
 	logger.Info(fmt.Sprintf("Duration %v, rate %.1f MiB/s", durafmt.Parse(elapsed).LimitFirstN(2).String(), rate))
