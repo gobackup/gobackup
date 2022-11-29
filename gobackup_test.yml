@@ -86,9 +86,8 @@ models:
       type: gcs
       keep: 20
       bucket: gobackup-test
-      region: asia-east2
       path: backups
-      upload_timeout: 300
+      timeout: 300
       credentials: |
         {
           "type": "service_account",

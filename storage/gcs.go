@@ -24,18 +24,18 @@ import (
 // timeout: 300
 type GCS struct {
 	Base
-	bucket        string
-	path          string
-	uploadTimeout time.Duration
-	client        *storage.Client
+	bucket  string
+	path    string
+	timeout time.Duration
+	client  *storage.Client
 }
 
 func (s *GCS) open() (err error) {
 	// https://cloud.google.com/storage/docs/locations
-	s.viper.SetDefault("upload_timeout", "0")
+	s.viper.SetDefault("timeout", "300")
 
-	timeout := s.viper.GetInt("upload_timeout")
-	s.uploadTimeout = time.Duration(timeout) * time.Second
+	timeout := s.viper.GetInt("timeout")
+	s.timeout = time.Duration(timeout) * time.Second
 	s.path = s.viper.GetString("path")
 	s.bucket = s.viper.GetString("bucket")
 
@@ -59,9 +59,9 @@ func (s *GCS) upload(fileKey string) (err error) {
 	var ctx = context.Background()
 	var cancel context.CancelFunc
 
-	if s.uploadTimeout.Seconds() > 0 {
-		logger.Info(fmt.Sprintf("upload timeout: %s", s.uploadTimeout))
-		ctx, cancel = context.WithTimeout(ctx, s.uploadTimeout)
+	if s.timeout.Seconds() > 0 {
+		logger.Info(fmt.Sprintf("timeout: %s", s.timeout))
+		ctx, cancel = context.WithTimeout(ctx, s.timeout)
 		defer cancel()
 	}
 
