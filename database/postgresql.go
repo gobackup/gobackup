@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/huacnlee/gobackup/helper"
@@ -15,6 +16,7 @@ import (
 // type: postgresql
 // host: localhost
 // port: 5432
+// socket:
 // database: test
 // username:
 // password:
@@ -22,6 +24,7 @@ type PostgreSQL struct {
 	Base
 	host        string
 	port        string
+	socket      string
 	database    string
 	username    string
 	password    string
@@ -37,10 +40,17 @@ func (ctx PostgreSQL) perform() (err error) {
 
 	ctx.host = viper.GetString("host")
 	ctx.port = viper.GetString("port")
+	ctx.socket = viper.GetString("socket")
 	ctx.database = viper.GetString("database")
 	ctx.username = viper.GetString("username")
 	ctx.password = viper.GetString("password")
 	ctx.args = viper.GetString("args")
+
+	// socket
+	if len(ctx.socket) != 0 {
+		ctx.host = ""
+		ctx.port = ""
+	}
 
 	if err = ctx.prepare(); err != nil {
 		return
@@ -61,6 +71,11 @@ func (ctx *PostgreSQL) prepare() (err error) {
 	}
 	if len(ctx.port) > 0 {
 		dumpArgs = append(dumpArgs, "--port="+ctx.port)
+	}
+	if len(ctx.socket) > 0 {
+		host := filepath.Dir(ctx.socket)
+		port := strings.TrimPrefix(filepath.Ext(ctx.socket), ".")
+		dumpArgs = append(dumpArgs, "--host="+host, "--port="+port)
 	}
 	if len(ctx.username) > 0 {
 		dumpArgs = append(dumpArgs, "--username="+ctx.username)

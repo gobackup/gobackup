@@ -24,12 +24,14 @@ const (
 // invoke_save: true
 // host: 192.168.1.2
 // port: 6379
+// socket:
 // password:
 // rdb_path: /var/db/redis/dump.rdb
 type Redis struct {
 	Base
 	host       string
 	port       string
+	socket     string
 	password   string
 	mode       redisMode
 	invokeSave bool
@@ -53,9 +55,16 @@ func (ctx *Redis) perform() (err error) {
 
 	ctx.host = viper.GetString("host")
 	ctx.port = viper.GetString("port")
+	ctx.socket = viper.GetString("socket")
 	ctx.password = viper.GetString("password")
 	ctx.rdbPath = viper.GetString("rdb_path")
 	ctx.invokeSave = viper.GetBool("invoke_save")
+
+	// socket
+	if len(ctx.socket) != 0 {
+		ctx.host = ""
+		ctx.port = ""
+	}
 
 	if viper.GetString("mode") == "sync" {
 		ctx.mode = redisModeSync
@@ -96,6 +105,9 @@ func (ctx *Redis) prepare() error {
 	}
 	if len(ctx.port) > 0 {
 		args = append(args, "-p "+ctx.port)
+	}
+	if len(ctx.socket) > 0 {
+		args = append(args, "-s", ctx.socket)
 	}
 	if len(ctx.password) > 0 {
 		args = append(args, `-a `+ctx.password)
