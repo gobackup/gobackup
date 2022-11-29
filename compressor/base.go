@@ -37,6 +37,8 @@ func newBase(model config.ModelConfig) (base Base) {
 
 // Run compressor
 func Run(model config.ModelConfig) (archivePath string, err error) {
+	logger := logger.Tag("Compressor")
+
 	base := newBase(model)
 
 	var ctx Context
@@ -50,7 +52,6 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 		model.CompressWith.Type = "tar"
 	}
 
-	logger.Info("------------ Compressor -------------")
 	logger.Info("=> Compress | " + model.CompressWith.Type)
 
 	// set workdir
@@ -60,7 +61,6 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 		return
 	}
 	logger.Info("->", archivePath)
-	logger.Info("------------ Compressor -------------\n")
 
 	return
 }

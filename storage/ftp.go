@@ -33,49 +33,51 @@ type FTP struct {
 	client *goftp.Client
 }
 
-func (ctx *FTP) open() (err error) {
-	ctx.viper.SetDefault("port", "21")
-	ctx.viper.SetDefault("timeout", 300)
+func (s *FTP) open() (err error) {
+	s.viper.SetDefault("port", "21")
+	s.viper.SetDefault("timeout", 300)
 
-	ctx.host = helper.CleanHost(ctx.viper.GetString("host"))
-	ctx.port = ctx.viper.GetString("port")
-	ctx.path = ctx.viper.GetString("path")
-	ctx.username = ctx.viper.GetString("username")
-	ctx.password = ctx.viper.GetString("password")
+	s.host = helper.CleanHost(s.viper.GetString("host"))
+	s.port = s.viper.GetString("port")
+	s.path = s.viper.GetString("path")
+	s.username = s.viper.GetString("username")
+	s.password = s.viper.GetString("password")
 
 	ftpConfig := goftp.Config{
-		User:     ctx.viper.GetString("username"),
-		Password: ctx.viper.GetString("password"),
-		Timeout:  ctx.viper.GetDuration("timeout") * time.Second,
+		User:     s.viper.GetString("username"),
+		Password: s.viper.GetString("password"),
+		Timeout:  s.viper.GetDuration("timeout") * time.Second,
 	}
-	ctx.client, err = goftp.DialConfig(ftpConfig, ctx.host+":"+ctx.port)
+	s.client, err = goftp.DialConfig(ftpConfig, s.host+":"+s.port)
 	if err != nil {
 		return err
 	}
 	return
 }
 
-func (ctx *FTP) close() {
-	ctx.client.Close()
+func (s *FTP) close() {
+	s.client.Close()
 }
 
-func (ctx *FTP) upload(fileKey string) (err error) {
+func (s *FTP) upload(fileKey string) (err error) {
+	logger := logger.Tag("FTP")
+
 	logger.Info("-> Uploading...")
-	_, err = ctx.client.Stat(ctx.path)
+	_, err = s.client.Stat(s.path)
 	if os.IsNotExist(err) {
-		if _, err := ctx.client.Mkdir(ctx.path); err != nil {
+		if _, err := s.client.Mkdir(s.path); err != nil {
 			return err
 		}
 	}
 
-	file, err := os.Open(ctx.archivePath)
+	file, err := os.Open(s.archivePath)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	remotePath := path.Join(ctx.path, fileKey)
-	err = ctx.client.Store(remotePath, file)
+	remotePath := path.Join(s.path, fileKey)
+	err = s.client.Store(remotePath, file)
 	if err != nil {
 		return err
 	}
@@ -84,8 +86,8 @@ func (ctx *FTP) upload(fileKey string) (err error) {
 	return nil
 }
 
-func (ctx *FTP) delete(fileKey string) (err error) {
-	remotePath := path.Join(ctx.path, fileKey)
-	err = ctx.client.Delete(remotePath)
+func (s *FTP) delete(fileKey string) (err error) {
+	remotePath := path.Join(s.path, fileKey)
+	err = s.client.Delete(remotePath)
 	return
 }

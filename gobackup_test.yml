@@ -83,22 +83,27 @@ models:
       salt: false
       openssl: true
     store_with:
-      type: local
-      keep: 10
-      path: /Users/jason/Downloads/backup1
-    databases:
-      redis1:
-        type: redis
-        mode: sync
-        rdb_path: /var/db/redis/dump.rdb
-        invoke_save: true
-        password: 456123
+      type: gcs
+      keep: 20
+      bucket: gobackup-test
+      path: backups
+      timeout: 300
+      credentials: |
+        {
+          "type": "service_account",
+          "project_id": "your-project",
+          "private_key_id": "d34a8bec191068177e7ce6c92c4a249d",
+          "private_key": "-----BEGIN PRIVATE KEY-----\n....\n-----END PRIVATE KEY-----\n",
+          "client_email": "test@your.iam.gserviceaccount.com",
+          "client_id": "12345",
+          "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+          "token_uri": "https://oauth2.googleapis.com/token",
+          "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+          "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/gobackup-test%40your.iam.gserviceaccount.com"
+        }
     archive:
       includes:
-        - /home/ubuntu/.ssh/
-        - /etc/nginx/nginx.conf
-        - /etc/redis/redis.conf
-        - /etc/logrotate.d/
+        - /Users/jason/work/imageproxy
       excludes:
         - /home/ubuntu/.ssh/known_hosts
         - /etc/logrotate.d/syslog

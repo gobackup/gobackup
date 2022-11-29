@@ -102,6 +102,8 @@ func (ctx *MongoDB) oplogOption() string {
 }
 
 func (ctx *MongoDB) dump() error {
+	logger := logger.Tag("MongoDB")
+
 	out, err := helper.Exec(ctx.mongodump())
 	if err != nil {
 		return fmt.Errorf("-> Dump error: %s", err)

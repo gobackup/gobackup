@@ -2,11 +2,12 @@ package database
 
 import (
 	"fmt"
-	"github.com/huacnlee/gobackup/helper"
-	"github.com/huacnlee/gobackup/logger"
 	"path"
 	"regexp"
 	"strings"
+
+	"github.com/huacnlee/gobackup/helper"
+	"github.com/huacnlee/gobackup/logger"
 )
 
 type redisMode int
@@ -41,6 +42,8 @@ var (
 )
 
 func (ctx *Redis) perform() (err error) {
+	logger := logger.Tag("Redis")
+
 	viper := ctx.viper
 	viper.SetDefault("rdb_path", "/var/db/redis/dump.rdb")
 	viper.SetDefault("host", "127.0.0.1")

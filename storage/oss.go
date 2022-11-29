@@ -36,41 +36,41 @@ var (
 	ossPartSize int64 = 1024 * 1024
 )
 
-func (ctx *OSS) open() (err error) {
-	ctx.viper.SetDefault("endpoint", "oss-cn-beijing.aliyuncs.com")
-	ctx.viper.SetDefault("max_retries", 3)
-	ctx.viper.SetDefault("path", "/")
-	ctx.viper.SetDefault("timeout", 300)
-	ctx.viper.SetDefault("threads", 1)
+func (s *OSS) open() (err error) {
+	s.viper.SetDefault("endpoint", "oss-cn-beijing.aliyuncs.com")
+	s.viper.SetDefault("max_retries", 3)
+	s.viper.SetDefault("path", "/")
+	s.viper.SetDefault("timeout", 300)
+	s.viper.SetDefault("threads", 1)
 
-	ctx.endpoint = ctx.viper.GetString("endpoint")
-	ctx.bucket = ctx.viper.GetString("bucket")
-	ctx.accessKeyID = ctx.viper.GetString("access_key_id")
-	ctx.accessKeySecret = ctx.viper.GetString("access_key_secret")
-	ctx.path = ctx.viper.GetString("path")
-	ctx.maxRetries = ctx.viper.GetInt("max_retries")
-	ctx.timeout = ctx.viper.GetInt("timeout")
-	ctx.threads = ctx.viper.GetInt("threads")
+	s.endpoint = s.viper.GetString("endpoint")
+	s.bucket = s.viper.GetString("bucket")
+	s.accessKeyID = s.viper.GetString("access_key_id")
+	s.accessKeySecret = s.viper.GetString("access_key_secret")
+	s.path = s.viper.GetString("path")
+	s.maxRetries = s.viper.GetInt("max_retries")
+	s.timeout = s.viper.GetInt("timeout")
+	s.threads = s.viper.GetInt("threads")
 
 	// limit thread in 1..100
-	if ctx.threads < 1 {
-		ctx.threads = 1
+	if s.threads < 1 {
+		s.threads = 1
 	}
-	if ctx.threads > 100 {
-		ctx.threads = 100
+	if s.threads > 100 {
+		s.threads = 100
 	}
 
-	logger.Info("endpoint:", ctx.endpoint)
-	logger.Info("bucket:", ctx.bucket)
+	logger.Info("endpoint:", s.endpoint)
+	logger.Info("bucket:", s.bucket)
 
-	ossClient, err := oss.New(ctx.endpoint, ctx.accessKeyID, ctx.accessKeySecret)
+	ossClient, err := oss.New(s.endpoint, s.accessKeyID, s.accessKeySecret)
 	if err != nil {
 		return err
 	}
-	ossClient.Config.Timeout = uint(ctx.timeout)
-	ossClient.Config.RetryTimes = uint(ctx.maxRetries)
+	ossClient.Config.Timeout = uint(s.timeout)
+	ossClient.Config.RetryTimes = uint(s.maxRetries)
 
-	ctx.client, err = ossClient.Bucket(ctx.bucket)
+	s.client, err = ossClient.Bucket(s.bucket)
 	if err != nil {
 		return err
 	}
@@ -78,14 +78,14 @@ func (ctx *OSS) open() (err error) {
 	return
 }
 
-func (ctx *OSS) close() {
+func (s *OSS) close() {
 }
 
-func (ctx *OSS) upload(fileKey string) (err error) {
-	remotePath := path.Join(ctx.path, fileKey)
+func (s *OSS) upload(fileKey string) (err error) {
+	remotePath := path.Join(s.path, fileKey)
 
 	logger.Info("-> Uploading OSS...")
-	err = ctx.client.UploadFile(remotePath, ctx.archivePath, ossPartSize, oss.Routines(ctx.threads))
+	err = s.client.UploadFile(remotePath, s.archivePath, ossPartSize, oss.Routines(s.threads))
 
 	if err != nil {
 		return err
@@ -95,8 +95,8 @@ func (ctx *OSS) upload(fileKey string) (err error) {
 	return nil
 }
 
-func (ctx *OSS) delete(fileKey string) (err error) {
-	remotePath := path.Join(ctx.path, fileKey)
-	err = ctx.client.DeleteObject(remotePath)
+func (s *OSS) delete(fileKey string) (err error) {
+	remotePath := path.Join(s.path, fileKey)
+	err = s.client.DeleteObject(remotePath)
 	return
 }
