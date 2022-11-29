@@ -2,10 +2,11 @@ package database
 
 import (
 	"fmt"
-	"github.com/huacnlee/gobackup/helper"
-	"github.com/huacnlee/gobackup/logger"
 	"path"
 	"strings"
+
+	"github.com/huacnlee/gobackup/helper"
+	"github.com/huacnlee/gobackup/logger"
 )
 
 // MySQL database
@@ -13,6 +14,7 @@ import (
 // type: mysql
 // host: 127.0.0.1
 // port: 3306
+// socket:
 // database:
 // username: root
 // password:
@@ -21,6 +23,7 @@ type MySQL struct {
 	Base
 	host              string
 	port              string
+	socket            string
 	database          string
 	username          string
 	password          string
@@ -35,6 +38,7 @@ func (ctx *MySQL) perform() (err error) {
 
 	ctx.host = viper.GetString("host")
 	ctx.port = viper.GetString("port")
+	ctx.socket = viper.GetString("socket")
 	ctx.database = viper.GetString("database")
 	ctx.username = viper.GetString("username")
 	ctx.password = viper.GetString("password")
@@ -48,6 +52,12 @@ func (ctx *MySQL) perform() (err error) {
 		return fmt.Errorf("mysql database config is required")
 	}
 
+	// socket
+	if len(ctx.socket) != 0 {
+		ctx.host = ""
+		ctx.port = ""
+	}
+
 	err = ctx.dump()
 	return
 }
@@ -59,6 +69,9 @@ func (ctx *MySQL) dumpArgs() []string {
 	}
 	if len(ctx.port) > 0 {
 		dumpArgs = append(dumpArgs, "--port", ctx.port)
+	}
+	if len(ctx.socket) > 0 {
+		dumpArgs = append(dumpArgs, "--socket", ctx.socket)
 	}
 	if len(ctx.username) > 0 {
 		dumpArgs = append(dumpArgs, "-u", ctx.username)
