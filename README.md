@@ -59,6 +59,7 @@ Use `tar` command to archive many file or path into a `.tar` file.
 - [Amazon S3](https://aws.amazon.com/s3)
 - [Alibaba Cloud Object Storage Service (OSS)](https://www.alibabacloud.com/product/oss)
 - [Google Cloud Storage](https://cloud.google.com/storage)
+- [B2 Cloud Storage](https://www.backblaze.com/b2) via S3 implement.
 
 ## Install (macOS / Linux)
 

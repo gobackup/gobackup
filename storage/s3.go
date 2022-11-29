@@ -29,6 +29,8 @@ import (
 // timeout: 300
 type S3 struct {
 	Base
+	Provider string
+
 	bucket string
 	path   string
 	client *s3manager.Uploader
@@ -74,6 +76,8 @@ func (s *S3) open() (err error) {
 func (s *S3) close() {}
 
 func (s *S3) upload(fileKey string) (err error) {
+	logger := logger.Tag(s.Provider)
+
 	f, err := os.Open(s.archivePath)
 	if err != nil {
 		return fmt.Errorf("failed to open file %q, %v", s.archivePath, err)
@@ -94,7 +98,7 @@ func (s *S3) upload(fileKey string) (err error) {
 		Body:   f,
 	}
 
-	logger.Info(fmt.Sprintf("-> S3 Uploading (%d MiB)...", info.Size()/(1024*1024)))
+	logger.Info(fmt.Sprintf("-> Uploading (%d MiB)...", info.Size()/(1024*1024)))
 
 	start := time.Now()
 
@@ -123,7 +127,9 @@ func (s *S3) upload(fileKey string) (err error) {
 	elapsed := t.Sub(start)
 
 	logger.Info("=>", result.Location)
-	logger.Info("=>", fmt.Sprintf("s3://%s/%s", s.bucket, remotePath))
+	if s.Provider == "S3" {
+		logger.Info("=>", fmt.Sprintf("s3://%s/%s", s.bucket, remotePath))
+	}
 	rate := math.Ceil(float64(info.Size()) / (elapsed.Seconds() * 1024 * 1024))
 
 	logger.Info(fmt.Sprintf("Duration %v, rate %.1f MiB/s", durafmt.Parse(elapsed).LimitFirstN(2).String(), rate))
