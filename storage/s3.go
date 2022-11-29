@@ -59,13 +59,10 @@ func (ctx *S3) open() (err error) {
 	ctx.bucket = ctx.viper.GetString("bucket")
 	ctx.path = ctx.viper.GetString("path")
 
-	timeout := ctx.viper.GetString("upload_timeout")
-	duration, err := time.ParseDuration(timeout)
-	if err != nil {
-		return fmt.Errorf("failed to parse timeout duration %v", err)
-	}
+	timeout := ctx.viper.GetInt("upload_timeout")
+	uploadTimeoutDuration := time.Duration(timeout) * time.Second
 
-	httpClient := &http.Client{Timeout: duration}
+	httpClient := &http.Client{Timeout: uploadTimeoutDuration}
 	cfg.HTTPClient = httpClient
 
 	sess := session.Must(session.NewSession(cfg))

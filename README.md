@@ -12,13 +12,13 @@ GoBackup is a fullstack backup tool design for web servers similar with [backup/
 
 You can write a config file, run `gobackup perform` command by once to dump database as file, archive config files, and then package them into a single file.
 
-It’s allow you store the backup file to local, FTP, SCP, S3 or other cloud storages.
+It's allow you store the backup file to local, FTP, SCP, S3 or other cloud storages.
 
 GoBackup 是一个类似 [backup/backup](https://github.com/backup/backup) 的一站式备份工具，为中小型服务器／个人服务器而设计，配合 Crontab 以实现定时备份的目的。
 
 使用 GoBackup 你可以通过一个简单的配置文件，一次（执行一个命令）将服务器上重要的（数据库、配置文件）东西导出、打包压缩，并备份到指定目的地（如：本地路径、FTP、云存储...）。
 
-详细中文介绍： https://ruby-china.org/topics/34094
+详细中文介绍：https://ruby-china.org/topics/34094
 
 https://gobackup.github.io/
 
@@ -58,6 +58,7 @@ Use `tar` command to archive many file or path into a `.tar` file.
 - SCP - Upload via SSH copy
 - [Amazon S3](https://aws.amazon.com/s3)
 - [Alibaba Cloud Object Storage Service (OSS)](https://www.alibabacloud.com/product/oss)
+- [Google Cloud Storage](https://cloud.google.com/storage)
 
 ## Install (macOS / Linux)
 
