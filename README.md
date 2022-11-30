@@ -85,7 +85,7 @@ USAGE:
    gobackup [global options] command [command options] [arguments...]
 
 VERSION:
-   1.0.0
+   1.2.0
 
 COMMANDS:
      perform
@@ -157,28 +157,25 @@ models:
 
 ```bash
 $ gobackup perform
-2017/09/08 06:47:36 ======== ruby_china ========
-2017/09/08 06:47:36 WorkDir: /tmp/gobackup/1504853256396379166
-2017/09/08 06:47:36 ------------- Databases --------------
-2017/09/08 06:47:36 => database | Redis: mysql
-2017/09/08 06:47:36 Dump mysql dump to /tmp/gobackup/1504853256396379166/mysql/ruby-china.sql
-2017/09/08 06:47:36
-
-2017/09/08 06:47:36 => database | Redis: redis
-2017/09/08 06:47:36 Copying redis dump to /tmp/gobackup/1504853256396379166/redis
-2017/09/08 06:47:36
-2017/09/08 06:47:36 ----------- End databases ------------
-
-2017/09/08 06:47:36 ------------- Compressor --------------
-2017/09/08 06:47:36 => Compress with Tgz...
-2017/09/08 06:47:39 -> /tmp/gobackup/2017-09-08T14:47:36+08:00.tar.gz
-2017/09/08 06:47:39 ----------- End Compressor ------------
-
-2017/09/08 06:47:39 => storage | FTP
-2017/09/08 06:47:39 -> Uploading...
-2017/09/08 06:47:39 -> upload /ruby_china/2017-09-08T14:47:36+08:00.tar.gz
-2017/09/08 06:48:04 Cleanup temp dir...
-2017/09/08 06:48:04 ======= End ruby_china =======
+[Modal: ruby_china] 2022/11/30 13:11:28 WorkDir: /tmp/gobackup/1669785088876548728/ruby_china
+[Database] 2022/11/30 13:11:28 => database | postgresql : postgresql
+[PostgreSQL] 2022/11/30 13:11:28 -> Dumping PostgreSQL...
+[PostgreSQL] 2022/11/30 13:11:39 dump path: /tmp/gobackup/1669785088876548728/ruby_china/postgresql/postgresql/ruby-china.sql
+[Database] 2022/11/30 13:11:39
+[Database] 2022/11/30 13:11:39 => database | redis : redis
+[Redis] 2022/11/30 13:11:39 -> Invoke save...
+[Redis] 2022/11/30 13:11:39 Copying redis dump to /tmp/gobackup/1669785088876548728/ruby_china/redis/redis
+[Database] 2022/11/30 13:11:40
+[Archive] 2022/11/30 13:11:40 => includes 7 rules
+[Compressor] 2022/11/30 13:11:41 => Compress | tgz
+[Compressor] 2022/11/30 13:12:09 -> /tmp/gobackup/1669785088876548728/2022.11.30.13.11.41.tar.gz
+[Encryptor] 2022/11/30 13:12:09 => Encrypt | openssl
+[Encryptor] 2022/11/30 13:12:15 -> /tmp/gobackup/1669785088876548728/2022.11.30.13.11.41.tar.gz.enc
+[Storage] 2022/11/30 13:12:15 => Storage | oss
+[OSS] 2022/11/30 13:12:15 endpoint: oss-cn-hongkong.aliyuncs.com
+[OSS] 2022/11/30 13:12:15 bucket: ruby-china-backup
+[OSS] 2022/11/30 13:12:15 -> Uploading backups/2022.11.30.13.11.41.tar.gz.enc...
+[Modal] 2022/11/30 13:12:15 Cleanup temp dir...
 ```
 
 ## Backup schedule
