@@ -1,29 +1,32 @@
+#!/usr/bin/env sh
+
+set -eu
+
 get_latest_release() {
-	curl --silent "https://api.github.com/repos/$repo/releases/latest" | # Get latest release from GitHub api
-		grep '"tag_name":' |                                            # Get tag line
-		sed -E 's/.*"([^"]+)".*/\1/'                                    # Pluck JSON value
-	}
+  repo="$1"
+	curl -sSL "https://api.github.com/repos/${repo}/releases/latest" | \
+    awk 'BEGIN{FS=": |,|\""}; /tag_name/{print $5}'
+}
 
-repo='huacnlee/gobackup'
-version=`get_latest_release`
-if [[ `uname` == 'Darwin' ]]; then
-   platform='darwin'
-else
-   platform='linux'
-fi
-if [[ `arch` == 'arm64' ]]; then
-	arch='arm64'
-else
-	arch='amd64'
-fi
-curl -SLo gobackup.tar.gz https://github.com/huacnlee/gobackup/releases/download/$version/gobackup-$platform-$arch.tar.gz
-tar zxf gobackup.tar.gz
+repo="huacnlee/gobackup"
+version="$(get_latest_release "${repo}")"  # v1.2.0
+platform="$(uname | tr "[A-Z]" "[a-z]")"  # Linux => linux
+arch="$(uname -m | sed 's/x86_64/amd64/')"  # x86_64 => amd64
+package="gobackup-${platform}-${arch}.tar.gz"
+package_url="https://github.com/${repo}/releases/download/${version}/${package}"
+bin="gobackup"
+dest_dir="/usr/local/bin"
+tmp_dir="$(mktemp -d)"
 
-if [[ `whoami` == 'root' ]]; then
-   mv gobackup /usr/local/bin/gobackup
-else
-   sudo mv gobackup /usr/local/bin/gobackup
-fi
-mkdir -p ~/.gobackup && touch ~/.gobackup/gobackup.yml
-rm gobackup.tar.gz
+trap "rm -r ${tmp_dir}" EXIT
 
+cd "${tmp_dir}"
+curl -sSL "${package_url}" | tar xzf -
+
+if test $(id -u) -eq 0; then
+   mv "${bin}" "${dest_dir}"
+else
+   sudo mv "${bin}" "${dest_dir}"
+fi
+
+mkdir -p ~/.gobackup
