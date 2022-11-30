@@ -5,6 +5,8 @@
 <p align="center">Simple tool for backup your databases, files to cloud storages.</p>
 <p align="center">
    <a href="https://github.com/huacnlee/gobackup/actions?query=workflow%3AGo"><img src="https://github.com/huacnlee/gobackup/workflows/Go/badge.svg" alt="Build Status" /></a>
+   <a href="https://github.com/huacnlee/gobackup/releases"><img src="https://img.shields.io/github/v/release/huacnlee/gobackup?label=Version&color=1" alt="GitHub release (latest by date)"></a>
+   <a href="https://hub.docker.com/r/huacnlee/gobackup"><img src="https://img.shields.io/docker/v/huacnlee/gobackup?label=Docker&color=blue" alt="Docker Image Version (latest server)"></a>
 </p>
 </p>
 
