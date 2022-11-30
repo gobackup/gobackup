@@ -118,6 +118,8 @@ func (ctx *Redis) prepare() error {
 }
 
 func (ctx *Redis) save() error {
+	logger := logger.Tag("Redis")
+
 	if !ctx.invokeSave {
 		return nil
 	}
@@ -129,13 +131,15 @@ func (ctx *Redis) save() error {
 	}
 
 	if !regexp.MustCompile("OK$").MatchString(strings.TrimSpace(out)) {
-		return fmt.Errorf(`Failed to invoke the "SAVE" command Response was: %s`, out)
+		return fmt.Errorf(`failed to invoke the "SAVE" command Response was: %s`, out)
 	}
 
 	return nil
 }
 
 func (ctx *Redis) sync() error {
+	logger := logger.Tag("Redis")
+
 	dumpFilePath := path.Join(ctx.dumpPath, "dump.rdb")
 	logger.Info("Syncing redis dump to", dumpFilePath)
 	_, err := helper.Exec(redisCliCommand, "--rdb", dumpFilePath)
@@ -151,6 +155,8 @@ func (ctx *Redis) sync() error {
 }
 
 func (ctx *Redis) copy() error {
+	logger := logger.Tag("Redis")
+
 	logger.Info("Copying redis dump to", ctx.dumpPath)
 	_, err := helper.Exec("cp", ctx.rdbPath, ctx.dumpPath)
 	if err != nil {
