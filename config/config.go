@@ -63,7 +63,7 @@ func Init(configFile string) {
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		logger.Error("Load gobackup config faild", err)
+		logger.Error("Load gobackup config faild: ", err)
 		return
 	}
 
