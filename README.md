@@ -70,8 +70,8 @@ Use `tar` command to archive many file or path into a `.tar` file.
 
 ## Install (macOS / Linux)
 
-```bash
-$ curl -sSL https://git.io/gobackup | bash
+```shell
+curl -sSL https://git.io/gobackup | sh
 ```
 
 after that, you will get `/usr/local/bin/gobackup` command.
