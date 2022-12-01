@@ -43,52 +43,52 @@ var (
 	redisCliCommand = "redis-cli"
 )
 
-func (ctx *Redis) perform() (err error) {
+func (db *Redis) perform() (err error) {
 	logger := logger.Tag("Redis")
 
-	viper := ctx.viper
+	viper := db.viper
 	viper.SetDefault("rdb_path", "/var/db/redis/dump.rdb")
 	viper.SetDefault("host", "127.0.0.1")
 	viper.SetDefault("port", "6379")
 	viper.SetDefault("invoke_save", true)
 	viper.SetDefault("mode", "copy")
 
-	ctx.host = viper.GetString("host")
-	ctx.port = viper.GetString("port")
-	ctx.socket = viper.GetString("socket")
-	ctx.password = viper.GetString("password")
-	ctx.rdbPath = viper.GetString("rdb_path")
-	ctx.invokeSave = viper.GetBool("invoke_save")
+	db.host = viper.GetString("host")
+	db.port = viper.GetString("port")
+	db.socket = viper.GetString("socket")
+	db.password = viper.GetString("password")
+	db.rdbPath = viper.GetString("rdb_path")
+	db.invokeSave = viper.GetBool("invoke_save")
 
 	// socket
-	if len(ctx.socket) != 0 {
-		ctx.host = ""
-		ctx.port = ""
+	if len(db.socket) != 0 {
+		db.host = ""
+		db.port = ""
 	}
 
 	if viper.GetString("mode") == "sync" {
-		ctx.mode = redisModeSync
+		db.mode = redisModeSync
 	} else {
-		ctx.mode = redisModeCopy
+		db.mode = redisModeCopy
 
-		if !helper.IsExistsPath(ctx.rdbPath) {
-			return fmt.Errorf("Redis RDB file: %s does not exist", ctx.rdbPath)
+		if !helper.IsExistsPath(db.rdbPath) {
+			return fmt.Errorf("Redis RDB file: %s does not exist", db.rdbPath)
 		}
 	}
 
-	if err = ctx.prepare(); err != nil {
+	if err = db.prepare(); err != nil {
 		return
 	}
 
 	logger.Info("-> Invoke save...")
-	if err = ctx.save(); err != nil {
+	if err = db.save(); err != nil {
 		return
 	}
 
-	if ctx.mode == redisModeCopy {
-		err = ctx.copy()
+	if db.mode == redisModeCopy {
+		err = db.copy()
 	} else {
-		err = ctx.sync()
+		err = db.sync()
 	}
 	if err != nil {
 		return
@@ -97,30 +97,30 @@ func (ctx *Redis) perform() (err error) {
 	return
 }
 
-func (ctx *Redis) prepare() error {
+func (db *Redis) prepare() error {
 	// redis-cli command
 	args := []string{"redis-cli"}
-	if len(ctx.host) > 0 {
-		args = append(args, "-h "+ctx.host)
+	if len(db.host) > 0 {
+		args = append(args, "-h "+db.host)
 	}
-	if len(ctx.port) > 0 {
-		args = append(args, "-p "+ctx.port)
+	if len(db.port) > 0 {
+		args = append(args, "-p "+db.port)
 	}
-	if len(ctx.socket) > 0 {
-		args = append(args, "-s", ctx.socket)
+	if len(db.socket) > 0 {
+		args = append(args, "-s", db.socket)
 	}
-	if len(ctx.password) > 0 {
-		args = append(args, `-a `+ctx.password)
+	if len(db.password) > 0 {
+		args = append(args, `-a `+db.password)
 	}
 	redisCliCommand = strings.Join(args, " ")
 
 	return nil
 }
 
-func (ctx *Redis) save() error {
+func (db *Redis) save() error {
 	logger := logger.Tag("Redis")
 
-	if !ctx.invokeSave {
+	if !db.invokeSave {
 		return nil
 	}
 	// FIXME: add retry
@@ -137,10 +137,10 @@ func (ctx *Redis) save() error {
 	return nil
 }
 
-func (ctx *Redis) sync() error {
+func (db *Redis) sync() error {
 	logger := logger.Tag("Redis")
 
-	dumpFilePath := path.Join(ctx.dumpPath, "dump.rdb")
+	dumpFilePath := path.Join(db.dumpPath, "dump.rdb")
 	logger.Info("Syncing redis dump to", dumpFilePath)
 	_, err := helper.Exec(redisCliCommand, "--rdb", dumpFilePath)
 	if err != nil {
@@ -154,11 +154,11 @@ func (ctx *Redis) sync() error {
 	return nil
 }
 
-func (ctx *Redis) copy() error {
+func (db *Redis) copy() error {
 	logger := logger.Tag("Redis")
 
-	logger.Info("Copying redis dump to", ctx.dumpPath)
-	_, err := helper.Exec("cp", ctx.rdbPath, ctx.dumpPath)
+	logger.Info("Copying redis dump to", db.dumpPath)
+	_, err := helper.Exec("cp", db.rdbPath, db.dumpPath)
 	if err != nil {
 		return fmt.Errorf("copy redis dump file error: %s", err)
 	}

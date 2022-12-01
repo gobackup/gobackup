@@ -18,7 +18,7 @@ func TestMySQL_dumpArgs(t *testing.T) {
 			Name: "mysql1",
 		},
 	)
-	mysql := &MySQL{
+	db := &MySQL{
 		Base:     base,
 		database: "dummy_test",
 		host:     "127.0.0.2",
@@ -26,7 +26,7 @@ func TestMySQL_dumpArgs(t *testing.T) {
 		password: "aaaa",
 	}
 
-	dumpArgs := mysql.dumpArgs()
+	dumpArgs := db.dumpArgs()
 	assert.Equal(t, dumpArgs, []string{
 		"--host",
 		"127.0.0.2",
@@ -48,7 +48,7 @@ func TestMySQL_dumpArgsWithAdditionalOptions(t *testing.T) {
 			Name: "mysql1",
 		},
 	)
-	mysql := &MySQL{
+	db := &MySQL{
 		Base:     base,
 		database: "dummy_test",
 		host:     "127.0.0.2",
@@ -60,7 +60,7 @@ func TestMySQL_dumpArgsWithAdditionalOptions(t *testing.T) {
 		},
 	}
 
-	dumpArgs := mysql.dumpArgs()
+	dumpArgs := db.dumpArgs()
 	assert.Equal(t, dumpArgs, []string{
 		"--host",
 		"127.0.0.2",
@@ -82,12 +82,12 @@ func TestMySQLPerform(t *testing.T) {
 	assert.NotNil(t, dbConfig)
 
 	base := newBase(*model, *dbConfig)
-	mysql := &MySQL{Base: base}
+	db := &MySQL{Base: base}
 
-	mysql.perform()
-	assert.Equal(t, mysql.database, "dummy_test")
-	assert.Equal(t, mysql.host, "localhost")
-	assert.Equal(t, mysql.port, "3306")
-	assert.Equal(t, mysql.username, "root")
-	assert.Equal(t, mysql.password, "123456")
+	db.perform()
+	assert.Equal(t, db.database, "dummy_test")
+	assert.Equal(t, db.host, "localhost")
+	assert.Equal(t, db.port, "3306")
+	assert.Equal(t, db.username, "root")
+	assert.Equal(t, db.password, "123456")
 }

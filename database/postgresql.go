@@ -32,72 +32,72 @@ type PostgreSQL struct {
 	args        string
 }
 
-func (ctx PostgreSQL) perform() (err error) {
-	viper := ctx.viper
+func (db PostgreSQL) perform() (err error) {
+	viper := db.viper
 	viper.SetDefault("host", "localhost")
 	viper.SetDefault("port", 5432)
 	viper.SetDefault("params", "")
 
-	ctx.host = viper.GetString("host")
-	ctx.port = viper.GetString("port")
-	ctx.socket = viper.GetString("socket")
-	ctx.database = viper.GetString("database")
-	ctx.username = viper.GetString("username")
-	ctx.password = viper.GetString("password")
-	ctx.args = viper.GetString("args")
+	db.host = viper.GetString("host")
+	db.port = viper.GetString("port")
+	db.socket = viper.GetString("socket")
+	db.database = viper.GetString("database")
+	db.username = viper.GetString("username")
+	db.password = viper.GetString("password")
+	db.args = viper.GetString("args")
 
 	// socket
-	if len(ctx.socket) != 0 {
-		ctx.host = ""
-		ctx.port = ""
+	if len(db.socket) != 0 {
+		db.host = ""
+		db.port = ""
 	}
 
-	if err = ctx.prepare(); err != nil {
+	if err = db.prepare(); err != nil {
 		return
 	}
 
-	err = ctx.dump()
+	err = db.dump()
 	return
 }
 
-func (ctx *PostgreSQL) prepare() (err error) {
+func (db *PostgreSQL) prepare() (err error) {
 	// pg_dump command
 	var dumpArgs []string
-	if len(ctx.database) == 0 {
+	if len(db.database) == 0 {
 		return fmt.Errorf("PostgreSQL database config is required")
 	}
-	if len(ctx.host) > 0 {
-		dumpArgs = append(dumpArgs, "--host="+ctx.host)
+	if len(db.host) > 0 {
+		dumpArgs = append(dumpArgs, "--host="+db.host)
 	}
-	if len(ctx.port) > 0 {
-		dumpArgs = append(dumpArgs, "--port="+ctx.port)
+	if len(db.port) > 0 {
+		dumpArgs = append(dumpArgs, "--port="+db.port)
 	}
-	if len(ctx.socket) > 0 {
-		host := filepath.Dir(ctx.socket)
-		port := strings.TrimPrefix(filepath.Ext(ctx.socket), ".")
+	if len(db.socket) > 0 {
+		host := filepath.Dir(db.socket)
+		port := strings.TrimPrefix(filepath.Ext(db.socket), ".")
 		dumpArgs = append(dumpArgs, "--host="+host, "--port="+port)
 	}
-	if len(ctx.username) > 0 {
-		dumpArgs = append(dumpArgs, "--username="+ctx.username)
+	if len(db.username) > 0 {
+		dumpArgs = append(dumpArgs, "--username="+db.username)
 	}
-	if len(ctx.args) > 0 {
-		dumpArgs = append(dumpArgs, ctx.args)
+	if len(db.args) > 0 {
+		dumpArgs = append(dumpArgs, db.args)
 	}
 
-	ctx.dumpCommand = "pg_dump " + strings.Join(dumpArgs, " ") + " " + ctx.database
+	db.dumpCommand = "pg_dump " + strings.Join(dumpArgs, " ") + " " + db.database
 
 	return nil
 }
 
-func (ctx *PostgreSQL) dump() error {
+func (db *PostgreSQL) dump() error {
 	logger := logger.Tag("PostgreSQL")
 
-	dumpFilePath := path.Join(ctx.dumpPath, ctx.database+".sql")
+	dumpFilePath := path.Join(db.dumpPath, db.database+".sql")
 	logger.Info("-> Dumping PostgreSQL...")
-	if len(ctx.password) > 0 {
-		os.Setenv("PGPASSWORD", ctx.password)
+	if len(db.password) > 0 {
+		os.Setenv("PGPASSWORD", db.password)
 	}
-	_, err := helper.Exec(ctx.dumpCommand, "-f", dumpFilePath)
+	_, err := helper.Exec(db.dumpCommand, "-f", dumpFilePath)
 	if err != nil {
 		return err
 	}

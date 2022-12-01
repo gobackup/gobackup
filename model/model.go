@@ -19,46 +19,46 @@ type Model struct {
 }
 
 // Perform model
-func (ctx Model) Perform() {
-	logger := logger.Tag(fmt.Sprintf("Modal: %s", ctx.Config.Name))
+func (m Model) Perform() {
+	logger := logger.Tag(fmt.Sprintf("Modal: %s", m.Config.Name))
 
-	logger.Info("WorkDir:", ctx.Config.DumpPath)
+	logger.Info("WorkDir:", m.Config.DumpPath)
 
 	defer func() {
 		if r := recover(); r != nil {
-			ctx.cleanup()
+			m.cleanup()
 		}
 
-		ctx.cleanup()
+		m.cleanup()
 	}()
 
-	err := database.Run(ctx.Config)
+	err := database.Run(m.Config)
 	if err != nil {
 		logger.Error(err)
 		return
 	}
 
-	if ctx.Config.Archive != nil {
-		err = archive.Run(ctx.Config)
+	if m.Config.Archive != nil {
+		err = archive.Run(m.Config)
 		if err != nil {
 			logger.Error(err)
 			return
 		}
 	}
 
-	archivePath, err := compressor.Run(ctx.Config)
+	archivePath, err := compressor.Run(m.Config)
 	if err != nil {
 		logger.Error(err)
 		return
 	}
 
-	archivePath, err = encryptor.Run(archivePath, ctx.Config)
+	archivePath, err = encryptor.Run(archivePath, m.Config)
 	if err != nil {
 		logger.Error(err)
 		return
 	}
 
-	err = storage.Run(ctx.Config, archivePath)
+	err = storage.Run(m.Config, archivePath)
 	if err != nil {
 		logger.Error(err)
 		return
@@ -67,12 +67,12 @@ func (ctx Model) Perform() {
 }
 
 // Cleanup model temp files
-func (ctx Model) cleanup() {
-	logger := logger.Tag("Modal")
+func (m Model) cleanup() {
+	logger := logger.Tag("Model")
 
-	logger.Info("Cleanup temp: " + ctx.Config.TempPath + "/")
-	err := os.RemoveAll(ctx.Config.TempPath)
+	logger.Info("Cleanup temp: " + m.Config.TempPath + "/")
+	err := os.RemoveAll(m.Config.TempPath)
 	if err != nil {
-		logger.Error("Cleanup temp dir "+ctx.Config.TempPath+" error:", err)
+		logger.Error("Cleanup temp dir "+m.Config.TempPath+" error:", err)
 	}
 }

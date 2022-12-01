@@ -17,8 +17,8 @@ type Base struct {
 	keep        int
 }
 
-// Context storage interface
-type Service interface {
+// Storage interface
+type Storage interface {
 	open() error
 	close()
 	upload(fileKey string) error
@@ -45,7 +45,7 @@ func Run(model config.ModelConfig, archivePath string) (err error) {
 
 	newFileKey := filepath.Base(archivePath)
 	base := newBase(model, archivePath)
-	var s Service
+	var s Storage
 	switch model.StoreWith.Type {
 	case "local":
 		s = &Local{Base: base}

@@ -8,45 +8,45 @@ import (
 )
 
 func TestMongoDB_credentialOptions(t *testing.T) {
-	ctx := &MongoDB{
+	db := &MongoDB{
 		username: "foo",
 		password: "bar",
 		authdb:   "sssbbb",
 	}
 
-	assert.Equal(t, ctx.credentialOptions(), "--username=foo --password=bar --authenticationDatabase=sssbbb")
+	assert.Equal(t, db.credentialOptions(), "--username=foo --password=bar --authenticationDatabase=sssbbb")
 }
 
 func TestMongoDB_connectivityOptions(t *testing.T) {
-	ctx := &MongoDB{
+	db := &MongoDB{
 		host: "10.11.12.13",
 		port: "12345",
 	}
-	assert.Equal(t, ctx.connectivityOptions(), "--host=10.11.12.13 --port=12345")
+	assert.Equal(t, db.connectivityOptions(), "--host=10.11.12.13 --port=12345")
 
-	ctx = &MongoDB{
+	db = &MongoDB{
 		host: "10.11.12.13",
 	}
-	assert.Equal(t, ctx.connectivityOptions(), "--host=10.11.12.13")
+	assert.Equal(t, db.connectivityOptions(), "--host=10.11.12.13")
 
-	ctx = &MongoDB{
+	db = &MongoDB{
 		port: "1122",
 	}
-	assert.Equal(t, ctx.connectivityOptions(), "--port=1122")
+	assert.Equal(t, db.connectivityOptions(), "--port=1122")
 }
 
 func TestMongoDB_oplogOption(t *testing.T) {
-	ctx := &MongoDB{oplog: true}
-	assert.Equal(t, ctx.oplogOption(), "--oplog")
-	ctx.oplog = false
-	assert.Equal(t, ctx.oplogOption(), "")
+	db := &MongoDB{oplog: true}
+	assert.Equal(t, db.oplogOption(), "--oplog")
+	db.oplog = false
+	assert.Equal(t, db.oplogOption(), "")
 }
 
 func TestMongoDB_mongodump(t *testing.T) {
 	base := Base{
 		dumpPath: "/tmp/gobackup/test",
 	}
-	ctx := &MongoDB{
+	db := &MongoDB{
 		Base:     base,
 		host:     "127.0.0.1",
 		port:     "4567",
@@ -57,5 +57,5 @@ func TestMongoDB_mongodump(t *testing.T) {
 		oplog:    true,
 	}
 	expect := "mongodump --db=hello --username=foo --password=bar --authenticationDatabase=sssbbb --host=127.0.0.1 --port=4567 --oplog --out=/tmp/gobackup/test"
-	assert.Equal(t, ctx.mongodump(), expect)
+	assert.Equal(t, db.mongodump(), expect)
 }

@@ -16,11 +16,11 @@ type Monkey struct {
 	Base
 }
 
-func (ctx Monkey) perform() error {
-	if ctx.model.Name != "TestMonkey" {
+func (db Monkey) perform() error {
+	if db.model.Name != "TestMonkey" {
 		return fmt.Errorf("Error")
 	}
-	if ctx.dbConfig.Name != "mysql1" {
+	if db.dbConfig.Name != "mysql1" {
 		return fmt.Errorf("Error")
 	}
 	return nil
@@ -35,8 +35,8 @@ func TestBaseInterface(t *testing.T) {
 			Name: "mysql1",
 		},
 	}
-	ctx := Monkey{Base: base}
-	err := ctx.perform()
+	db := Monkey{Base: base}
+	err := db.perform()
 	assert.Nil(t, err)
 }
 

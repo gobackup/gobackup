@@ -30,73 +30,73 @@ type MySQL struct {
 	additionalOptions []string
 }
 
-func (ctx *MySQL) perform() (err error) {
-	viper := ctx.viper
+func (db *MySQL) perform() (err error) {
+	viper := db.viper
 	viper.SetDefault("host", "127.0.0.1")
 	viper.SetDefault("username", "root")
 	viper.SetDefault("port", 3306)
 
-	ctx.host = viper.GetString("host")
-	ctx.port = viper.GetString("port")
-	ctx.socket = viper.GetString("socket")
-	ctx.database = viper.GetString("database")
-	ctx.username = viper.GetString("username")
-	ctx.password = viper.GetString("password")
+	db.host = viper.GetString("host")
+	db.port = viper.GetString("port")
+	db.socket = viper.GetString("socket")
+	db.database = viper.GetString("database")
+	db.username = viper.GetString("username")
+	db.password = viper.GetString("password")
 	addOpts := viper.GetString("additional_options")
 	if len(addOpts) > 0 {
-		ctx.additionalOptions = strings.Split(addOpts, " ")
+		db.additionalOptions = strings.Split(addOpts, " ")
 	}
 
 	// mysqldump command
-	if len(ctx.database) == 0 {
+	if len(db.database) == 0 {
 		return fmt.Errorf("mysql database config is required")
 	}
 
 	// socket
-	if len(ctx.socket) != 0 {
-		ctx.host = ""
-		ctx.port = ""
+	if len(db.socket) != 0 {
+		db.host = ""
+		db.port = ""
 	}
 
-	err = ctx.dump()
+	err = db.dump()
 	return
 }
 
-func (ctx *MySQL) dumpArgs() []string {
+func (db *MySQL) dumpArgs() []string {
 	dumpArgs := []string{}
-	if len(ctx.host) > 0 {
-		dumpArgs = append(dumpArgs, "--host", ctx.host)
+	if len(db.host) > 0 {
+		dumpArgs = append(dumpArgs, "--host", db.host)
 	}
-	if len(ctx.port) > 0 {
-		dumpArgs = append(dumpArgs, "--port", ctx.port)
+	if len(db.port) > 0 {
+		dumpArgs = append(dumpArgs, "--port", db.port)
 	}
-	if len(ctx.socket) > 0 {
-		dumpArgs = append(dumpArgs, "--socket", ctx.socket)
+	if len(db.socket) > 0 {
+		dumpArgs = append(dumpArgs, "--socket", db.socket)
 	}
-	if len(ctx.username) > 0 {
-		dumpArgs = append(dumpArgs, "-u", ctx.username)
+	if len(db.username) > 0 {
+		dumpArgs = append(dumpArgs, "-u", db.username)
 	}
-	if len(ctx.password) > 0 {
-		dumpArgs = append(dumpArgs, `-p`+ctx.password)
+	if len(db.password) > 0 {
+		dumpArgs = append(dumpArgs, `-p`+db.password)
 	}
-	if len(ctx.additionalOptions) > 0 {
-		dumpArgs = append(dumpArgs, ctx.additionalOptions...)
+	if len(db.additionalOptions) > 0 {
+		dumpArgs = append(dumpArgs, db.additionalOptions...)
 	}
 
-	dumpArgs = append(dumpArgs, ctx.database)
-	dumpFilePath := path.Join(ctx.dumpPath, ctx.database+".sql")
+	dumpArgs = append(dumpArgs, db.database)
+	dumpFilePath := path.Join(db.dumpPath, db.database+".sql")
 	dumpArgs = append(dumpArgs, "--result-file="+dumpFilePath)
 	return dumpArgs
 }
 
-func (ctx *MySQL) dump() error {
+func (db *MySQL) dump() error {
 	logger := logger.Tag("MySQL")
 
 	logger.Info("-> Dumping MySQL...")
-	_, err := helper.Exec("mysqldump", ctx.dumpArgs()...)
+	_, err := helper.Exec("mysqldump", db.dumpArgs()...)
 	if err != nil {
 		return fmt.Errorf("-> Dump error: %s", err)
 	}
-	logger.Info("dump path:", ctx.dumpPath)
+	logger.Info("dump path:", db.dumpPath)
 	return nil
 }

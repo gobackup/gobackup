@@ -33,82 +33,82 @@ var (
 	mongodumpCli = "mongodump"
 )
 
-func (ctx *MongoDB) perform() (err error) {
-	viper := ctx.viper
+func (db *MongoDB) perform() (err error) {
+	viper := db.viper
 	viper.SetDefault("oplog", false)
 	viper.SetDefault("host", "127.0.0.1")
 	viper.SetDefault("port", 27017)
 
-	ctx.host = viper.GetString("host")
-	ctx.port = viper.GetString("port")
-	ctx.database = viper.GetString("database")
-	ctx.username = viper.GetString("username")
-	ctx.password = viper.GetString("password")
-	ctx.oplog = viper.GetBool("oplog")
-	ctx.authdb = viper.GetString("authdb")
+	db.host = viper.GetString("host")
+	db.port = viper.GetString("port")
+	db.database = viper.GetString("database")
+	db.username = viper.GetString("username")
+	db.password = viper.GetString("password")
+	db.oplog = viper.GetBool("oplog")
+	db.authdb = viper.GetString("authdb")
 
-	err = ctx.dump()
+	err = db.dump()
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (ctx *MongoDB) mongodump() string {
+func (db *MongoDB) mongodump() string {
 	return mongodumpCli + " " +
-		ctx.nameOption() + " " +
-		ctx.credentialOptions() + " " +
-		ctx.connectivityOptions() + " " +
-		ctx.oplogOption() + " " +
-		"--out=" + ctx.dumpPath
+		db.nameOption() + " " +
+		db.credentialOptions() + " " +
+		db.connectivityOptions() + " " +
+		db.oplogOption() + " " +
+		"--out=" + db.dumpPath
 }
 
-func (ctx *MongoDB) nameOption() string {
-	return "--db=" + ctx.database
+func (db *MongoDB) nameOption() string {
+	return "--db=" + db.database
 }
 
-func (ctx *MongoDB) credentialOptions() string {
+func (db *MongoDB) credentialOptions() string {
 	opts := []string{}
-	if len(ctx.username) > 0 {
-		opts = append(opts, "--username="+ctx.username)
+	if len(db.username) > 0 {
+		opts = append(opts, "--username="+db.username)
 	}
-	if len(ctx.password) > 0 {
-		opts = append(opts, `--password=`+ctx.password)
+	if len(db.password) > 0 {
+		opts = append(opts, `--password=`+db.password)
 	}
-	if len(ctx.authdb) > 0 {
-		opts = append(opts, "--authenticationDatabase="+ctx.authdb)
+	if len(db.authdb) > 0 {
+		opts = append(opts, "--authenticationDatabase="+db.authdb)
 	}
 	return strings.Join(opts, " ")
 }
 
-func (ctx *MongoDB) connectivityOptions() string {
+func (db *MongoDB) connectivityOptions() string {
 	opts := []string{}
-	if len(ctx.host) > 0 {
-		opts = append(opts, "--host="+ctx.host+"")
+	if len(db.host) > 0 {
+		opts = append(opts, "--host="+db.host+"")
 	}
-	if len(ctx.port) > 0 {
-		opts = append(opts, "--port="+ctx.port+"")
+	if len(db.port) > 0 {
+		opts = append(opts, "--port="+db.port+"")
 	}
 
 	return strings.Join(opts, " ")
 }
 
-func (ctx *MongoDB) oplogOption() string {
-	if ctx.oplog {
+func (db *MongoDB) oplogOption() string {
+	if db.oplog {
 		return "--oplog"
 	}
 
 	return ""
 }
 
-func (ctx *MongoDB) dump() error {
+func (db *MongoDB) dump() error {
 	logger := logger.Tag("MongoDB")
 
-	out, err := helper.Exec(ctx.mongodump())
+	out, err := helper.Exec(db.mongodump())
 	if err != nil {
 		return fmt.Errorf("-> Dump error: %s", err)
 	}
 	logger.Info(out)
-	logger.Info("dump path:", ctx.dumpPath)
+	logger.Info("dump path:", db.dumpPath)
 	return nil
 }

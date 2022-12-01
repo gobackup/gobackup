@@ -19,8 +19,8 @@ type Base struct {
 	dumpPath string
 }
 
-// Context database interface
-type Context interface {
+// Database interface
+type Database interface {
 	perform() error
 }
 
@@ -41,16 +41,16 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 	logger := logger.Tag("Database")
 
 	base := newBase(model, dbConfig)
-	var ctx Context
+	var db Database
 	switch dbConfig.Type {
 	case "mysql":
-		ctx = &MySQL{Base: base}
+		db = &MySQL{Base: base}
 	case "redis":
-		ctx = &Redis{Base: base}
+		db = &Redis{Base: base}
 	case "postgresql":
-		ctx = &PostgreSQL{Base: base}
+		db = &PostgreSQL{Base: base}
 	case "mongodb":
-		ctx = &MongoDB{Base: base}
+		db = &MongoDB{Base: base}
 	default:
 		logger.Warn(fmt.Errorf("model: %s databases.%s config `type: %s`, but is not implement", model.Name, dbConfig.Name, dbConfig.Type))
 		return
@@ -59,7 +59,7 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 	logger.Info("=> database |", dbConfig.Type, ":", base.name)
 
 	// perform
-	err = ctx.perform()
+	err = db.perform()
 	if err != nil {
 		return err
 	}
