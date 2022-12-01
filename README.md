@@ -47,7 +47,7 @@ Use `tar` command to archive many file or path into a `.tar` file.
 ### Compressor
 
 | Type                            | Extension   | Parallel Support by |
-|---------------------------------|-------------|---------------------|
+| ------------------------------- | ----------- | ------------------- |
 | `gz`, `tgz`, `taz`, `tar.gz`    | `.tar.gz`   | pigz                |
 | `Z`, `taZ`, `tar.Z`             | `.tar.Z`    |                     |
 | `bz2`, `tbz`, `tbz2`, `tar.bz2` | `.tar.bz2`  | pbzip2              |
@@ -167,25 +167,6 @@ models:
 
 ```bash
 $ gobackup perform
-<<<<<<< HEAD
-2022/11/30 13:11:28 [Modal: ruby_china] WorkDir: /tmp/gobackup/1669785088876548728/ruby_china
-2022/11/30 13:11:28 [Database] => database | postgresql : postgresql
-2022/11/30 13:11:28 [PostgreSQL] -> Dumping PostgreSQL...
-2022/11/30 13:11:39 [PostgreSQL] dump path: /tmp/gobackup/1669785088876548728/ruby_china/postgresql/postgresql/ruby-china.sql
-2022/11/30 13:11:39 [Database] => database | redis : redis
-2022/11/30 13:11:39 [Redis] -> Invoke save...
-2022/11/30 13:11:39 [Redis] Copying redis dump to /tmp/gobackup/1669785088876548728/ruby_china/redis/redis
-2022/11/30 13:11:40 [Archive] => includes 7 rules
-2022/11/30 13:11:41 [Compressor] => Compress | tgz
-2022/11/30 13:12:09 [Compressor] -> /tmp/gobackup/1669785088876548728/2022.11.30.13.11.41.tar.gz
-2022/11/30 13:12:09 [Encryptor] => Encrypt | openssl
-2022/11/30 13:12:15 [Encryptor] -> /tmp/gobackup/1669785088876548728/2022.11.30.13.11.41.tar.gz.enc
-2022/11/30 13:12:15 [Storage] => Storage | oss
-2022/11/30 13:12:15 [OSS] endpoint: oss-cn-hongkong.aliyuncs.com
-2022/11/30 13:12:15 [OSS] bucket: ruby-china-backup
-2022/11/30 13:12:15 [OSS] -> Uploading backups/2022.11.30.13.11.41.tar.gz.enc...
-2022/11/30 13:12:15 [Modal] Cleanup temp dir...
-=======
 [Model: ruby_china] 2022/11/30 13:11:28 WorkDir: /tmp/gobackup/1669785088876548728/ruby_china
 [Database] 2022/11/30 13:11:28 => database | postgresql : postgresql
 [PostgreSQL] 2022/11/30 13:11:28 -> Dumping PostgreSQL...
@@ -205,7 +186,6 @@ $ gobackup perform
 [OSS] 2022/11/30 13:12:15 bucket: ruby-china-backup
 [OSS] 2022/11/30 13:12:15 -> Uploading backups/2022.11.30.13.11.41.tar.gz.enc...
 [Model] 2022/11/30 13:12:15 Cleanup temp dir...
->>>>>>> dbe1634 (Refactor base interface name.)
 ```
 
 ## Backup schedule
