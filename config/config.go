@@ -20,11 +20,38 @@ var (
 	GobackupDir string = getGobackupDir()
 )
 
+type ScheduleConfig struct {
+	Enabled bool
+	// Cron expression
+	Cron string
+	// Every
+	Every string
+	// At time
+	At string
+}
+
+func (sc ScheduleConfig) String() string {
+	if sc.Enabled {
+		if len(sc.Cron) > 0 {
+			return fmt.Sprintf("cron %s", sc.Cron)
+		} else {
+			if len(sc.At) > 0 {
+				return fmt.Sprintf("every %s at %s", sc.Every, sc.At)
+			} else {
+				return fmt.Sprintf("every %s", sc.Every)
+			}
+		}
+	}
+
+	return "disabled"
+}
+
 // ModelConfig for special case
 type ModelConfig struct {
 	Name         string
 	TempPath     string
 	DumpPath     string
+	Schedule     ScheduleConfig
 	CompressWith SubConfig
 	EncryptWith  SubConfig
 	Archive      *viper.Viper
@@ -54,12 +81,16 @@ type SubConfig struct {
 // - ~/.gobackup/gobackup.yml
 // - /etc/gobackup/gobackup.yml
 func Init(configFile string) {
+	logger := logger.Tag("Config")
+
 	viper.SetConfigType("yaml")
 
 	// set config file directly
 	if len(configFile) > 0 {
+		logger.Info("Load config:", configFile)
 		viper.SetConfigFile(configFile)
 	} else {
+		logger.Info("Load config from default path.")
 		viper.SetConfigName("gobackup")
 
 		// ./gobackup.yml
@@ -110,6 +141,8 @@ func loadModel(key string) (model ModelConfig) {
 	model.DumpPath = filepath.Join(model.TempPath, key)
 	model.Viper = viper.Sub("models." + key)
 
+	model.Schedule = ScheduleConfig{Enabled: false}
+
 	model.CompressWith = SubConfig{
 		Type:  model.Viper.GetString("compress_with.type"),
 		Viper: model.Viper.Sub("compress_with"),
@@ -122,8 +155,12 @@ func loadModel(key string) (model ModelConfig) {
 
 	model.Archive = model.Viper.Sub("archive")
 
+<<<<<<< HEAD
 	model.Splitter = model.Viper.Sub("split_with")
 
+=======
+	loadScheduleConfig(&model)
+>>>>>>> 7b05219 (Add scheduler to perform backup in schedule.)
 	loadDatabasesConfig(&model)
 	loadStoragesConfig(&model)
 
@@ -132,6 +169,21 @@ func loadModel(key string) (model ModelConfig) {
 	}
 
 	return
+}
+
+func loadScheduleConfig(model *ModelConfig) {
+	subViper := model.Viper.Sub("schedule")
+	model.Schedule = ScheduleConfig{Enabled: false}
+	if subViper == nil {
+		return
+	}
+
+	model.Schedule = ScheduleConfig{
+		Enabled: true,
+		Cron:    subViper.GetString("cron"),
+		Every:   subViper.GetString("every"),
+		At:      subViper.GetString("at"),
+	}
 }
 
 func loadDatabasesConfig(model *ModelConfig) {

@@ -4,6 +4,9 @@
 # ~/.gobackup/gobackup.yml or /etc/gobackup/gobackup.yml
 models:
   base_test:
+    schedule:
+      # At 04:05 on Sunday.
+      cron: "5 4 * * sun"
     compress_with:
       type: tgz
     encrypt_with:
@@ -52,6 +55,9 @@ models:
         - /home/ubuntu/.ssh/known_hosts
         - /etc/logrotate.d/syslog
   normal_files:
+    schedule:
+      every: "1day"
+      at: "0:30"
     storages:
       scp:
         type: scp
@@ -87,6 +93,8 @@ models:
         access_key_id: Ohsgwk86h2ks
         secret_access_key: Ojsiw729wujhKdhwsIIOw9173
   demo:
+    schedule:
+      every: "30s"
     compress_with:
       type: tgz
     encrypt_with:
