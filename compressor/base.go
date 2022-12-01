@@ -20,13 +20,13 @@ type Base struct {
 	viper           *viper.Viper
 }
 
-// Context compressor
-type Context interface {
+// Compressor
+type Compressor interface {
 	perform() (archivePath string, err error)
 }
 
-func (ctx *Base) archiveFilePath(ext string) string {
-	return path.Join(ctx.model.TempPath, time.Now().Format("2006.01.02.15.04.05")+ext)
+func (c *Base) archiveFilePath(ext string) string {
+	return path.Join(c.model.TempPath, time.Now().Format("2006.01.02.15.04.05")+ext)
 }
 
 func newBase(model config.ModelConfig) (base Base) {
@@ -44,7 +44,7 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 
 	base := newBase(model)
 
-	var ctx Context
+	var c Compressor
 	var ext, parallelProgram string
 	switch model.CompressWith.Type {
 	case "gz", "tgz", "taz", "tar.gz":
@@ -78,13 +78,13 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 
 	base.ext = ext
 	base.parallelProgram = parallelProgram
-	ctx = &Tar{Base: base}
+	c = &Tar{Base: base}
 
 	logger.Info("=> Compress | " + model.CompressWith.Type)
 
 	// set workdir
 	os.Chdir(path.Join(model.DumpPath, "../"))
-	archivePath, err = ctx.perform()
+	archivePath, err = c.perform()
 	if err != nil {
 		return
 	}

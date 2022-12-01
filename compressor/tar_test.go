@@ -8,8 +8,8 @@ import (
 )
 
 func TestTar_options(t *testing.T) {
-	ctx := &Tar{}
-	opts := ctx.options()
+	tar := &Tar{}
+	opts := tar.options()
 	if helper.IsGnuTar {
 		assert.Equal(t, opts[0], "--ignore-failed-read")
 		assert.Equal(t, opts[1], "-a")
