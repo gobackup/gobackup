@@ -2,8 +2,10 @@ package logger
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
+	"time"
 
 	"github.com/fatih/color"
 )
@@ -15,9 +17,18 @@ type Logger struct {
 
 var (
 	_logFlag     = log.Ldate | log.Ltime
-	_myLog       = log.New(os.Stdout, "", _logFlag)
+	_myLog       = log.New(&writer{os.Stdout, "2006/01/02 15:04:05"}, "", 0)
 	sharedLogger Logger
 )
+
+type writer struct {
+	io.Writer
+	timeFormat string
+}
+
+func (w writer) Write(b []byte) (n int, err error) {
+	return w.Writer.Write(append([]byte(time.Now().Format(w.timeFormat)+" "), b...))
+}
 
 func init() {
 	isTest := os.Getenv("GO_ENV") == "test"
