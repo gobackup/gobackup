@@ -28,14 +28,14 @@ func (ctx *Tar) options() (opts []string) {
 		opts = append(opts, "--ignore-failed-read")
 	}
 
-	if ctx.ext == ".tar.gz" {
-		path, err := exec.LookPath("pigz")
-		if err == nil {
+	var useCompressProgram bool
+	if len(ctx.parallelProgram) > 0 {
+		if path, err := exec.LookPath(ctx.parallelProgram); err == nil {
+			useCompressProgram = true
 			opts = append(opts, "--use-compress-program", path)
-		} else {
-			opts = append(opts, "-a")
 		}
-	} else {
+	}
+	if !useCompressProgram {
 		opts = append(opts, "-a")
 	}
 	opts = append(opts, "-cf")

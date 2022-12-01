@@ -13,10 +13,11 @@ import (
 
 // Base compressor
 type Base struct {
-	name  string
-	ext   string
-	model config.ModelConfig
-	viper *viper.Viper
+	name            string
+	ext             string
+	parallelProgram string
+	model           config.ModelConfig
+	viper           *viper.Viper
 }
 
 // Context compressor
@@ -44,14 +45,16 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 	base := newBase(model)
 
 	var ctx Context
-	var ext string
+	var ext, parallelProgram string
 	switch model.CompressWith.Type {
 	case "gz", "tgz", "taz", "tar.gz":
 		ext = ".tar.gz"
+		parallelProgram = "pigz"
 	case "Z", "taZ", "tar.Z":
 		ext = ".tar.Z"
 	case "bz2", "tbz", "tbz2", "tar.bz2":
 		ext = ".tar.bz2"
+		parallelProgram = "pbzip2"
 	case "lz", "tar.lz":
 		ext = ".tar.lz"
 	case "lzma", "tlz", "tar.lzma":
@@ -60,6 +63,7 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 		ext = ".tar.lzo"
 	case "xz", "txz", "tar.xz":
 		ext = ".tar.xz"
+		parallelProgram = "pixz"
 	case "zst", "tzst", "tar.zst":
 		ext = ".tar.zst"
 	case "tar":
@@ -73,6 +77,7 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 	}
 
 	base.ext = ext
+	base.parallelProgram = parallelProgram
 	ctx = &Tar{Base: base}
 
 	logger.Info("=> Compress | " + model.CompressWith.Type)
