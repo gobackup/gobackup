@@ -1,6 +1,7 @@
 package compressor
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"time"
@@ -13,6 +14,7 @@ import (
 // Base compressor
 type Base struct {
 	name  string
+	ext   string
 	model config.ModelConfig
 	viper *viper.Viper
 }
@@ -42,15 +44,36 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 	base := newBase(model)
 
 	var ctx Context
+	var ext string
 	switch model.CompressWith.Type {
-	case "tgz":
-		ctx = &Tgz{Base: base}
+	case "gz", "tgz", "taz", "tar.gz":
+		ext = ".tar.gz"
+	case "Z", "taZ", "tar.Z":
+		ext = ".tar.Z"
+	case "bz2", "tbz", "tbz2", "tar.bz2":
+		ext = ".tar.bz2"
+	case "lz", "tar.lz":
+		ext = ".tar.lz"
+	case "lzma", "tlz", "tar.lzma":
+		ext = ".tar.lzma"
+	case "lzo", "tar.lzo":
+		ext = ".tar.lzo"
+	case "xz", "txz", "tar.xz":
+		ext = ".tar.xz"
+	case "zst", "tzst", "tar.zst":
+		ext = ".tar.zst"
 	case "tar":
-		ctx = &Tar{Base: base}
-	default:
-		ctx = &Tar{Base: base}
+		ext = ".tar"
+	case "":
+		ext = ".tar"
 		model.CompressWith.Type = "tar"
+	default:
+		err = fmt.Errorf("Unsupported compress type: %s", model.CompressWith.Type)
+		return
 	}
+
+	base.ext = ext
+	ctx = &Tar{Base: base}
 
 	logger.Info("=> Compress | " + model.CompressWith.Type)
 
