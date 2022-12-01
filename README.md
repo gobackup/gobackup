@@ -46,8 +46,18 @@ Use `tar` command to archive many file or path into a `.tar` file.
 
 ### Compressor
 
-- Tgz - `.tar.gz`
-- Uncompressed - `.tar`
+| Type                            | Extension   | Parallel Support by |
+|---------------------------------|-------------|---------------------|
+| `gz`, `tgz`, `taz`, `tar.gz`    | `.tar.gz`   | pigz                |
+| `Z`, `taZ`, `tar.Z`             | `.tar.Z`    |                     |
+| `bz2`, `tbz`, `tbz2`, `tar.bz2` | `.tar.bz2`  | pbzip2              |
+| `lz`, `tar.lz`                  | `.tar.lz`   |                     |
+| `lzma`, `tlz`, `tar.lzma`       | `.tar.lzma` |                     |
+| `lzo`, `tar.lzo`                | `.tar.lzo`  |                     |
+| `xz`, `txz`, `tar.xz`           | `.tar.xz`   | pixz                |
+| `zst`, `tzst`, `tar.zst`        | `.tar.zst`  |                     |
+| `tar`                           | `.tar`      |                     |
+| default                         | `.tar`      |                     |
 
 ### Encryptor
 

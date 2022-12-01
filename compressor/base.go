@@ -1,6 +1,7 @@
 package compressor
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"time"
@@ -12,18 +13,20 @@ import (
 
 // Base compressor
 type Base struct {
-	name  string
-	model config.ModelConfig
-	viper *viper.Viper
+	name            string
+	ext             string
+	parallelProgram string
+	model           config.ModelConfig
+	viper           *viper.Viper
 }
 
-// Context compressor
-type Context interface {
+// Compressor
+type Compressor interface {
 	perform() (archivePath string, err error)
 }
 
-func (ctx *Base) archiveFilePath(ext string) string {
-	return path.Join(ctx.model.TempPath, time.Now().Format("2006.01.02.15.04.05")+ext)
+func (c *Base) archiveFilePath(ext string) string {
+	return path.Join(c.model.TempPath, time.Now().Format("2006.01.02.15.04.05")+ext)
 }
 
 func newBase(model config.ModelConfig) (base Base) {
@@ -41,22 +44,47 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 
 	base := newBase(model)
 
-	var ctx Context
+	var c Compressor
+	var ext, parallelProgram string
 	switch model.CompressWith.Type {
-	case "tgz":
-		ctx = &Tgz{Base: base}
+	case "gz", "tgz", "taz", "tar.gz":
+		ext = ".tar.gz"
+		parallelProgram = "pigz"
+	case "Z", "taZ", "tar.Z":
+		ext = ".tar.Z"
+	case "bz2", "tbz", "tbz2", "tar.bz2":
+		ext = ".tar.bz2"
+		parallelProgram = "pbzip2"
+	case "lz", "tar.lz":
+		ext = ".tar.lz"
+	case "lzma", "tlz", "tar.lzma":
+		ext = ".tar.lzma"
+	case "lzo", "tar.lzo":
+		ext = ".tar.lzo"
+	case "xz", "txz", "tar.xz":
+		ext = ".tar.xz"
+		parallelProgram = "pixz"
+	case "zst", "tzst", "tar.zst":
+		ext = ".tar.zst"
 	case "tar":
-		ctx = &Tar{Base: base}
-	default:
-		ctx = &Tar{Base: base}
+		ext = ".tar"
+	case "":
+		ext = ".tar"
 		model.CompressWith.Type = "tar"
+	default:
+		err = fmt.Errorf("Unsupported compress type: %s", model.CompressWith.Type)
+		return
 	}
+
+	base.ext = ext
+	base.parallelProgram = parallelProgram
+	c = &Tar{Base: base}
 
 	logger.Info("=> Compress | " + model.CompressWith.Type)
 
 	// set workdir
 	os.Chdir(path.Join(model.DumpPath, "../"))
-	archivePath, err = ctx.perform()
+	archivePath, err = c.perform()
 	if err != nil {
 		return
 	}
