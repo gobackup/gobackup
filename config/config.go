@@ -67,6 +67,12 @@ func Init(configFile string) {
 		return
 	}
 
+	viperConfigFile := viper.ConfigFileUsed()
+	if info, _ := os.Stat(viperConfigFile); info.Mode()&(1<<2) != 0 {
+		// max permission: 0770
+		logger.Warnf("Other users are able to access %s with mode %v", viperConfigFile, info.Mode())
+	}
+
 	viper.SetDefault("workdir", path.Join(os.TempDir(), "gobackup"))
 
 	Exist = true
@@ -76,7 +82,7 @@ func Init(configFile string) {
 	}
 
 	if len(Models) == 0 {
-		logger.Fatalf("No model found in %s", viper.ConfigFileUsed())
+		logger.Fatalf("No model found in %s", viperConfigFile)
 	}
 }
 
