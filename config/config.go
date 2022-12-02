@@ -115,6 +115,7 @@ func loadStoragesConfig(model *ModelConfig) {
 	// Backward compatible with `store_with` config
 	storeWith := model.Viper.Sub("store_with")
 	if storeWith != nil {
+		logger.Warn(`[DeprecationWarning] "store_with" is deprecated now, please use "storages" which supports multiple storages.`)
 		model.Storages = append(model.Storages, SubConfig{
 			Name:  "",
 			Type:  model.Viper.GetString("store_with.type"),
