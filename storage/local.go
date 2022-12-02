@@ -17,7 +17,7 @@ type Local struct {
 }
 
 func (s *Local) open() (err error) {
-	s.destPath = s.model.StoreWith.Viper.GetString("path")
+	s.destPath = s.viper.GetString("path")
 	helper.MkdirP(s.destPath)
 	return
 }
