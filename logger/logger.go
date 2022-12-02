@@ -53,41 +53,87 @@ func (logger Logger) Tag(tag string) Logger {
 	return logger
 }
 
+func (logger Logger) log(v ...interface{}) {
+	logger.myLog.Print(v...)
+}
+
 // Print log
 func (logger Logger) Print(v ...interface{}) {
-	logger.myLog.Print(v...)
+	logger.log(v...)
 }
 
 // Println log
 func (logger Logger) Println(v ...interface{}) {
-	logger.myLog.Println(v...)
+	logger.Print(v...)
+}
+
+// Printf log
+func (logger Logger) Printf(format string, v ...interface{}) {
+	logger.Print(fmt.Sprintf(format, v...))
 }
 
 // Debug log
 func (logger Logger) Debug(v ...interface{}) {
-	logger.myLog.Println("[debug]", fmt.Sprint(v...))
+	logger.log("[debug] ", fmt.Sprint(v...))
+}
+
+// Debugf log
+func (logger Logger) Debugf(format string, v ...interface{}) {
+	logger.Debug(fmt.Sprintf(format, v...))
 }
 
 // Info log
 func (logger Logger) Info(v ...interface{}) {
-	logger.Println(v...)
+	logger.log(v...)
+}
+
+// Infof log
+func (logger Logger) Infof(format string, v ...interface{}) {
+	logger.Info(fmt.Sprintf(format, v...))
 }
 
 // Warn log
 func (logger Logger) Warn(v ...interface{}) {
 	c := color.YellowString(fmt.Sprint(v...))
-	logger.myLog.Println(c)
+	logger.log(c)
+}
+
+// Warnf log
+func (logger Logger) Warnf(format string, v ...interface{}) {
+	logger.Warn(fmt.Sprintf(format, v...))
 }
 
 // Error log
 func (logger Logger) Error(v ...interface{}) {
 	c := color.RedString(fmt.Sprint(v...))
-	logger.myLog.Println(c)
+	logger.log(c)
+}
+
+// Errorf log
+func (logger Logger) Errorf(format string, v ...interface{}) {
+	logger.Error(fmt.Sprintf(format, v...))
+}
+
+// Fatal log
+func (logger Logger) Fatal(v ...interface{}) {
+	c := color.MagentaString(fmt.Sprint(v...))
+	logger.log(c)
+	os.Exit(1)
+}
+
+// Fatalf log
+func (logger Logger) Fatalf(format string, v ...interface{}) {
+	logger.Fatal(fmt.Sprintf(format, v...))
 }
 
 // Print log
 func Print(v ...interface{}) {
 	sharedLogger.Print(v...)
+}
+
+// Printf log
+func Printf(format string, v ...interface{}) {
+	sharedLogger.Printf(format, v...)
 }
 
 // Println log
@@ -100,9 +146,19 @@ func Debug(v ...interface{}) {
 	sharedLogger.Debug(v...)
 }
 
+// Debugf log
+func Debugf(format string, v ...interface{}) {
+	sharedLogger.Debugf(format, v...)
+}
+
 // Info log
 func Info(v ...interface{}) {
 	sharedLogger.Info(v...)
+}
+
+// Infof log
+func Infof(format string, v ...interface{}) {
+	sharedLogger.Infof(format, v...)
 }
 
 // Warn log
@@ -110,7 +166,27 @@ func Warn(v ...interface{}) {
 	sharedLogger.Warn(v...)
 }
 
+// Warnf log
+func Warnf(format string, v ...interface{}) {
+	sharedLogger.Warnf(format, v...)
+}
+
 // Error log
 func Error(v ...interface{}) {
 	sharedLogger.Error(v...)
+}
+
+// Errorf log
+func Errorf(format string, v ...interface{}) {
+	sharedLogger.Errorf(format, v...)
+}
+
+// Fatal log
+func Fatal(v ...interface{}) {
+	sharedLogger.Fatal(v...)
+}
+
+// Fatalf log
+func Fatalf(format string, v ...interface{}) {
+	sharedLogger.Fatalf(format, v...)
 }
