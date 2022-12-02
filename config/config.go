@@ -107,6 +107,10 @@ func loadModel(key string) (model ModelConfig) {
 	loadDatabasesConfig(&model)
 	loadStoragesConfig(&model)
 
+	if len(model.Storages) == 0 {
+		logger.Fatalf("No storage found in model %s", model.Name)
+	}
+
 	return
 }
 
