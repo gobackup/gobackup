@@ -24,6 +24,7 @@ var (
 )
 
 type Cycler struct {
+	name     string
 	packages PackageList
 	isLoaded bool
 }
@@ -45,10 +46,10 @@ func (c *Cycler) shiftByKeep(keep int) (first *Package) {
 	return
 }
 
-func (c *Cycler) run(model string, fileKey string, keep int, deletePackage func(fileKey string) error) {
+func (c *Cycler) run(fileKey string, keep int, deletePackage func(fileKey string) error) {
 	logger := logger.Tag("Cycler")
 
-	cyclerFileName := path.Join(cyclerPath, model+".json")
+	cyclerFileName := path.Join(cyclerPath, c.name+".json")
 
 	c.load(cyclerFileName)
 	c.add(fileKey)

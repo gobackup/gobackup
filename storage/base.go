@@ -15,6 +15,7 @@ type Base struct {
 	archivePath string
 	viper       *viper.Viper
 	keep        int
+	cycler      *Cycler
 }
 
 // Storage interface
@@ -25,11 +26,20 @@ type Storage interface {
 	delete(fileKey string) error
 }
 
-func newBase(model config.ModelConfig, archivePath string) (base Base) {
+func newBase(model config.ModelConfig, archivePath string, storageConfig config.SubConfig) (base Base) {
+	// Backward compatible with `store_with` config
+	var cyclerName string
+	if storageConfig.Name == "" {
+		cyclerName = model.Name
+	} else {
+		cyclerName = fmt.Sprintf("%s_%s", model.Name, storageConfig.Name)
+	}
+
 	base = Base{
 		model:       model,
 		archivePath: archivePath,
-		viper:       model.StoreWith.Viper,
+		viper:       storageConfig.Viper,
+		cycler:      &Cycler{name: cyclerName},
 	}
 
 	if base.viper != nil {
@@ -39,14 +49,14 @@ func newBase(model config.ModelConfig, archivePath string) (base Base) {
 	return
 }
 
-// Run storage
-func Run(model config.ModelConfig, archivePath string) (err error) {
+// run storage
+func runModel(model config.ModelConfig, archivePath string, storageConfig config.SubConfig) (err error) {
 	logger := logger.Tag("Storage")
 
 	newFileKey := filepath.Base(archivePath)
-	base := newBase(model, archivePath)
+	base := newBase(model, archivePath, storageConfig)
 	var s Storage
-	switch model.StoreWith.Type {
+	switch storageConfig.Type {
 	case "local":
 		s = &Local{Base: base}
 	case "ftp":
@@ -72,10 +82,10 @@ func Run(model config.ModelConfig, archivePath string) (err error) {
 	case "spaces":
 		s = &S3{Base: base, Service: "spaces"}
 	default:
-		return fmt.Errorf("[%s] storage type has not implement", model.StoreWith.Type)
+		return fmt.Errorf("[%s] storage type has not implement", storageConfig.Type)
 	}
 
-	logger.Info("=> Storage | " + model.StoreWith.Type)
+	logger.Info("=> Storage | " + storageConfig.Type)
 	err = s.open()
 	if err != nil {
 		return err
@@ -87,8 +97,19 @@ func Run(model config.ModelConfig, archivePath string) (err error) {
 		return err
 	}
 
-	cycler := Cycler{}
-	cycler.run(model.Name, newFileKey, base.keep, s.delete)
+	base.cycler.run(newFileKey, base.keep, s.delete)
+
+	return nil
+}
+
+// Run storage
+func Run(model config.ModelConfig, archivePath string) (err error) {
+	for _, storageConfig := range model.Storages {
+		err := runModel(model, archivePath, storageConfig)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }

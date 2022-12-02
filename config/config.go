@@ -26,7 +26,6 @@ type ModelConfig struct {
 	DumpPath     string
 	CompressWith SubConfig
 	EncryptWith  SubConfig
-	StoreWith    SubConfig
 	Archive      *viper.Viper
 	Databases    []SubConfig
 	Storages     []SubConfig
@@ -92,11 +91,6 @@ func loadModel(key string) (model ModelConfig) {
 		Viper: model.Viper.Sub("encrypt_with"),
 	}
 
-	model.StoreWith = SubConfig{
-		Type:  model.Viper.GetString("store_with.type"),
-		Viper: model.Viper.Sub("store_with"),
-	}
-
 	model.Archive = model.Viper.Sub("archive")
 
 	loadDatabasesConfig(&model)
@@ -118,13 +112,23 @@ func loadDatabasesConfig(model *ModelConfig) {
 }
 
 func loadStoragesConfig(model *ModelConfig) {
+	// Backward compatible with `store_with` config
+	storeWith := model.Viper.Sub("store_with")
+	if storeWith != nil {
+		model.Storages = append(model.Storages, SubConfig{
+			Name:  "",
+			Type:  model.Viper.GetString("store_with.type"),
+			Viper: model.Viper.Sub("store_with"),
+		})
+	}
+
 	subViper := model.Viper.Sub("storages")
 	for key := range model.Viper.GetStringMap("storages") {
-		dbViper := subViper.Sub(key)
+		storageViper := subViper.Sub(key)
 		model.Storages = append(model.Storages, SubConfig{
 			Name:  key,
-			Type:  dbViper.GetString("type"),
-			Viper: dbViper,
+			Type:  storageViper.GetString("type"),
+			Viper: storageViper,
 		})
 	}
 }
