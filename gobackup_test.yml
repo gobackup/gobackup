@@ -11,10 +11,20 @@ models:
       password: 123456
       salt: false
       openssl: true
-    store_with:
-      type: local
-      keep: 10
-      path: /Users/jason/Downloads/backup1
+    storages:
+      local:
+        type: local
+        keep: 10
+        path: /Users/jason/Downloads/backup1
+      scp:
+        type: scp
+        keep: 10
+        path: ~/backup
+        host: your-host.com
+        private_key: ~/.ssh/id_rsa
+        username: ubuntu
+        password: password
+        timeout: 300
     databases:
       dummy_test:
         type: mysql
@@ -42,15 +52,16 @@ models:
         - /home/ubuntu/.ssh/known_hosts
         - /etc/logrotate.d/syslog
   normal_files:
-    store_with:
-      type: scp
-      keep: 10
-      path: ~/backup
-      host: your-host.com
-      private_key: ~/.ssh/id_rsa
-      username: ubuntu
-      password: password
-      timeout: 300
+    storages:
+      scp:
+        type: scp
+        keep: 10
+        path: ~/backup
+        host: your-host.com
+        private_key: ~/.ssh/id_rsa
+        username: ubuntu
+        password: password
+        timeout: 300
   test_model:
     compress_with:
       type: tgz
@@ -66,14 +77,15 @@ models:
   test_s3:
     compress_with:
       type: tgz
-    store_with:
-      type: s3
-      keep: 20
-      bucket: gobackup-test
-      region: ap-southeast-1
-      path: backups
-      access_key_id: Ohsgwk86h2ks
-      secret_access_key: Ojsiw729wujhKdhwsIIOw9173
+    storages:
+      s3_southeast:
+        type: s3
+        keep: 20
+        bucket: gobackup-test
+        region: ap-southeast-1
+        path: backups
+        access_key_id: Ohsgwk86h2ks
+        secret_access_key: Ojsiw729wujhKdhwsIIOw9173
   demo:
     compress_with:
       type: tgz
@@ -82,14 +94,15 @@ models:
       password: 123456
       salt: false
       openssl: true
-    store_with:
-      type: kodo
-      keep: 20
-      bucket: movieso
-      path: backups
-      timeout: 300
-      access_key_id:
-      secret_access_key:
+    storages:
+      s3_kodo:
+        type: kodo
+        keep: 20
+        bucket: movieso
+        path: backups
+        timeout: 300
+        access_key_id:
+        secret_access_key:
     archive:
       includes:
         - /Users/jason/work/imageproxy

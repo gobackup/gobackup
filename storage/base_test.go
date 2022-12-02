@@ -10,7 +10,7 @@ import (
 func TestBase_newBase(t *testing.T) {
 	model := config.ModelConfig{}
 	archivePath := "/tmp/gobackup/test-storeage/foo.zip"
-	s := newBase(model, archivePath)
+	s := newBase(model, archivePath, config.SubConfig{})
 
 	assert.Equal(t, s.archivePath, archivePath)
 	assert.Equal(t, s.model, model)
