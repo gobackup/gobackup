@@ -124,12 +124,12 @@ func loadDatabasesConfig(model *ModelConfig) {
 }
 
 func loadStoragesConfig(model *ModelConfig) {
+	storageConfigs := map[string]SubConfig{}
 	// Backward compatible with `store_with` config
 	storeWith := model.Viper.Sub("store_with")
-	model.Storages = map[string]SubConfig{}
 	if storeWith != nil {
 		logger.Warn(`[Deprecated] "store_with" is deprecated now, please use "storages" which supports multiple storages.`)
-		model.Storages["store_with"] = SubConfig{
+		storageConfigs["store_with"] = SubConfig{
 			Name:  "",
 			Type:  model.Viper.GetString("store_with.type"),
 			Viper: model.Viper.Sub("store_with"),
@@ -137,15 +137,15 @@ func loadStoragesConfig(model *ModelConfig) {
 	}
 
 	subViper := model.Viper.Sub("storages")
-	model.Storages = map[string]SubConfig{}
 	for key := range model.Viper.GetStringMap("storages") {
 		storageViper := subViper.Sub(key)
-		model.Storages[key] = SubConfig{
+		storageConfigs[key] = SubConfig{
 			Name:  key,
 			Type:  storageViper.GetString("type"),
 			Viper: storageViper,
 		}
 	}
+	model.Storages = storageConfigs
 }
 
 // GetModelByName get model by name
