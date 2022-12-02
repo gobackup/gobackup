@@ -27,8 +27,8 @@ type ModelConfig struct {
 	CompressWith SubConfig
 	EncryptWith  SubConfig
 	Archive      *viper.Viper
-	Databases    []SubConfig
-	Storages     []SubConfig
+	Databases    map[string]SubConfig
+	Storages     map[string]SubConfig
 	Viper        *viper.Viper
 }
 
@@ -101,36 +101,39 @@ func loadModel(key string) (model ModelConfig) {
 
 func loadDatabasesConfig(model *ModelConfig) {
 	subViper := model.Viper.Sub("databases")
+	model.Databases = map[string]SubConfig{}
 	for key := range model.Viper.GetStringMap("databases") {
 		dbViper := subViper.Sub(key)
-		model.Databases = append(model.Databases, SubConfig{
+		model.Databases[key] = SubConfig{
 			Name:  key,
 			Type:  dbViper.GetString("type"),
 			Viper: dbViper,
-		})
+		}
 	}
 }
 
 func loadStoragesConfig(model *ModelConfig) {
 	// Backward compatible with `store_with` config
 	storeWith := model.Viper.Sub("store_with")
+	model.Storages = map[string]SubConfig{}
 	if storeWith != nil {
 		logger.Warn(`[Deprecated] "store_with" is deprecated now, please use "storages" which supports multiple storages.`)
-		model.Storages = append(model.Storages, SubConfig{
+		model.Storages["store_with"] = SubConfig{
 			Name:  "",
 			Type:  model.Viper.GetString("store_with.type"),
 			Viper: model.Viper.Sub("store_with"),
-		})
+		}
 	}
 
 	subViper := model.Viper.Sub("storages")
+	model.Storages = map[string]SubConfig{}
 	for key := range model.Viper.GetStringMap("storages") {
 		storageViper := subViper.Sub(key)
-		model.Storages = append(model.Storages, SubConfig{
+		model.Storages[key] = SubConfig{
 			Name:  key,
 			Type:  storageViper.GetString("type"),
 			Viper: storageViper,
-		})
+		}
 	}
 }
 

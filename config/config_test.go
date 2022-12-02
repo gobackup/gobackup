@@ -28,12 +28,11 @@ func TestModel(t *testing.T) {
 	assert.Equal(t, model.EncryptWith.Type, "openssl")
 	assert.NotNil(t, model.EncryptWith.Viper)
 
-	// storages
-	assert.Equal(t, model.Storages[0].Type, "local")
-	assert.Equal(t, model.Storages[0].Viper.GetString("path"), "/Users/jason/Downloads/backup1")
+	assert.Equal(t, model.Storages["local"].Type, "local")
+	assert.Equal(t, model.Storages["local"].Viper.GetString("path"), "/Users/jason/Downloads/backup1")
 
-	assert.Equal(t, model.Storages[1].Type, "scp")
-	assert.Equal(t, model.Storages[1].Viper.GetString("host"), "your-host.com")
+	assert.Equal(t, model.Storages["scp"].Type, "scp")
+	assert.Equal(t, model.Storages["scp"].Viper.GetString("host"), "your-host.com")
 
 	// databases
 	assert.Len(t, model.Databases, 3)
