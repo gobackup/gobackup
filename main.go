@@ -3,9 +3,12 @@ package main
 import (
 	"os"
 
-	"github.com/huacnlee/gobackup/config"
-	"github.com/huacnlee/gobackup/model"
+	"github.com/spf13/viper"
 	"github.com/urfave/cli"
+
+	"github.com/huacnlee/gobackup/config"
+	"github.com/huacnlee/gobackup/logger"
+	"github.com/huacnlee/gobackup/model"
 )
 
 const (
@@ -75,4 +78,5 @@ func performOne(modelName string) {
 			return
 		}
 	}
+	logger.Fatalf("Model %s not found in %s", modelName, viper.ConfigFileUsed())
 }

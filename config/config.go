@@ -6,8 +6,9 @@ import (
 	"path"
 	"time"
 
-	"github.com/huacnlee/gobackup/logger"
 	"github.com/spf13/viper"
+
+	"github.com/huacnlee/gobackup/logger"
 )
 
 var (
@@ -72,6 +73,10 @@ func Init(configFile string) {
 	Models = []ModelConfig{}
 	for key := range viper.GetStringMap("models") {
 		Models = append(Models, loadModel(key))
+	}
+
+	if len(Models) == 0 {
+		logger.Fatalf("No model found in %s", viper.ConfigFileUsed())
 	}
 }
 
