@@ -32,7 +32,10 @@ func newBase(model config.ModelConfig, dbConfig config.SubConfig) (base Base) {
 		name:     dbConfig.Name,
 	}
 	base.dumpPath = path.Join(model.DumpPath, dbConfig.Type, base.name)
-	helper.MkdirP(base.dumpPath)
+	if err := helper.MkdirP(base.dumpPath); err != nil {
+		logger.Errorf("Failed to mkdir dump path %s: %v", base.dumpPath, err)
+		return
+	}
 	return
 }
 

@@ -18,7 +18,10 @@ func Run(model config.ModelConfig) (err error) {
 		return nil
 	}
 
-	helper.MkdirP(model.DumpPath)
+	if err = helper.MkdirP(model.DumpPath); err != nil {
+		logger.Errorf("Failed to mkdir dump path %s: %v", model.DumpPath, err)
+		return
+	}
 
 	includes := model.Archive.GetStringSlice("includes")
 	includes = cleanPaths(includes)

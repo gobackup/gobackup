@@ -75,7 +75,10 @@ func (c *Cycler) run(fileKey string, keep int, deletePackage func(fileKey string
 func (c *Cycler) load(cyclerFileName string) {
 	logger := logger.Tag("Cycler")
 
-	helper.MkdirP(cyclerPath)
+	if err := helper.MkdirP(cyclerPath); err != nil {
+		logger.Errorf("Failed to mkdir cycler path %s: %v", cyclerPath, err)
+		return
+	}
 
 	// write example JSON if not exist
 	if !helper.IsExistsPath(cyclerFileName) {
