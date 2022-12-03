@@ -78,6 +78,6 @@ func (m Model) cleanup() {
 	}
 	logger.Infof("Cleanup temp: %s/", tempDir)
 	if err := os.RemoveAll(tempDir); err != nil {
-		logger.Error("Cleanup temp dir %s error: %v", tempDir, err)
+		logger.Errorf("Cleanup temp dir %s error: %v", tempDir, err)
 	}
 }
