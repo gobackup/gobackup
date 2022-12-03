@@ -66,7 +66,7 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 	if err != nil {
 		return err
 	}
-	logger.Info("")
+	logger.Info("Dump succeeded")
 
 	return
 }
