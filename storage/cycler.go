@@ -82,7 +82,10 @@ func (c *Cycler) load(cyclerFileName string) {
 
 	// write example JSON if not exist
 	if !helper.IsExistsPath(cyclerFileName) {
-		ioutil.WriteFile(cyclerFileName, []byte("[]"), 0660)
+		if err := ioutil.WriteFile(cyclerFileName, []byte("[]"), 0660); err != nil {
+			logger.Errorf("Failed to write file %s: %v", cyclerFileName, err)
+			return
+		}
 	}
 
 	f, err := ioutil.ReadFile(cyclerFileName)
