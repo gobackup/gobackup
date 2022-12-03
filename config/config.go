@@ -81,7 +81,16 @@ func Init(configFile string) {
 		logger.Warnf("Other users are able to access %s with mode %v", viperConfigFile, info.Mode())
 	}
 
-	viper.SetDefault("workdir", filepath.Join(os.TempDir(), "gobackup"))
+	viper.Set("useTempWorkDir", false)
+	if workdir := viper.GetString("workdir"); len(workdir) == 0 {
+		// use temp dir as workdir
+		dir, err := os.MkdirTemp("", "gobackup")
+		if err != nil {
+			logger.Fatal(err)
+		}
+		viper.Set("workdir", dir)
+		viper.Set("useTempWorkDir", true)
+	}
 
 	Exist = true
 	Models = []ModelConfig{}

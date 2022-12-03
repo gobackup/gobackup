@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/spf13/viper"
+
 	"github.com/huacnlee/gobackup/archive"
 	"github.com/huacnlee/gobackup/compressor"
 	"github.com/huacnlee/gobackup/config"
@@ -70,9 +72,12 @@ func (m Model) Perform() {
 func (m Model) cleanup() {
 	logger := logger.Tag("Model")
 
-	logger.Info("Cleanup temp: " + m.Config.TempPath + "/")
-	err := os.RemoveAll(m.Config.TempPath)
-	if err != nil {
-		logger.Error("Cleanup temp dir "+m.Config.TempPath+" error:", err)
+	tempDir := m.Config.TempPath
+	if viper.GetBool("useTempWorkDir") {
+		tempDir = viper.GetString("workdir")
+	}
+	logger.Infof("Cleanup temp: %s/", tempDir)
+	if err := os.RemoveAll(tempDir); err != nil {
+		logger.Error("Cleanup temp dir %s error: %v", tempDir, err)
 	}
 }
