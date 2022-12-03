@@ -31,7 +31,7 @@ func (s *Local) upload(fileKey string) (err error) {
 	if err != nil {
 		return err
 	}
-	logger.Info("Store successed", s.destPath)
+	logger.Info("Store succeeded", s.destPath)
 	return nil
 }
 

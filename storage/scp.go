@@ -99,7 +99,7 @@ func (s *SCP) upload(fileKey string) (err error) {
 	logger.Info("-> scp", remotePath)
 	s.client.CopyFromFile(*file, remotePath, "0655")
 
-	logger.Info("Store successed")
+	logger.Info("Store succeeded")
 	return nil
 }
 

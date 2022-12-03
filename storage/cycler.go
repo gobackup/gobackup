@@ -101,7 +101,7 @@ func (c *Cycler) save(cyclerFileName string) {
 	logger := logger.Tag("Cycler")
 
 	if !c.isLoaded {
-		logger.Warn("Skip save cycler.json because it not loaded")
+		logger.Warn("Skip save cycler.json because it is not loaded")
 		return
 	}
 

@@ -59,7 +59,7 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 		return
 	}
 
-	logger.Info("=> database |", dbConfig.Type, ":", base.name)
+	logger.Infof("=> database | %v: %v", dbConfig.Type, base.name)
 
 	// perform
 	err = db.perform()
