@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/spf13/viper"
@@ -16,8 +16,8 @@ var (
 	Exist bool
 	// Models configs
 	Models []ModelConfig
-	// HomeDir of user
-	HomeDir = os.Getenv("HOME")
+	// gobackup base dir
+	GobackupDir string = getGobackupDir()
 )
 
 // ModelConfig for special case
@@ -31,6 +31,14 @@ type ModelConfig struct {
 	Databases    map[string]SubConfig
 	Storages     map[string]SubConfig
 	Viper        *viper.Viper
+}
+
+func getGobackupDir() string {
+	dir := os.Getenv("GOBACKUP_DIR")
+	if len(dir) == 0 {
+		dir = filepath.Join(os.Getenv("HOME"), ".gobackup")
+	}
+	return dir
 }
 
 // SubConfig sub config info
@@ -73,7 +81,7 @@ func Init(configFile string) {
 		logger.Warnf("Other users are able to access %s with mode %v", viperConfigFile, info.Mode())
 	}
 
-	viper.SetDefault("workdir", path.Join(os.TempDir(), "gobackup"))
+	viper.SetDefault("workdir", filepath.Join(os.TempDir(), "gobackup"))
 
 	Exist = true
 	Models = []ModelConfig{}
@@ -88,8 +96,8 @@ func Init(configFile string) {
 
 func loadModel(key string) (model ModelConfig) {
 	model.Name = key
-	model.TempPath = path.Join(viper.GetString("workdir"), fmt.Sprintf("%d", time.Now().UnixNano()))
-	model.DumpPath = path.Join(model.TempPath, key)
+	model.TempPath = filepath.Join(viper.GetString("workdir"), fmt.Sprintf("%d", time.Now().UnixNano()))
+	model.DumpPath = filepath.Join(model.TempPath, key)
 	model.Viper = viper.Sub("models." + key)
 
 	model.CompressWith = SubConfig{

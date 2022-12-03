@@ -3,7 +3,7 @@ package storage
 import (
 	"encoding/json"
 	"io/ioutil"
-	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/huacnlee/gobackup/config"
@@ -19,7 +19,7 @@ type Package struct {
 }
 
 var (
-	cyclerPath = path.Join(config.HomeDir, ".gobackup/cycler")
+	cyclerPath = filepath.Join(config.GobackupDir, "cycler")
 )
 
 type Cycler struct {
@@ -48,7 +48,7 @@ func (c *Cycler) shiftByKeep(keep int) (first *Package) {
 func (c *Cycler) run(fileKey string, keep int, deletePackage func(fileKey string) error) {
 	logger := logger.Tag("Cycler")
 
-	cyclerFileName := path.Join(cyclerPath, c.name+".json")
+	cyclerFileName := filepath.Join(cyclerPath, c.name+".json")
 
 	c.load(cyclerFileName)
 	c.add(fileKey)
