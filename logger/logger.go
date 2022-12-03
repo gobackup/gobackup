@@ -57,6 +57,10 @@ func (logger Logger) log(v ...interface{}) {
 	logger.myLog.Print(v...)
 }
 
+func (logger Logger) logln(v ...interface{}) {
+	logger.myLog.Println(v...)
+}
+
 // Print log
 func (logger Logger) Print(v ...interface{}) {
 	logger.log(v...)
@@ -64,7 +68,7 @@ func (logger Logger) Print(v ...interface{}) {
 
 // Println log
 func (logger Logger) Println(v ...interface{}) {
-	logger.Print(v...)
+	logger.logln(v...)
 }
 
 // Printf log
@@ -74,7 +78,7 @@ func (logger Logger) Printf(format string, v ...interface{}) {
 
 // Debug log
 func (logger Logger) Debug(v ...interface{}) {
-	logger.log("[debug] ", fmt.Sprint(v...))
+	logger.logln("[debug] ", fmt.Sprint(v...))
 }
 
 // Debugf log
@@ -84,7 +88,7 @@ func (logger Logger) Debugf(format string, v ...interface{}) {
 
 // Info log
 func (logger Logger) Info(v ...interface{}) {
-	logger.log(v...)
+	logger.logln(v...)
 }
 
 // Infof log
@@ -95,7 +99,7 @@ func (logger Logger) Infof(format string, v ...interface{}) {
 // Warn log
 func (logger Logger) Warn(v ...interface{}) {
 	c := color.YellowString(fmt.Sprint(v...))
-	logger.log(c)
+	logger.logln(c)
 }
 
 // Warnf log
@@ -106,7 +110,7 @@ func (logger Logger) Warnf(format string, v ...interface{}) {
 // Error log
 func (logger Logger) Error(v ...interface{}) {
 	c := color.RedString(fmt.Sprint(v...))
-	logger.log(c)
+	logger.logln(c)
 }
 
 // Errorf log
@@ -117,7 +121,7 @@ func (logger Logger) Errorf(format string, v ...interface{}) {
 // Fatal log
 func (logger Logger) Fatal(v ...interface{}) {
 	c := color.MagentaString(fmt.Sprint(v...))
-	logger.log(c)
+	logger.logln(c)
 	os.Exit(1)
 }
 
