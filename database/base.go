@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/google/shlex"
+	"github.com/spf13/viper"
+
 	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
-	"github.com/spf13/viper"
 )
 
 // Base database
@@ -61,12 +63,49 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 
 	logger.Infof("=> database | %v: %v", dbConfig.Type, base.name)
 
+	// pre perform
+	if preStart := dbConfig.Viper.GetString("prestart"); len(preStart) != 0 {
+		logger.Info("Run dump prestart command")
+		c, err := shlex.Split(preStart)
+		if err != nil {
+			return err
+		}
+		if _, err := helper.Exec(c[0], c[1:]...); err != nil {
+			return err
+		}
+		logger.Info("Dump prestart command succeeded")
+	}
+
+	postStart := dbConfig.Viper.GetString("poststart")
+	alwaysPostStart := dbConfig.Viper.GetBool("always_poststart")
+
 	// perform
 	err = db.perform()
 	if err != nil {
-		return err
+		logger.Info("Dump failed")
+		if len(postStart) == 0 {
+			return
+		} else if alwaysPostStart {
+			logger.Info("always_poststart is true, start to run post start command")
+		} else {
+			return
+		}
+	} else {
+		logger.Info("Dump succeeded")
 	}
-	logger.Info("Dump succeeded")
+
+	// post perform
+	if len(postStart) != 0 {
+		logger.Info("Run dump poststart command")
+		c, err := shlex.Split(postStart)
+		if err != nil {
+			return err
+		}
+		if _, err := helper.Exec(c[0], c[1:]...); err != nil {
+			return err
+		}
+		logger.Info("Dump poststart command succeeded")
+	}
 
 	return
 }
