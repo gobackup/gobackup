@@ -22,7 +22,7 @@ type Model struct {
 
 // Perform model
 func (m Model) Perform() {
-	logger := logger.Tag(fmt.Sprintf("Modal: %s", m.Config.Name))
+	logger := logger.Tag(fmt.Sprintf("Model: %s", m.Config.Name))
 
 	logger.Info("WorkDir:", m.Config.DumpPath)
 
