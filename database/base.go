@@ -63,30 +63,41 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 
 	logger.Infof("=> database | %v: %v", dbConfig.Type, base.name)
 
-	// pre perform
-	if preStart := dbConfig.Viper.GetString("prestart"); len(preStart) != 0 {
-		logger.Info("Run dump prestart command")
-		c, err := shlex.Split(preStart)
+	// before perform
+	if before := dbConfig.Viper.GetString("before"); len(before) != 0 {
+		logger.Info("Run dump before hooks")
+		c, err := shlex.Split(before)
 		if err != nil {
 			return err
 		}
 		if _, err := helper.Exec(c[0], c[1:]...); err != nil {
 			return err
 		}
-		logger.Info("Dump prestart command succeeded")
+		logger.Info("Dump before hooks succeeded")
 	}
 
-	postStart := dbConfig.Viper.GetString("poststart")
-	alwaysPostStart := dbConfig.Viper.GetBool("always_poststart")
+	after := dbConfig.Viper.GetString("after")
+	onExit := dbConfig.Viper.GetString("on_exit")
 
 	// perform
 	err = db.perform()
 	if err != nil {
 		logger.Info("Dump failed")
-		if len(postStart) == 0 {
+		if len(after) == 0 {
 			return
-		} else if alwaysPostStart {
-			logger.Info("always_poststart is true, start to run post start command")
+		} else if len(onExit) != 0 {
+			switch onExit {
+			case "always":
+				logger.Info("on_exit is always, start to run after hooks")
+			case "success":
+				logger.Info("on_exit is success, skip run after hooks")
+				return
+			case "failure":
+				logger.Info("on_exit is failure, start to run after hooks")
+			default:
+				// skip after
+				return
+			}
 		} else {
 			return
 		}
@@ -94,17 +105,17 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 		logger.Info("Dump succeeded")
 	}
 
-	// post perform
-	if len(postStart) != 0 {
-		logger.Info("Run dump poststart command")
-		c, err := shlex.Split(postStart)
+	// after perform
+	if len(after) != 0 {
+		logger.Info("Run dump after hooks")
+		c, err := shlex.Split(after)
 		if err != nil {
 			return err
 		}
 		if _, err := helper.Exec(c[0], c[1:]...); err != nil {
 			return err
 		}
-		logger.Info("Dump poststart command succeeded")
+		logger.Info("Dump after hooks succeeded")
 	}
 
 	return
