@@ -76,6 +76,9 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 		return
 	}
 
+	// save Extension
+	model.Viper.Set("Ext", ext)
+
 	base.ext = ext
 	base.parallelProgram = parallelProgram
 	c = &Tar{Base: base}

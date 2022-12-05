@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/huacnlee/gobackup/config"
@@ -13,8 +14,10 @@ import (
 
 type PackageList []Package
 
+// When `FileKeys` is not empty, `FileKey` is the directory
 type Package struct {
 	FileKey   string    `json:"file_key"`
+	FileKeys  []string  `json:"file_keys,omitempty"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -28,9 +31,10 @@ type Cycler struct {
 	isLoaded bool
 }
 
-func (c *Cycler) add(fileKey string) {
+func (c *Cycler) add(fileKey string, fileKeys []string) {
 	c.packages = append(c.packages, Package{
 		FileKey:   fileKey,
+		FileKeys:  fileKeys,
 		CreatedAt: time.Now(),
 	})
 }
@@ -45,13 +49,13 @@ func (c *Cycler) shiftByKeep(keep int) (first *Package) {
 	return
 }
 
-func (c *Cycler) run(fileKey string, keep int, deletePackage func(fileKey string) error) {
+func (c *Cycler) run(fileKey string, fileKeys []string, keep int, deletePackage func(fileKey string) error) {
 	logger := logger.Tag("Cycler")
 
 	cyclerFileName := filepath.Join(cyclerPath, c.name+".json")
 
 	c.load(cyclerFileName)
-	c.add(fileKey)
+	c.add(fileKey, fileKeys)
 	defer c.save(cyclerFileName)
 
 	if keep == 0 {
@@ -64,10 +68,18 @@ func (c *Cycler) run(fileKey string, keep int, deletePackage func(fileKey string
 			break
 		}
 
-		err := deletePackage(pkg.FileKey)
-		logger.Info("Removed", pkg.FileKey)
-		if err != nil {
-			logger.Warn("remove failed: ", err)
+		fk := pkg.FileKey
+		if len(pkg.FileKeys) != 0 && !strings.HasSuffix(fk, "/") {
+			fk += "/"
+		}
+		for _, k := range append(pkg.FileKeys, fk) {
+			// deletePackage() should handle directory case which has `/` suffix
+			err := deletePackage(k)
+			if err != nil {
+				logger.Warnf("Remove %s failed: %v", k, err)
+			} else {
+				logger.Info("Removed", k)
+			}
 		}
 	}
 }
