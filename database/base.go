@@ -64,36 +64,36 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 	logger.Infof("=> database | %v: %v", dbConfig.Type, base.name)
 
 	// before perform
-	if before := dbConfig.Viper.GetString("before"); len(before) != 0 {
-		logger.Info("Run dump before hooks")
-		c, err := shlex.Split(before)
+	if beforeScript := dbConfig.Viper.GetString("before_script"); len(beforeScript) != 0 {
+		logger.Info("Run dump before_script")
+		c, err := shlex.Split(beforeScript)
 		if err != nil {
 			return err
 		}
 		if _, err := helper.Exec(c[0], c[1:]...); err != nil {
 			return err
 		}
-		logger.Info("Dump before hooks succeeded")
+		logger.Info("Dump before_script succeeded")
 	}
 
-	after := dbConfig.Viper.GetString("after")
+	afterScript := dbConfig.Viper.GetString("after_script")
 	onExit := dbConfig.Viper.GetString("on_exit")
 
 	// perform
 	err = db.perform()
 	if err != nil {
 		logger.Info("Dump failed")
-		if len(after) == 0 {
+		if len(afterScript) == 0 {
 			return
 		} else if len(onExit) != 0 {
 			switch onExit {
 			case "always":
-				logger.Info("on_exit is always, start to run after hooks")
+				logger.Info("on_exit is always, start to run after_script")
 			case "success":
-				logger.Info("on_exit is success, skip run after hooks")
+				logger.Info("on_exit is success, skip run after_script")
 				return
 			case "failure":
-				logger.Info("on_exit is failure, start to run after hooks")
+				logger.Info("on_exit is failure, start to run after_script")
 			default:
 				// skip after
 				return
@@ -106,16 +106,16 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 	}
 
 	// after perform
-	if len(after) != 0 {
-		logger.Info("Run dump after hooks")
-		c, err := shlex.Split(after)
+	if len(afterScript) != 0 {
+		logger.Info("Run dump after_script")
+		c, err := shlex.Split(afterScript)
 		if err != nil {
 			return err
 		}
 		if _, err := helper.Exec(c[0], c[1:]...); err != nil {
 			return err
 		}
-		logger.Info("Dump after hooks succeeded")
+		logger.Info("Dump after_script succeeded")
 	}
 
 	return
