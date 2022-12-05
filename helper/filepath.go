@@ -15,10 +15,11 @@ func IsExistsPath(p string) bool {
 }
 
 // MkdirP like mkdir -p
-func MkdirP(dirPath string) {
+func MkdirP(dirPath string) error {
 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-		os.MkdirAll(dirPath, 0777)
+		return os.MkdirAll(dirPath, 0750)
 	}
+	return nil
 }
 
 // ExplandHome ~/foo -> /home/jason/foo

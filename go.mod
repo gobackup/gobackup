@@ -8,6 +8,7 @@ require (
 	github.com/aws/aws-sdk-go v1.15.77
 	github.com/bramvdbogaerde/go-scp v0.0.0-20170919175937-e1fc87afa325
 	github.com/fatih/color v0.0.0-20170523135355-570b54cabe6b
+	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
 	github.com/longbridgeapp/assert v1.1.0
 	github.com/secsy/goftp v0.0.0-20170729073433-503caa01c039

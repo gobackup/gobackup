@@ -3,8 +3,7 @@ package storage
 import (
 	"encoding/json"
 	"io/ioutil"
-	"os"
-	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/huacnlee/gobackup/config"
@@ -20,7 +19,7 @@ type Package struct {
 }
 
 var (
-	cyclerPath = path.Join(config.HomeDir, ".gobackup/cycler")
+	cyclerPath = filepath.Join(config.GobackupDir, "cycler")
 )
 
 type Cycler struct {
@@ -49,7 +48,7 @@ func (c *Cycler) shiftByKeep(keep int) (first *Package) {
 func (c *Cycler) run(fileKey string, keep int, deletePackage func(fileKey string) error) {
 	logger := logger.Tag("Cycler")
 
-	cyclerFileName := path.Join(cyclerPath, c.name+".json")
+	cyclerFileName := filepath.Join(cyclerPath, c.name+".json")
 
 	c.load(cyclerFileName)
 	c.add(fileKey)
@@ -76,11 +75,17 @@ func (c *Cycler) run(fileKey string, keep int, deletePackage func(fileKey string
 func (c *Cycler) load(cyclerFileName string) {
 	logger := logger.Tag("Cycler")
 
-	helper.MkdirP(cyclerPath)
+	if err := helper.MkdirP(cyclerPath); err != nil {
+		logger.Errorf("Failed to mkdir cycler path %s: %v", cyclerPath, err)
+		return
+	}
 
 	// write example JSON if not exist
 	if !helper.IsExistsPath(cyclerFileName) {
-		ioutil.WriteFile(cyclerFileName, []byte("[]"), os.ModePerm)
+		if err := ioutil.WriteFile(cyclerFileName, []byte("[]"), 0660); err != nil {
+			logger.Errorf("Failed to write file %s: %v", cyclerFileName, err)
+			return
+		}
 	}
 
 	f, err := ioutil.ReadFile(cyclerFileName)
@@ -99,7 +104,7 @@ func (c *Cycler) save(cyclerFileName string) {
 	logger := logger.Tag("Cycler")
 
 	if !c.isLoaded {
-		logger.Warn("Skip save cycler.json because it not loaded")
+		logger.Warn("Skip save cycler.json because it is not loaded")
 		return
 	}
 
@@ -109,7 +114,7 @@ func (c *Cycler) save(cyclerFileName string) {
 		return
 	}
 
-	err = ioutil.WriteFile(cyclerFileName, data, os.ModePerm)
+	err = ioutil.WriteFile(cyclerFileName, data, 0660)
 	if err != nil {
 		logger.Error("Save cycler.json failed: ", err)
 		return

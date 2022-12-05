@@ -82,7 +82,7 @@ func (s *FTP) upload(fileKey string) (err error) {
 		return err
 	}
 
-	logger.Info("Store successed")
+	logger.Info("Store succeeded")
 	return nil
 }
 

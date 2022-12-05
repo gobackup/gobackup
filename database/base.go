@@ -3,11 +3,14 @@ package database
 import (
 	"fmt"
 	"path"
+	"strings"
+
+	"github.com/google/shlex"
+	"github.com/spf13/viper"
 
 	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
-	"github.com/spf13/viper"
 )
 
 // Base database
@@ -32,8 +35,41 @@ func newBase(model config.ModelConfig, dbConfig config.SubConfig) (base Base) {
 		name:     dbConfig.Name,
 	}
 	base.dumpPath = path.Join(model.DumpPath, dbConfig.Type, base.name)
-	helper.MkdirP(base.dumpPath)
+	if err := helper.MkdirP(base.dumpPath); err != nil {
+		logger.Errorf("Failed to mkdir dump path %s: %v", base.dumpPath, err)
+		return
+	}
 	return
+}
+
+func runHook(action, script string) error {
+	logger := logger.Tag("Database")
+	if len(script) == 0 {
+		return nil
+	}
+	logger.Infof("Run %s", action)
+	ignoreError := strings.HasPrefix(script, "-")
+	script = strings.TrimPrefix(script, "-")
+	c, err := shlex.Split(script)
+	if err != nil {
+		if ignoreError {
+			logger.Infof("Skip %s with error: %v", action, err)
+		} else {
+			return err
+		}
+	} else {
+		if _, err := helper.Exec(c[0], c[1:]...); err != nil {
+			if ignoreError {
+				logger.Infof("Run %s failed: %v, ignore it", action, err)
+			} else {
+				return fmt.Errorf("Run %s failed: %v", action, err)
+			}
+		} else {
+			logger.Infof("Run %s succeeded", action)
+		}
+	}
+
+	return nil
 }
 
 // New - initialize Database
@@ -56,14 +92,47 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 		return
 	}
 
-	logger.Info("=> database |", dbConfig.Type, ":", base.name)
+	logger.Infof("=> database | %v: %v", dbConfig.Type, base.name)
+
+	// before perform
+	beforeScript := dbConfig.Viper.GetString("before_script")
+	if err := runHook("dump before_script", beforeScript); err != nil {
+		return err
+	}
+
+	afterScript := dbConfig.Viper.GetString("after_script")
+	onExit := dbConfig.Viper.GetString("on_exit")
 
 	// perform
 	err = db.perform()
 	if err != nil {
+		logger.Info("Dump failed")
+		if len(afterScript) == 0 {
+			return
+		} else if len(onExit) != 0 {
+			switch onExit {
+			case "always":
+				logger.Info("on_exit is always, start to run after_script")
+			case "success":
+				logger.Info("on_exit is success, skip run after_script")
+				return
+			case "failure":
+				logger.Info("on_exit is failure, start to run after_script")
+			default:
+				// skip after
+				return
+			}
+		} else {
+			return
+		}
+	} else {
+		logger.Info("Dump succeeded")
+	}
+
+	// after perform
+	if err := runHook("dump after_script", afterScript); err != nil {
 		return err
 	}
-	logger.Info("")
 
 	return
 }

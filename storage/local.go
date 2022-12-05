@@ -16,10 +16,9 @@ type Local struct {
 	destPath string
 }
 
-func (s *Local) open() (err error) {
+func (s *Local) open() error {
 	s.destPath = s.viper.GetString("path")
-	helper.MkdirP(s.destPath)
-	return
+	return helper.MkdirP(s.destPath)
 }
 
 func (s *Local) close() {}
@@ -31,7 +30,7 @@ func (s *Local) upload(fileKey string) (err error) {
 	if err != nil {
 		return err
 	}
-	logger.Info("Store successed", s.destPath)
+	logger.Info("Store succeeded", s.destPath)
 	return nil
 }
 
