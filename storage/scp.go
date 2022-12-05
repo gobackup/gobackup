@@ -66,6 +66,7 @@ func (s *SCP) open() (err error) {
 	}
 
 	var clientConfig ssh.ClientConfig
+	// privateKey has higher priority and append password auth if password is present
 	logger.Info("PrivateKey", s.privateKey)
 	clientConfig, err = auth.PrivateKey(
 		s.username,
@@ -74,17 +75,22 @@ func (s *SCP) open() (err error) {
 	)
 	if err != nil {
 		if len(s.password) == 0 {
+			// privateKey failed and no password
 			return err
 		} else {
-			logger.Warn(err)
-			logger.Infof("PrivateKey fail, Try %s@%s with Password", s.username, s.host)
-			clientConfig = ssh.ClientConfig{
-				User:            s.username,
-				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-			}
-			clientConfig.Auth = append(clientConfig.Auth, ssh.Password(s.password))
+			logger.Infof("PrivateKey failed: %v, try %s@%s with password", err, s.username, s.host)
+			// err is always nil atm
+			clientConfig, _ = auth.PasswordKey(
+				s.username,
+				s.password,
+				ssh.InsecureIgnoreHostKey(),
+			)
 		}
+	} else if len(s.password) != 0 {
+		// append password auth
+		clientConfig.Auth = append(clientConfig.Auth, ssh.Password(s.password))
 	}
+
 	clientConfig.Timeout = s.viper.GetDuration("timeout") * time.Second
 
 	sshClient, err := ssh.Dial("tcp", s.host+":"+s.port, &clientConfig)
