@@ -27,15 +27,17 @@ import (
 // password:
 // timeout: 300
 // private_key: ~/.ssh/id_rsa
+// passpharase:
 type SCP struct {
 	Base
-	path       string
-	host       string
-	port       string
-	privateKey string
-	username   string
-	password   string
-	client     *ssh.Client
+	path        string
+	host        string
+	port        string
+	privateKey  string
+	passpharase string
+	username    string
+	password    string
+	client      *ssh.Client
 }
 
 func (s *SCP) open() (err error) {
@@ -51,6 +53,7 @@ func (s *SCP) open() (err error) {
 	s.username = s.viper.GetString("username")
 	s.password = s.viper.GetString("password")
 	s.privateKey = helper.ExplandHome(s.viper.GetString("private_key"))
+	s.passpharase = s.viper.GetString("passpharase")
 
 	if len(s.host) == 0 {
 		return fmt.Errorf("host is required")
@@ -65,37 +68,77 @@ func (s *SCP) open() (err error) {
 		}
 	}
 
-	var clientConfig ssh.ClientConfig
-	// privateKey has higher priority and append password auth if password is present
-	logger.Info("PrivateKey", s.privateKey)
-	clientConfig, err = auth.PrivateKey(
-		s.username,
-		s.privateKey,
-		ssh.InsecureIgnoreHostKey(),
-	)
-	if err != nil {
-		if len(s.password) == 0 {
-			// privateKey failed and no password
-			return err
-		} else {
-			logger.Infof("PrivateKey failed: %v, try %s@%s with password", err, s.username, s.host)
-			// err is always nil atm
-			clientConfig, _ = auth.PasswordKey(
-				s.username,
-				s.password,
-				ssh.InsecureIgnoreHostKey(),
-			)
-		}
-	} else if len(s.password) != 0 {
-		// append password auth
-		clientConfig.Auth = append(clientConfig.Auth, ssh.Password(s.password))
+	var auths []ssh.AuthMethod
+	keyCallBack := ssh.InsecureIgnoreHostKey()
+	clientConfig := ssh.ClientConfig{
+		User:            s.username,
+		Auth:            []ssh.AuthMethod{},
+		HostKeyCallback: keyCallBack,
 	}
 
+	// PrivateKeyWithPassphrase, PrivateKey
+	logger.Debugf("PrivateKey: %s", s.privateKey)
+	if len(s.passpharase) != 0 {
+		if cc, err := auth.PrivateKeyWithPassphrase(
+			s.username,
+			[]byte(s.passpharase),
+			s.privateKey,
+			keyCallBack,
+		); err != nil {
+			logger.Debugf("PrivateKey with passpharase failed: %v", err)
+		} else {
+			auths = append(auths, cc.Auth...)
+			logger.Debug("Added passpharase private key")
+		}
+	} else {
+		if cc, err := auth.PrivateKey(
+			s.username,
+			s.privateKey,
+			keyCallBack,
+		); err != nil {
+			logger.Debugf("PrivateKey failed: %v", err)
+		} else {
+			auths = append(auths, cc.Auth...)
+			logger.Debug("Added private key")
+		}
+	}
+
+	// private key has higher priority than SSH agent here since crypto/ssh will only try the first instance of a particular RFC 4252 method.
+	// https://pkg.go.dev/golang.org/x/crypto/ssh#ClientConfig
+	if len(auths) == 0 {
+		// SshAgent
+		if cc, err := auth.SshAgent(
+			s.username,
+			keyCallBack,
+		); err != nil {
+			logger.Debugf("SSH agent failed: %v", err)
+		} else {
+			auths = append(auths, cc.Auth...)
+			logger.Debug("Added SSH agent")
+		}
+	}
+
+	// PasswordKey
+	if len(s.password) != 0 {
+		if cc, err := auth.PasswordKey(
+			s.username,
+			s.password,
+			keyCallBack,
+		); err != nil {
+			logger.Debugf("SSH agent failed: %v", err)
+		} else {
+			auths = append(auths, cc.Auth...)
+			logger.Debug("Added password key")
+		}
+	}
+
+	logger.Debugf("Auths: %#v", auths)
+	clientConfig.Auth = auths
 	clientConfig.Timeout = s.viper.GetDuration("timeout") * time.Second
 
 	sshClient, err := ssh.Dial("tcp", s.host+":"+s.port, &clientConfig)
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to ssh %s@%s -p %s: %v", s.username, s.host, s.port, err)
 	}
 
 	// mkdir
