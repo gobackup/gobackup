@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/storage v1.28.0
 	github.com/aliyun/aliyun-oss-go-sdk v2.1.8+incompatible
 	github.com/aws/aws-sdk-go v1.15.77
-	github.com/bramvdbogaerde/go-scp v0.0.0-20170919175937-e1fc87afa325
+	github.com/bramvdbogaerde/go-scp v1.2.0
 	github.com/fatih/color v0.0.0-20170523135355-570b54cabe6b
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
@@ -14,7 +14,7 @@ require (
 	github.com/secsy/goftp v0.0.0-20170729073433-503caa01c039
 	github.com/spf13/viper v0.0.0-20170723055207-25b30aa063fc
 	github.com/urfave/cli v1.22.5
-	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	golang.org/x/crypto v0.3.0
 	google.golang.org/api v0.102.0
 )
 
@@ -52,9 +52,9 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/testify v1.8.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
-	golang.org/x/net v0.0.0-20221014081412-f15817d10f9b // indirect
+	golang.org/x/net v0.2.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783 // indirect
-	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10 // indirect
+	golang.org/x/sys v0.3.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
