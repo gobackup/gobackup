@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"path"
+	"strings"
 
 	"github.com/google/shlex"
 	"github.com/spf13/viper"
@@ -41,6 +42,36 @@ func newBase(model config.ModelConfig, dbConfig config.SubConfig) (base Base) {
 	return
 }
 
+func runHook(action, script string) error {
+	logger := logger.Tag("Database")
+	if len(script) == 0 {
+		return nil
+	}
+	logger.Infof("Run %s", action)
+	ignoreError := strings.HasPrefix(script, "-")
+	script = strings.TrimPrefix(script, "-")
+	c, err := shlex.Split(script)
+	if err != nil {
+		if ignoreError {
+			logger.Infof("Skip %s with error: %v", action, err)
+		} else {
+			return err
+		}
+	} else {
+		if _, err := helper.Exec(c[0], c[1:]...); err != nil {
+			if ignoreError {
+				logger.Infof("Run %s failed: %v, ignore it", action, err)
+			} else {
+				return fmt.Errorf("Run %s failed: %v", action, err)
+			}
+		} else {
+			logger.Infof("Run %s succeeded", action)
+		}
+	}
+
+	return nil
+}
+
 // New - initialize Database
 func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 	logger := logger.Tag("Database")
@@ -64,16 +95,9 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 	logger.Infof("=> database | %v: %v", dbConfig.Type, base.name)
 
 	// before perform
-	if beforeScript := dbConfig.Viper.GetString("before_script"); len(beforeScript) != 0 {
-		logger.Info("Run dump before_script")
-		c, err := shlex.Split(beforeScript)
-		if err != nil {
-			return err
-		}
-		if _, err := helper.Exec(c[0], c[1:]...); err != nil {
-			return err
-		}
-		logger.Info("Dump before_script succeeded")
+	beforeScript := dbConfig.Viper.GetString("before_script")
+	if err := runHook("dump before_script", beforeScript); err != nil {
+		return err
 	}
 
 	afterScript := dbConfig.Viper.GetString("after_script")
@@ -106,16 +130,8 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 	}
 
 	// after perform
-	if len(afterScript) != 0 {
-		logger.Info("Run dump after_script")
-		c, err := shlex.Split(afterScript)
-		if err != nil {
-			return err
-		}
-		if _, err := helper.Exec(c[0], c[1:]...); err != nil {
-			return err
-		}
-		logger.Info("Dump after_script succeeded")
+	if err := runHook("dump after_script", afterScript); err != nil {
+		return err
 	}
 
 	return
