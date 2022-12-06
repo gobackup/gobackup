@@ -15,8 +15,6 @@ import (
 	"github.com/huacnlee/gobackup/logger"
 )
 
-var log = logger.Tag("FTP")
-
 // FTP storage
 //
 // type: ftp
@@ -72,8 +70,9 @@ func (s *FTP) close() {
 }
 
 func (s *FTP) mkdir(rpath string) error {
+	logger := logger.Tag("FTP")
 	_, err := s.client.GetEntry(rpath)
-	log.Debugf("GetEntry %s: %v", rpath, err)
+	logger.Debugf("GetEntry %s: %v", rpath, err)
 	if err != nil {
 		if err.(*textproto.Error).Msg == "Can't check for file existence" {
 			if err := s.client.MakeDir(rpath); err != nil {
@@ -89,7 +88,8 @@ func (s *FTP) mkdir(rpath string) error {
 }
 
 func (s *FTP) upload(fileKey string) error {
-	log.Info("-> Uploading...")
+	logger := logger.Tag("FTP")
+	logger.Info("-> Uploading...")
 
 	var fileKeys []string
 	if len(s.fileKeys) != 0 {
@@ -120,16 +120,17 @@ func (s *FTP) upload(fileKey string) error {
 			return err
 		}
 
-		log.Infof("Store %s succeeded", remotePath)
+		logger.Infof("Store %s succeeded", remotePath)
 	}
 
-	log.Info("Store succeeded")
+	logger.Info("Store succeeded")
 	return nil
 }
 
 func (s *FTP) delete(fileKey string) error {
+	logger := logger.Tag("FTP")
 	remotePath := path.Join(s.path, fileKey)
-	log.Info("-> remove", remotePath)
+	logger.Info("-> remove", remotePath)
 	if !strings.HasSuffix(fileKey, "/") {
 		// file
 		return s.client.Delete(remotePath)
