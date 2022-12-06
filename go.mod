@@ -10,8 +10,8 @@ require (
 	github.com/fatih/color v0.0.0-20170523135355-570b54cabe6b
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
+	github.com/jlaffaye/ftp v0.1.0
 	github.com/longbridgeapp/assert v1.1.0
-	github.com/secsy/goftp v0.0.0-20170729073433-503caa01c039
 	github.com/spf13/viper v0.0.0-20170723055207-25b30aa063fc
 	github.com/urfave/cli v1.22.5
 	golang.org/x/crypto v0.3.0
@@ -33,6 +33,8 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.6.0 // indirect
+	github.com/hashicorp/errwrap v1.0.0 // indirect
+	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8 // indirect
 	github.com/kr/text v0.2.0 // indirect
