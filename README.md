@@ -30,6 +30,8 @@ https://gobackup.github.io/
 - Multiple Databases source support.
 - Multiple Storage type support.
 - Archive paths or files into a tar.
+- Split large backup file into multiple parts.
+- Run as daemon to backup in schedully.
 
 ## Current Support status
 
@@ -99,6 +101,8 @@ VERSION:
 
 COMMANDS:
      perform
+     start    Start as daemon
+     run      Run GoBackup
      help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
@@ -188,17 +192,77 @@ $ gobackup perform
 
 ## Backup schedule
 
-You may want run backup in scheduly, you need Crontab:
+GoBackup built in a daemon mode, you can use `gobackup start` to start it.
 
-```bash
-$ crontab -l
-0 0 * * * /usr/local/bin/gobackup perform >> ~/.gobackup/gobackup.log
+You can configure the `schedule` for each models, it will run backup task at the time you set.
+
+### For example
+
+Configure your schedule in `gobackup.yml`
+
+````yml
+models:
+  my_backup:
+    schedule:
+      # At 04:05 on Sunday.
+      cron: "5 4 * * sun"
+    storages:
+      local:
+        type: local
+        path: /path/to/backups
+    databases:
+      mysql:
+        type: mysql
+        host: localhost
+        port: 3306
+        database: my_database
+        username: root
+        password: password
+  other_backup:
+    # At 04:05 on every day.
+    schedule:
+      every: "1day",
+      at: "04:05"
+    storages:
+      local:
+        type: local
+        path: /path/to/backups
+    databases:
+      mysql:
+        type: mysql
+        host: localhost
+        port: 3306
+        database: my_database
+        username: root
+        password: password
 ```
 
-> `0 0 * * *` means run at 0:00 AM, every day.
+And then start daemon:
 
-And after a day, you can check up the execute status by `~/.gobackup/gobackup.log`.
+```bash
+gobackup start
+```
+
+> NOTE: If you wants start without daemon, use `gobackup run` instead.
+
+## Signal handling
+
+GoBackup will handle the following signals:
+
+- `HUP` - Hot reload configuration.
+- `QUIT` - Graceful shutdown.
+
+```bash
+$ ps aux | grep gobackup
+jason            20443   0.0  0.1 409232800   8912   ??  Ss    7:47PM   0:00.02 gobackup run
+
+# Reload configuration
+$ kill -HUP 20443
+# Exit daemon
+$ kill -QUIT 20443
+```
 
 ## License
 
 MIT
+````
