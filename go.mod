@@ -13,9 +13,9 @@ require (
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
 	github.com/jlaffaye/ftp v0.1.0
 	github.com/longbridgeapp/assert v1.1.0
+	github.com/sevlyar/go-daemon v0.1.6
 	github.com/spf13/viper v0.0.0-20170723055207-25b30aa063fc
 	github.com/studio-b12/gowebdav v0.0.0-20221109171924-60ec5ad56012
-	github.com/takama/daemon v1.0.0
 	github.com/urfave/cli/v2 v2.23.6
 	golang.org/x/crypto v0.3.0
 	google.golang.org/api v0.102.0
@@ -40,6 +40,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8 // indirect
+	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect

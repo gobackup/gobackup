@@ -1,16 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/logger"
 	"github.com/huacnlee/gobackup/model"
 	"github.com/huacnlee/gobackup/scheduler"
+	"github.com/sevlyar/go-daemon"
 	"github.com/spf13/viper"
-	"github.com/takama/daemon"
-
 	"github.com/urfave/cli/v2"
 )
 
@@ -25,15 +26,17 @@ var (
 	runAsDaemon = false
 )
 
-func main() {
-	app := cli.NewApp()
-
-	var configFlag = &cli.StringFlag{
+func buildFlags(flags []cli.Flag) []cli.Flag {
+	return append(flags, &cli.StringFlag{
 		Name:        "config",
 		Aliases:     []string{"c"},
 		Usage:       "Special a config file",
 		Destination: &configFile,
-	}
+	})
+}
+
+func main() {
+	app := cli.NewApp()
 
 	app.Version = version
 	app.Name = "gobackup"
@@ -42,15 +45,14 @@ func main() {
 	app.Commands = []*cli.Command{
 		{
 			Name: "perform",
-			Flags: []cli.Flag{
-				configFlag,
+			Flags: buildFlags([]cli.Flag{
 				&cli.StringFlag{
 					Name:        "model",
 					Aliases:     []string{"m"},
 					Usage:       "Model name that you want perform",
 					Destination: &modelName,
 				},
-			},
+			}),
 			Action: func(ctx *cli.Context) error {
 				config.Init(configFile)
 
@@ -64,28 +66,52 @@ func main() {
 			},
 		},
 		{
-			Name: "start",
-			Flags: []cli.Flag{
-				configFlag,
-				&cli.BoolFlag{
-					Name:        "daemon",
-					Aliases:     []string{"d"},
-					Usage:       "Run as daemon",
-					Destination: &runAsDaemon,
-				},
-			},
+			Name:  "start",
+			Usage: "Start as daemon",
+			Flags: buildFlags([]cli.Flag{}),
 			Action: func(ctx *cli.Context) error {
-				config.Init(configFile)
+				fmt.Println("GoBackup starting...")
 
+				args := []string{"gobackup", "run"}
+				if len(configFile) != 0 {
+					args = append(args, "--config", configFile)
+				}
+
+				dm := &daemon.Context{
+					PidFileName: filepath.Join(config.GoBackupDir, "gobackup.pid"),
+					LogFileName: filepath.Join(config.GoBackupDir, "gobackup.log"),
+					WorkDir:     "./",
+					Args:        args,
+				}
+				d, err := dm.Reborn()
+				if err != nil {
+					log.Fatal("Unable to run: ", err)
+				}
+				if d != nil {
+					return nil
+				}
+				defer dm.Release()
+
+				initApplication()
 				scheduler.Start()
 
-				if runAsDaemon {
-					service, err := daemon.New("gobackup", "GoBackup daemon", daemon.GlobalDaemon)
-					if err != nil {
-						log.Fatal("Error: ", err)
-					}
-					service.Start()
+				return nil
+			},
+		},
+		{
+			Name:  "run",
+			Usage: "Run GoBackup",
+			Flags: buildFlags([]cli.Flag{}),
+			Action: func(ctx *cli.Context) error {
+				initApplication()
+				scheduler.Start()
+
+				err := daemon.ServeSignals()
+				if err != nil {
+					log.Printf("Error: %s", err.Error())
 				}
+
+				log.Println("daemon terminated")
 
 				return nil
 			},
@@ -93,6 +119,11 @@ func main() {
 	}
 
 	app.Run(os.Args)
+}
+
+func initApplication() {
+	config.Init(configFile)
+
 }
 
 func performAll() {

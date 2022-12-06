@@ -30,6 +30,10 @@ func Start() error {
 			scheduler = mycron.Every(modelConfig.Schedule.Every)
 			if len(modelConfig.Schedule.At) > 0 {
 				scheduler = scheduler.At(modelConfig.Schedule.At)
+			} else {
+				// If no $at present, delay start cron job with $eveny duration
+				startDuration, _ := time.ParseDuration(modelConfig.Schedule.Every)
+				scheduler = scheduler.StartAt(time.Now().Add(startDuration))
 			}
 		}
 

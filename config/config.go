@@ -17,7 +17,7 @@ var (
 	// Models configs
 	Models []ModelConfig
 	// gobackup base dir
-	GobackupDir string = getGobackupDir()
+	GoBackupDir string = getGoBackupDir()
 )
 
 type ScheduleConfig struct {
@@ -61,7 +61,7 @@ type ModelConfig struct {
 	Viper        *viper.Viper
 }
 
-func getGobackupDir() string {
+func getGoBackupDir() string {
 	dir := os.Getenv("GOBACKUP_DIR")
 	if len(dir) == 0 {
 		dir = filepath.Join(os.Getenv("HOME"), ".gobackup")
@@ -154,13 +154,9 @@ func loadModel(key string) (model ModelConfig) {
 	}
 
 	model.Archive = model.Viper.Sub("archive")
-
-<<<<<<< HEAD
 	model.Splitter = model.Viper.Sub("split_with")
 
-=======
 	loadScheduleConfig(&model)
->>>>>>> 7b05219 (Add scheduler to perform backup in schedule.)
 	loadDatabasesConfig(&model)
 	loadStoragesConfig(&model)
 

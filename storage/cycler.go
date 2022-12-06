@@ -22,7 +22,7 @@ type Package struct {
 }
 
 var (
-	cyclerPath = filepath.Join(config.GobackupDir, "cycler")
+	cyclerPath = filepath.Join(config.GoBackupDir, "cycler")
 )
 
 type Cycler struct {
