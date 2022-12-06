@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://gobackup.github.io/images/gobackup.svg" width="160" />
+<img src="https://user-images.githubusercontent.com/5518/205909959-12b92929-4ac5-4bb5-9111-6f9a3ed76cf6.png" width="160" />
 
 <h1 align="center">GoBackup</h1>
 <p align="center">Simple tool for backup your databases, files to cloud storages.</p>
