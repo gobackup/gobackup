@@ -6,8 +6,8 @@ import (
 	"io"
 	"math"
 	"os"
-	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -118,13 +118,14 @@ func (s *GCS) upload(fileKey string) (err error) {
 }
 
 func (s *GCS) delete(fileKey string) (err error) {
-	remotePath := path.Join(s.path, fileKey)
-	object := s.client.Bucket(s.bucket).Object(remotePath)
-
-	err = object.Delete(context.Background())
-	if err != nil {
-		return fmt.Errorf("GCS failed to delete file %q, %v", remotePath, err)
+	// No need to remove empty directory
+	if !strings.HasSuffix(fileKey, "/") {
+		remotePath := filepath.Join(s.path, fileKey)
+		object := s.client.Bucket(s.bucket).Object(remotePath)
+		if err = object.Delete(context.Background()); err != nil {
+			return fmt.Errorf("GCS failed to delete file %q, %v", remotePath, err)
+		}
 	}
 
-	return
+	return nil
 }
