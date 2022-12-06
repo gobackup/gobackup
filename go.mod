@@ -13,6 +13,7 @@ require (
 	github.com/jlaffaye/ftp v0.1.0
 	github.com/longbridgeapp/assert v1.1.0
 	github.com/spf13/viper v0.0.0-20170723055207-25b30aa063fc
+	github.com/studio-b12/gowebdav v0.0.0-20221109171924-60ec5ad56012
 	github.com/urfave/cli v1.22.5
 	golang.org/x/crypto v0.3.0
 	google.golang.org/api v0.102.0
