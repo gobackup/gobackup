@@ -12,6 +12,7 @@ import (
 	"github.com/huacnlee/gobackup/database"
 	"github.com/huacnlee/gobackup/encryptor"
 	"github.com/huacnlee/gobackup/logger"
+	"github.com/huacnlee/gobackup/splitter"
 	"github.com/huacnlee/gobackup/storage"
 )
 
@@ -55,6 +56,12 @@ func (m Model) Perform() {
 	}
 
 	archivePath, err = encryptor.Run(archivePath, m.Config)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
+	archivePath, err = splitter.Run(archivePath, m.Config)
 	if err != nil {
 		logger.Error(err)
 		return

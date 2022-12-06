@@ -2,6 +2,7 @@ package storage
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/huacnlee/gobackup/config"
@@ -10,9 +11,11 @@ import (
 )
 
 // Base storage
+// When `archivePath` is a directory, `fileKeys` stores files in the `archivePath` with directory prefix
 type Base struct {
 	model       config.ModelConfig
 	archivePath string
+	fileKeys    []string
 	viper       *viper.Viper
 	keep        int
 	cycler      *Cycler
@@ -26,7 +29,7 @@ type Storage interface {
 	delete(fileKey string) error
 }
 
-func newBase(model config.ModelConfig, archivePath string, storageConfig config.SubConfig) (base Base) {
+func newBase(model config.ModelConfig, archivePath string, storageConfig config.SubConfig) (base Base, err error) {
 	// Backward compatible with `store_with` config
 	var cyclerName string
 	if storageConfig.Name == "" {
@@ -35,9 +38,27 @@ func newBase(model config.ModelConfig, archivePath string, storageConfig config.
 		cyclerName = fmt.Sprintf("%s_%s", model.Name, storageConfig.Name)
 	}
 
+	var keys []string
+	if fi, err := os.Stat(archivePath); err == nil && fi.IsDir() {
+		// NOTE: ignore err is not nil scenario here to pass test and should be fine
+		// 2022.12.04.07.09.47
+		entries, err := os.ReadDir(archivePath)
+		if err != nil {
+			return base, err
+		}
+		for _, e := range entries {
+			// Assume all entries are file
+			// 2022.12.04.07.09.47/2022.12.04.07.09.47.tar.xz-000
+			if !e.IsDir() {
+				keys = append(keys, filepath.Join(filepath.Base(archivePath), e.Name()))
+			}
+		}
+	}
+
 	base = Base{
 		model:       model,
 		archivePath: archivePath,
+		fileKeys:    keys,
 		viper:       storageConfig.Viper,
 		cycler:      &Cycler{name: cyclerName},
 	}
@@ -54,7 +75,11 @@ func runModel(model config.ModelConfig, archivePath string, storageConfig config
 	logger := logger.Tag("Storage")
 
 	newFileKey := filepath.Base(archivePath)
-	base := newBase(model, archivePath, storageConfig)
+	base, err := newBase(model, archivePath, storageConfig)
+	if err != nil {
+		return err
+	}
+
 	var s Storage
 	switch storageConfig.Type {
 	case "local":
@@ -97,7 +122,7 @@ func runModel(model config.ModelConfig, archivePath string, storageConfig config
 		return err
 	}
 
-	base.cycler.run(newFileKey, base.keep, s.delete)
+	base.cycler.run(newFileKey, base.fileKeys, base.keep, s.delete)
 
 	return nil
 }

@@ -9,8 +9,8 @@ import (
 
 func TestCycler_add(t *testing.T) {
 	cycler := Cycler{}
-	cycler.add("foo")
-	cycler.add("bar")
+	cycler.add("foo", []string{})
+	cycler.add("bar", []string{})
 
 	assert.Equal(t, len(cycler.packages), 2)
 }
@@ -28,10 +28,10 @@ func TestCycler_shiftByKeep(t *testing.T) {
 			},
 		},
 	}
-	cycler.add("p3")
-	cycler.add("p4")
-	cycler.add("p5")
-	cycler.add("p6")
+	cycler.add("p3", []string{})
+	cycler.add("p4", []string{})
+	cycler.add("p5", []string{})
+	cycler.add("p6", []string{})
 
 	pkg := cycler.shiftByKeep(2)
 	assert.Equal(t, len(cycler.packages), 5)

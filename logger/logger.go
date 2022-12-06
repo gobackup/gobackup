@@ -19,6 +19,8 @@ var (
 	_logFlag     = log.Ldate | log.Ltime
 	_myLog       = log.New(&writer{os.Stdout, "2006/01/02 15:04:05"}, "", 0)
 	sharedLogger Logger
+	isTest       = os.Getenv("GO_ENV") == "test"
+	isDebug      = os.Getenv("DEBUG") == "true"
 )
 
 type writer struct {
@@ -31,7 +33,6 @@ func (w writer) Write(b []byte) (n int, err error) {
 }
 
 func init() {
-	isTest := os.Getenv("GO_ENV") == "test"
 	if isTest {
 		os.MkdirAll("../log", 0777)
 		logfile, _ := os.OpenFile("../log/test.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -78,7 +79,9 @@ func (logger Logger) Printf(format string, v ...interface{}) {
 
 // Debug log
 func (logger Logger) Debug(v ...interface{}) {
-	logger.logln("[debug] ", fmt.Sprint(v...))
+	if isDebug || isTest {
+		logger.logln("[debug] ", fmt.Sprint(v...))
+	}
 }
 
 // Debugf log

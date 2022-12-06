@@ -48,5 +48,8 @@ func Run(archivePath string, model config.ModelConfig) (encryptPath string, err 
 	}
 	logger.Info("->", encryptPath)
 
+	// save Extension
+	model.Viper.Set("Ext", model.Viper.GetString("Ext")+".enc")
+
 	return
 }

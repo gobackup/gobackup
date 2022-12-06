@@ -28,6 +28,7 @@ type ModelConfig struct {
 	CompressWith SubConfig
 	EncryptWith  SubConfig
 	Archive      *viper.Viper
+	Splitter     *viper.Viper
 	Databases    map[string]SubConfig
 	Storages     map[string]SubConfig
 	Viper        *viper.Viper
@@ -120,6 +121,8 @@ func loadModel(key string) (model ModelConfig) {
 	}
 
 	model.Archive = model.Viper.Sub("archive")
+
+	model.Splitter = model.Viper.Sub("split_with")
 
 	loadDatabasesConfig(&model)
 	loadStoragesConfig(&model)
