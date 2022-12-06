@@ -2,7 +2,7 @@ package storage
 
 import (
 	"fmt"
-	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
@@ -89,25 +89,36 @@ func (s *OSS) close() {
 func (s *OSS) upload(fileKey string) (err error) {
 	logger := logger.Tag("OSS")
 
-	remotePath := path.Join(s.path, fileKey)
-
-	start := time.Now()
-	logger.Info(fmt.Sprintf("-> Uploading %s...", remotePath))
-	err = s.client.UploadFile(remotePath, s.archivePath, ossPartSize, oss.Routines(s.threads))
-
-	if err != nil {
-		return err
+	var fileKeys []string
+	if len(s.fileKeys) != 0 {
+		// directory
+		// 2022.12.04.07.09.47/2022.12.04.07.09.47.tar.xz-000
+		fileKeys = s.fileKeys
+	} else {
+		// file
+		// 2022.12.04.07.09.25.tar.xz
+		fileKeys = append(fileKeys, fileKey)
 	}
 
-	t := time.Now()
-	elapsed := t.Sub(start)
-	logger.Info(fmt.Sprintf("Duration %v", durafmt.Parse(elapsed).LimitFirstN(2).String()))
+	for _, key := range fileKeys {
+		filePath := filepath.Join(filepath.Dir(s.archivePath), key)
+		remotePath := filepath.Join(s.path, key)
+
+		start := time.Now()
+		logger.Info(fmt.Sprintf("-> Uploading %s...", remotePath))
+		if err := s.client.UploadFile(remotePath, filePath, ossPartSize, oss.Routines(s.threads)); err != nil {
+			return err
+		}
+
+		t := time.Now()
+		elapsed := t.Sub(start)
+		logger.Info(fmt.Sprintf("Duration %v", durafmt.Parse(elapsed).LimitFirstN(2).String()))
+	}
 
 	return nil
 }
 
-func (s *OSS) delete(fileKey string) (err error) {
-	remotePath := path.Join(s.path, fileKey)
-	err = s.client.DeleteObject(remotePath)
-	return
+func (s *OSS) delete(fileKey string) error {
+	remotePath := filepath.Join(s.path, fileKey)
+	return s.client.DeleteObject(remotePath)
 }
