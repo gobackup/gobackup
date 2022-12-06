@@ -84,6 +84,8 @@ func runModel(model config.ModelConfig, archivePath string, storageConfig config
 	switch storageConfig.Type {
 	case "local":
 		s = &Local{Base: base}
+	case "webdav":
+		s = &WebDAV{Base: base}
 	case "ftp":
 		s = &FTP{Base: base}
 	case "scp":
