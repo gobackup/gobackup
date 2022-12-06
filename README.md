@@ -200,7 +200,7 @@ You can configure the `schedule` for each models, it will run backup task at the
 
 Configure your schedule in `gobackup.yml`
 
-````yml
+```yml
 models:
   my_backup:
     schedule:
@@ -265,4 +265,3 @@ $ kill -QUIT 20443
 ## License
 
 MIT
-````
