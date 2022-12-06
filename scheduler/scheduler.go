@@ -10,11 +10,15 @@ import (
 	"github.com/huacnlee/gobackup/model"
 )
 
+var (
+	mycron *gocron.Scheduler
+)
+
 // Start scheduler
 func Start() error {
 	logger := logger.Tag("Scheduler")
 
-	mycron := gocron.NewScheduler(time.Local)
+	mycron = gocron.NewScheduler(time.Local)
 
 	for _, modelConfig := range config.Models {
 		if !modelConfig.Schedule.Enabled {
@@ -53,4 +57,10 @@ func Start() error {
 	mycron.StartAsync()
 
 	return nil
+}
+
+func Stop() {
+	if mycron != nil {
+		mycron.Stop()
+	}
 }

@@ -1,10 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
+	"syscall"
 
 	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/logger"
@@ -20,10 +22,13 @@ const (
 )
 
 var (
-	modelName   = ""
-	configFile  = ""
-	version     = "master"
-	runAsDaemon = false
+	modelName  = ""
+	configFile = ""
+	version    = "master"
+	signal     = flag.String("s", "", `Send signal to the daemon:
+  quit — graceful shutdown
+  stop — fast shutdown
+  reload — reloading the configuration file`)
 )
 
 func buildFlags(flags []cli.Flag) []cli.Flag {
@@ -35,12 +40,30 @@ func buildFlags(flags []cli.Flag) []cli.Flag {
 	})
 }
 
+func termHandler(sig os.Signal) error {
+	logger.Info("Received QUIT signal, exiting...")
+	scheduler.Stop()
+	os.Exit(0)
+	return nil
+}
+
+func reloadHandler(sig os.Signal) error {
+	logger.Info("Reloading config...")
+	config.Init(configFile)
+
+	return nil
+}
+
 func main() {
 	app := cli.NewApp()
 
 	app.Version = version
 	app.Name = "gobackup"
 	app.Usage = usage
+
+	daemon.AddCommand(daemon.StringFlag(signal, "quit"), syscall.SIGQUIT, termHandler)
+	daemon.AddCommand(daemon.StringFlag(signal, "stop"), syscall.SIGTERM, termHandler)
+	daemon.AddCommand(daemon.StringFlag(signal, "reload"), syscall.SIGHUP, reloadHandler)
 
 	app.Commands = []*cli.Command{
 		{
@@ -78,7 +101,6 @@ func main() {
 				}
 
 				dm := &daemon.Context{
-					PidFileName: filepath.Join(config.GoBackupDir, "gobackup.pid"),
 					LogFileName: filepath.Join(config.GoBackupDir, "gobackup.log"),
 					WorkDir:     "./",
 					Args:        args,
