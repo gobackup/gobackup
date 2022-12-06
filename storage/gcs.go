@@ -12,8 +12,9 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/hako/durafmt"
-	"github.com/huacnlee/gobackup/logger"
 	"google.golang.org/api/option"
+
+	"github.com/huacnlee/gobackup/logger"
 )
 
 // GCS - Google Clound storage
@@ -22,6 +23,7 @@ import (
 // bucket: gobackup-test
 // path: backups
 // credentials: { ... }
+// credentials_file:
 // timeout: 300
 type GCS struct {
 	Base
@@ -41,8 +43,18 @@ func (s *GCS) open() (err error) {
 	s.bucket = s.viper.GetString("bucket")
 
 	credentials := s.viper.GetString("credentials")
+	credentialsFile := s.viper.GetString("credentials_file")
 
-	s.client, err = storage.NewClient(context.Background(), option.WithCredentialsJSON([]byte(credentials)))
+	var opt option.ClientOption
+	if len(credentials) != 0 {
+		opt = option.WithCredentialsJSON([]byte(credentials))
+	} else if len(credentialsFile) != 0 {
+		opt = option.WithCredentialsFile(credentialsFile)
+	} else {
+		return fmt.Errorf("GCS: credentials or credentialsFile is required")
+	}
+
+	s.client, err = storage.NewClient(context.Background(), opt)
 	if err != nil {
 		return err
 	}
