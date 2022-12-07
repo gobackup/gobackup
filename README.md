@@ -2,7 +2,7 @@
 <img src="https://user-images.githubusercontent.com/5518/205909959-12b92929-4ac5-4bb5-9111-6f9a3ed76cf6.png" width="160" />
 
 <h1 align="center">GoBackup</h1>
-<p align="center">Simple tool for backup your databases, files to cloud storages.</p>
+<p align="center">CLI tool for backup your databases, files to FTP / SCP / S3 / GCS and other cloud storages.</p>
 <p align="center">
    <a href="https://github.com/huacnlee/gobackup/actions?query=workflow%3AGo"><img src="https://github.com/huacnlee/gobackup/workflows/Go/badge.svg" alt="Build Status" /></a>
    <a href="https://github.com/huacnlee/gobackup/releases"><img src="https://img.shields.io/github/v/release/huacnlee/gobackup?label=Version&color=1" alt="GitHub release (latest by date)"></a>
@@ -79,6 +79,7 @@ Use `tar` command to archive many file or path into a `.tar` file.
 - [QCloud COS](https://cloud.tencent.com/product/cos)
 - [UCloud US3](https://docs.ucloud.cn/ufile/introduction/concept)
 - [Qiniu Kodo](https://www.qiniu.com/products/kodo)
+- [WebDav](http://www.webdav.org)
 
 ## Install (macOS / Linux)
 
@@ -91,23 +92,23 @@ after that, you will get `/usr/local/bin/gobackup` command.
 ```bash
 $ gobackup -h
 NAME:
-   gobackup - Easy full stack backup operations on UNIX-like systems
+   gobackup - Backup your databases, files to FTP / SCP / S3 / GCS and other cloud storages.
 
 USAGE:
    gobackup [global options] command [command options] [arguments...]
 
 VERSION:
-   1.2.0
+   1.3.0
 
 COMMANDS:
-     perform
-     start    Start as daemon
-     run      Run GoBackup
-     help, h  Shows a list of commands or help for one command
+   perform
+   start    Start as daemon
+   run      Run GoBackup
+   help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --help, -h     show help
-   --version, -v  print the version
+   --help, -h     show help (default: false)
+   --version, -v  print the version (default: false)
 ```
 
 ## Configuration
@@ -124,14 +125,15 @@ models:
   gitlab:
     compress_with:
       type: tgz
-    store_with:
-      type: scp
-      path: ~/backup
-      host: your-host.com
-      private_key: ~/.ssh/id_rsa
-      username: ubuntu
-      password: password
-      timeout: 300
+    storages:
+      scp1:
+        type: scp
+        path: ~/backup
+        host: your-host.com
+        private_key: ~/.ssh/id_rsa
+        username: ubuntu
+        password: password
+        timeout: 300
     databases:
       gitlab:
         type: mysql
@@ -159,9 +161,10 @@ models:
         - /home/ubuntu/.ssh/known_hosts
         - /etc/logrotate.d/syslog
   gitlab_repos:
-    store_with:
-      type: local
-      path: /data/backups/gitlab-repos/
+    storages:
+      local:
+        type: local
+        path: /data/backups/gitlab-repos/
     archive:
       includes:
         - /home/git/repositories
