@@ -6,16 +6,16 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 	"syscall"
+
+	"github.com/sevlyar/go-daemon"
+	"github.com/spf13/viper"
+	"github.com/urfave/cli/v2"
 
 	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/logger"
 	"github.com/huacnlee/gobackup/model"
 	"github.com/huacnlee/gobackup/scheduler"
-	"github.com/sevlyar/go-daemon"
-	"github.com/spf13/viper"
-	"github.com/urfave/cli/v2"
 )
 
 const (
@@ -23,7 +23,6 @@ const (
 )
 
 var (
-	modelNames string
 	configFile string
 	version    = "master"
 	signal     = flag.String("s", "", `Send signal to the daemon:
@@ -70,15 +69,16 @@ func main() {
 		{
 			Name: "perform",
 			Flags: buildFlags([]cli.Flag{
-				&cli.StringFlag{
-					Name:        "model",
-					Aliases:     []string{"m"},
-					Usage:       "Model name that you want perform",
-					Destination: &modelNames,
+				&cli.StringSliceFlag{
+					Name:    "model",
+					Aliases: []string{"m"},
+					Usage:   "Model name that you want perform",
 				},
 			}),
 			Action: func(ctx *cli.Context) error {
+				var modelNames []string
 				initApplication()
+				modelNames = append(ctx.StringSlice("model"), ctx.Args().Slice()...)
 				perform(modelNames)
 
 				return nil
@@ -143,14 +143,13 @@ func initApplication() {
 	config.Init(configFile)
 }
 
-func perform(modelNames string) {
+func perform(modelNames []string) {
 	var models []*model.Model
 	if len(modelNames) == 0 {
 		// perform all
 		models = model.GetModels()
 	} else {
-		mns := strings.Split(modelNames, ",")
-		for _, name := range mns {
+		for _, name := range modelNames {
 			if m := model.GetModelByName(name); m == nil {
 				logger.Fatalf("Model %s not found in %s", name, viper.ConfigFileUsed())
 			} else {
