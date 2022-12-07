@@ -16,7 +16,7 @@ func TestModelsLength(t *testing.T) {
 }
 
 func TestModel(t *testing.T) {
-	model := GetModelByName("base_test")
+	model := GetModelConfigByName("base_test")
 
 	assert.Equal(t, model.Name, "base_test")
 
@@ -79,7 +79,7 @@ func TestModel(t *testing.T) {
 }
 
 func Test_otherModels(t *testing.T) {
-	model := GetModelByName("normal_files")
+	model := GetModelConfigByName("normal_files")
 
 	// schedule
 	schedule := model.Schedule
@@ -88,7 +88,7 @@ func Test_otherModels(t *testing.T) {
 	assert.Equal(t, "1day", schedule.Every)
 	assert.Equal(t, "0:30", schedule.At)
 
-	model = GetModelByName("test_model")
+	model = GetModelConfigByName("test_model")
 	assert.Equal(t, false, model.Schedule.Enabled)
 }
 

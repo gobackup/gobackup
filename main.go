@@ -157,7 +157,7 @@ func performAll() {
 }
 
 func performOne(modelName string) {
-	modelConfig := config.GetModelByName(modelName)
+	modelConfig := config.GetModelConfigByName(modelName)
 	if modelConfig == nil {
 		logger.Fatalf("Model %s not found in %s", modelName, viper.ConfigFileUsed())
 	}

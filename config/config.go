@@ -220,8 +220,8 @@ func loadStoragesConfig(model *ModelConfig) {
 	model.Storages = storageConfigs
 }
 
-// GetModelByName get model by name
-func GetModelByName(name string) (model *ModelConfig) {
+// GetModelConfigByName get model config by name
+func GetModelConfigByName(name string) (model *ModelConfig) {
 	for _, m := range Models {
 		if m.Name == name {
 			model = &m

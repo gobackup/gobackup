@@ -75,7 +75,7 @@ func TestMySQL_dumpArgsWithAdditionalOptions(t *testing.T) {
 }
 
 func TestMySQLPerform(t *testing.T) {
-	model := config.GetModelByName("base_test")
+	model := config.GetModelConfigByName("base_test")
 	assert.NotNil(t, model)
 
 	dbConfig := model.GetDatabaseByName("dummy_test")
