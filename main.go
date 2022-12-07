@@ -77,7 +77,7 @@ func main() {
 				},
 			}),
 			Action: func(ctx *cli.Context) error {
-				config.Init(configFile)
+				initApplication()
 
 				if len(modelName) == 0 {
 					performAll()
@@ -145,7 +145,6 @@ func main() {
 
 func initApplication() {
 	config.Init(configFile)
-
 }
 
 func performAll() {
