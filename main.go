@@ -160,9 +160,8 @@ func performAll() {
 func performOne(modelName string) {
 	modelConfig := config.GetModelByName(modelName)
 	if modelConfig == nil {
-		return
+		logger.Fatalf("Model %s not found in %s", modelName, viper.ConfigFileUsed())
 	}
-	logger.Fatalf("Model %s not found in %s", modelName, viper.ConfigFileUsed())
 
 	m := model.Model{
 		Config: *modelConfig,
