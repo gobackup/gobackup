@@ -8,6 +8,7 @@ RUN apk add \
       mysql-client \
       redis \
       mongodb-tools \
+      sqlite \
       # replace busybox utils
       tar \
       gzip \
