@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"syscall"
 
 	"github.com/huacnlee/gobackup/config"
@@ -22,8 +23,8 @@ const (
 )
 
 var (
-	modelName  = ""
-	configFile = ""
+	modelNames string
+	configFile string
 	version    = "master"
 	signal     = flag.String("s", "", `Send signal to the daemon:
   quit — graceful shutdown
@@ -73,17 +74,12 @@ func main() {
 					Name:        "model",
 					Aliases:     []string{"m"},
 					Usage:       "Model name that you want perform",
-					Destination: &modelName,
+					Destination: &modelNames,
 				},
 			}),
 			Action: func(ctx *cli.Context) error {
 				initApplication()
-
-				if len(modelName) == 0 {
-					performAll()
-				} else {
-					performOne(modelName)
-				}
+				perform(modelNames)
 
 				return nil
 			},
@@ -147,19 +143,23 @@ func initApplication() {
 	config.Init(configFile)
 }
 
-func performAll() {
-	for _, modelConfig := range config.Models {
-		m := model.Model{
-			Config: modelConfig,
+func perform(modelNames string) {
+	var models []*model.Model
+	if len(modelNames) == 0 {
+		// perform all
+		models = model.GetModels()
+	} else {
+		mns := strings.Split(modelNames, ",")
+		for _, name := range mns {
+			if m := model.GetModelByName(name); m == nil {
+				logger.Fatalf("Model %s not found in %s", name, viper.ConfigFileUsed())
+			} else {
+				models = append(models, m)
+			}
 		}
+	}
+
+	for _, m := range models {
 		m.Perform()
 	}
-}
-
-func performOne(modelName string) {
-	m := model.GetModelByName(modelName)
-	if m == nil {
-		logger.Fatalf("Model %s not found in %s", modelName, viper.ConfigFileUsed())
-	}
-	m.Perform()
 }
