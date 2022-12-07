@@ -99,3 +99,14 @@ func GetModelByName(name string) *Model {
 		Config: *modelConfig,
 	}
 }
+
+// GetModels get models
+func GetModels() (models []*Model) {
+	for _, modelConfig := range config.Models {
+		m := Model{
+			Config: modelConfig,
+		}
+		models = append(models, &m)
+	}
+	return
+}
