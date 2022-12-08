@@ -41,8 +41,6 @@ type SCP struct {
 }
 
 func (s *SCP) open() (err error) {
-	logger := logger.Tag("SCP")
-
 	s.viper.SetDefault("port", "22")
 	s.viper.SetDefault("timeout", 300)
 	s.viper.SetDefault("private_key", "~/.ssh/id_rsa")
@@ -68,72 +66,14 @@ func (s *SCP) open() (err error) {
 		}
 	}
 
-	var auths []ssh.AuthMethod
-	keyCallBack := ssh.InsecureIgnoreHostKey()
-	clientConfig := ssh.ClientConfig{
-		User:            s.username,
-		Auth:            []ssh.AuthMethod{},
-		HostKeyCallback: keyCallBack,
+	sc := sshConfig{
+		username:    s.username,
+		password:    s.password,
+		privateKey:  s.privateKey,
+		passpharase: s.passpharase,
 	}
 
-	// PrivateKeyWithPassphrase, PrivateKey
-	logger.Debugf("PrivateKey: %s", s.privateKey)
-	if len(s.passpharase) != 0 {
-		if cc, err := auth.PrivateKeyWithPassphrase(
-			s.username,
-			[]byte(s.passpharase),
-			s.privateKey,
-			keyCallBack,
-		); err != nil {
-			logger.Debugf("PrivateKey with passpharase failed: %v", err)
-		} else {
-			auths = append(auths, cc.Auth...)
-			logger.Debug("Added passpharase private key")
-		}
-	} else {
-		if cc, err := auth.PrivateKey(
-			s.username,
-			s.privateKey,
-			keyCallBack,
-		); err != nil {
-			logger.Debugf("PrivateKey failed: %v", err)
-		} else {
-			auths = append(auths, cc.Auth...)
-			logger.Debug("Added private key")
-		}
-	}
-
-	// private key has higher priority than SSH agent here since crypto/ssh will only try the first instance of a particular RFC 4252 method.
-	// https://pkg.go.dev/golang.org/x/crypto/ssh#ClientConfig
-	if len(auths) == 0 {
-		// SshAgent
-		if cc, err := auth.SshAgent(
-			s.username,
-			keyCallBack,
-		); err != nil {
-			logger.Debugf("SSH agent failed: %v", err)
-		} else {
-			auths = append(auths, cc.Auth...)
-			logger.Debug("Added SSH agent")
-		}
-	}
-
-	// PasswordKey
-	if len(s.password) != 0 {
-		if cc, err := auth.PasswordKey(
-			s.username,
-			s.password,
-			keyCallBack,
-		); err != nil {
-			logger.Debugf("SSH agent failed: %v", err)
-		} else {
-			auths = append(auths, cc.Auth...)
-			logger.Debug("Added password key")
-		}
-	}
-
-	logger.Debugf("Auths: %#v", auths)
-	clientConfig.Auth = auths
+	clientConfig := newSSHClientConfig(sc)
 	clientConfig.Timeout = s.viper.GetDuration("timeout") * time.Second
 
 	sshClient, err := ssh.Dial("tcp", s.host+":"+s.port, &clientConfig)
@@ -148,6 +88,84 @@ func (s *SCP) open() (err error) {
 
 	s.client = sshClient
 	return nil
+}
+
+type sshConfig struct {
+	username    string
+	password    string
+	privateKey  string
+	passpharase string
+}
+
+func newSSHClientConfig(c sshConfig) ssh.ClientConfig {
+	logger := logger.Tag("SSH")
+
+	var auths []ssh.AuthMethod
+	keyCallBack := ssh.InsecureIgnoreHostKey()
+
+	// PrivateKeyWithPassphrase, PrivateKey
+	logger.Debugf("PrivateKey: %s", c.privateKey)
+	if len(c.passpharase) != 0 {
+		if cc, err := auth.PrivateKeyWithPassphrase(
+			c.username,
+			[]byte(c.passpharase),
+			c.privateKey,
+			keyCallBack,
+		); err != nil {
+			logger.Debugf("PrivateKey with passpharase failed: %v", err)
+		} else {
+			auths = append(auths, cc.Auth...)
+			logger.Debug("Added passpharase private key")
+		}
+	} else {
+		if cc, err := auth.PrivateKey(
+			c.username,
+			c.privateKey,
+			keyCallBack,
+		); err != nil {
+			logger.Debugf("PrivateKey failed: %v", err)
+		} else {
+			auths = append(auths, cc.Auth...)
+			logger.Debug("Added private key")
+		}
+	}
+
+	// private key has higher priority than SSH agent here since crypto/ssh will only try the first instance of a particular RFC 4252 method.
+	// https://pkg.go.dev/golang.org/x/crypto/ssh#ClientConfig
+	if len(auths) == 0 {
+		// SshAgent
+		if cc, err := auth.SshAgent(
+			c.username,
+			keyCallBack,
+		); err != nil {
+			logger.Debugf("SSH agent failed: %v", err)
+		} else {
+			auths = append(auths, cc.Auth...)
+			logger.Debug("Added SSH agent")
+		}
+	}
+
+	// PasswordKey
+	if len(c.password) != 0 {
+		if cc, err := auth.PasswordKey(
+			c.username,
+			c.password,
+			keyCallBack,
+		); err != nil {
+			logger.Debugf("SSH agent failed: %v", err)
+		} else {
+			auths = append(auths, cc.Auth...)
+			logger.Debug("Added password key")
+		}
+	}
+
+	logger.Debugf("Auths: %#v", auths)
+
+	return ssh.ClientConfig{
+		User:            c.username,
+		Auth:            auths,
+		HostKeyCallback: keyCallBack,
+	}
 }
 
 func sshRun(client *ssh.Client, cmd string) error {
