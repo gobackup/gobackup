@@ -10,7 +10,9 @@
 </p>
 </p>
 
-GoBackup is a fullstack backup tool design for web servers similar with [backup/backup](https://github.com/backup/backup), work with Crontab to backup automatically.
+GoBackup is a fullstack backup tool design for application servers, to backup your databases, files to cloud storages (Local disk, FTP, SCP, S3, GCS, Aliyun OSS ...).
+
+> Inspired by [backup/backup](https://github.com/backup/backup) and replace it for without Ruby dependency.
 
 You can write a config file, run `gobackup perform` command by once to dump database as file, archive config files, and then package them into a single file.
 
@@ -20,9 +22,7 @@ GoBackup 是一个类似 [backup/backup](https://github.com/backup/backup) 的�
 
 使用 GoBackup 你可以通过一个简单的配置文件，一次（执行一个命令）将服务器上重要的（数据库、配置文件）东西导出、打包压缩，并备份到指定目的地（如：本地路径、FTP、云存储...）。
 
-详细中文介绍：https://ruby-china.org/topics/34094
-
-https://gobackup.github.io/
+https://gobackup.github.io
 
 ## Features
 
@@ -41,7 +41,6 @@ https://gobackup.github.io/
 - PostgreSQL
 - Redis - `mode: sync/copy`
 - MongoDB
-- SQLite
 
 ### Archive
 
@@ -175,28 +174,23 @@ models:
 
 ```bash
 $ gobackup perform
-2022/12/08 11:58:30 [Config] Load config from default path.
-2022/12/08 11:58:30 [Model: ruby_china] WorkDir: /tmp/gobackup634716675/1670471910880879264/ruby_china
-2022/12/08 11:58:30 [Database] => database | postgresql: postgresql
-2022/12/08 11:58:30 [PostgreSQL] -> Dumping PostgreSQL...
-2022/12/08 11:58:42 [PostgreSQL] dump path: /tmp/gobackup634716675/1670471910880879264/ruby_china/postgresql/postgresql/ruby-china.sql
-2022/12/08 11:58:42 [Database] Dump succeeded
-2022/12/08 11:58:42 [Database] => database | redis: redis
-2022/12/08 11:58:42 [Redis] -> Invoke save...
-2022/12/08 11:58:42 [Redis] Copying redis dump to /tmp/gobackup634716675/1670471910880879264/ruby_china/redis/redis
-2022/12/08 11:58:44 [Database] Dump succeeded
-2022/12/08 11:58:44 [Archive] => includes 7 rules
-2022/12/08 11:58:44 [Compressor] => Compress | tgz
-2022/12/08 11:59:12 [Compressor] -> /tmp/gobackup634716675/1670471910880879264/2022.12.08.11.58.44.tar.gz
-2022/12/08 11:59:12 [Encryptor] => Encrypt | openssl
-2022/12/08 11:59:15 [Encryptor] -> /tmp/gobackup634716675/1670471910880879264/2022.12.08.11.58.44.tar.gz.enc
-2022/12/08 11:59:16 [Storage] => Storage | local
-2022/12/08 11:59:18 [Local] Store succeeded /data/backups/2022.12.08.11.58.44.tar.gz.enc
-2022/12/08 11:59:18 [Storage] => Storage | oss
-2022/12/08 11:59:18 [OSS] endpoint: oss-cn-hongkong.aliyuncs.com
-2022/12/08 11:59:18 [OSS] bucket: ruby-china-backup
-2022/12/08 11:59:18 [OSS] -> Uploading backups/2022.12.08.11.58.44.tar.gz.enc...
-2022/12/08 12:00:00 [Model] Cleanup temp dir...
+2022/11/30 13:11:28 [Model: ruby_china] WorkDir: /tmp/gobackup/1669785088876548728/ruby_china
+2022/11/30 13:11:28 [Database] => database | postgresql : postgresql
+2022/11/30 13:11:28 [PostgreSQL] -> Dumping PostgreSQL...
+2022/11/30 13:11:39 [PostgreSQL] dump path: /tmp/gobackup/1669785088876548728/ruby_china/postgresql/postgresql/ruby-china.sql
+2022/11/30 13:11:39 [Database] => database | redis : redis
+2022/11/30 13:11:39 [Redis] -> Invoke save...
+2022/11/30 13:11:39 [Redis] Copying redis dump to /tmp/gobackup/1669785088876548728/ruby_china/redis/redis
+2022/11/30 13:11:40 [Archive] => includes 7 rules
+2022/11/30 13:11:41 [Compressor] => Compress | tgz
+2022/11/30 13:12:09 [Compressor] -> /tmp/gobackup/1669785088876548728/2022.11.30.13.11.41.tar.gz
+2022/11/30 13:12:09 [Encryptor] => Encrypt | openssl
+2022/11/30 13:12:15 [Encryptor] -> /tmp/gobackup/1669785088876548728/2022.11.30.13.11.41.tar.gz.enc
+2022/11/30 13:12:15 [Storage] => Storage | oss
+2022/11/30 13:12:15 [OSS] endpoint: oss-cn-hongkong.aliyuncs.com
+2022/11/30 13:12:15 [OSS] bucket: ruby-china-backup
+2022/11/30 13:12:15 [OSS] -> Uploading backups/2022.11.30.13.11.41.tar.gz.enc...
+2022/11/30 13:12:15 [Model] Cleanup temp dir...
 ```
 
 ## Backup schedule
