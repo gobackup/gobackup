@@ -36,8 +36,6 @@ https://gobackup.github.io
 - Split large backup file into multiple parts.
 - Run as daemon to backup in schedully.
 
-## Current Support status
-
 ### Databases
 
 - MySQL
