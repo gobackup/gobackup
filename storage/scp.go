@@ -18,31 +18,35 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
-// SCP storage
+// SSH
 //
-// type: scp
-// host: 192.168.1.2
+// host:
 // port: 22
-// username: root
+// username:
 // password:
 // timeout: 300
 // private_key: ~/.ssh/id_rsa
 // passpharase:
-type SCP struct {
-	Base
-	path        string
+type SSH struct {
 	host        string
 	port        string
 	privateKey  string
 	passpharase string
 	username    string
 	password    string
-	client      *ssh.Client
+}
+
+// SCP storage
+//
+// type: scp
+type SCP struct {
+	Base
+	SSH
+	path   string
+	client *ssh.Client
 }
 
 func (s *SCP) open() (err error) {
-	logger := logger.Tag("SCP")
-
 	s.viper.SetDefault("port", "22")
 	s.viper.SetDefault("timeout", 300)
 	s.viper.SetDefault("private_key", "~/.ssh/id_rsa")
@@ -68,72 +72,14 @@ func (s *SCP) open() (err error) {
 		}
 	}
 
-	var auths []ssh.AuthMethod
-	keyCallBack := ssh.InsecureIgnoreHostKey()
-	clientConfig := ssh.ClientConfig{
-		User:            s.username,
-		Auth:            []ssh.AuthMethod{},
-		HostKeyCallback: keyCallBack,
+	sc := sshConfig{
+		username:    s.username,
+		password:    s.password,
+		privateKey:  s.privateKey,
+		passpharase: s.passpharase,
 	}
 
-	// PrivateKeyWithPassphrase, PrivateKey
-	logger.Debugf("PrivateKey: %s", s.privateKey)
-	if len(s.passpharase) != 0 {
-		if cc, err := auth.PrivateKeyWithPassphrase(
-			s.username,
-			[]byte(s.passpharase),
-			s.privateKey,
-			keyCallBack,
-		); err != nil {
-			logger.Debugf("PrivateKey with passpharase failed: %v", err)
-		} else {
-			auths = append(auths, cc.Auth...)
-			logger.Debug("Added passpharase private key")
-		}
-	} else {
-		if cc, err := auth.PrivateKey(
-			s.username,
-			s.privateKey,
-			keyCallBack,
-		); err != nil {
-			logger.Debugf("PrivateKey failed: %v", err)
-		} else {
-			auths = append(auths, cc.Auth...)
-			logger.Debug("Added private key")
-		}
-	}
-
-	// private key has higher priority than SSH agent here since crypto/ssh will only try the first instance of a particular RFC 4252 method.
-	// https://pkg.go.dev/golang.org/x/crypto/ssh#ClientConfig
-	if len(auths) == 0 {
-		// SshAgent
-		if cc, err := auth.SshAgent(
-			s.username,
-			keyCallBack,
-		); err != nil {
-			logger.Debugf("SSH agent failed: %v", err)
-		} else {
-			auths = append(auths, cc.Auth...)
-			logger.Debug("Added SSH agent")
-		}
-	}
-
-	// PasswordKey
-	if len(s.password) != 0 {
-		if cc, err := auth.PasswordKey(
-			s.username,
-			s.password,
-			keyCallBack,
-		); err != nil {
-			logger.Debugf("SSH agent failed: %v", err)
-		} else {
-			auths = append(auths, cc.Auth...)
-			logger.Debug("Added password key")
-		}
-	}
-
-	logger.Debugf("Auths: %#v", auths)
-	clientConfig.Auth = auths
+	clientConfig := newSSHClientConfig(sc)
 	clientConfig.Timeout = s.viper.GetDuration("timeout") * time.Second
 
 	sshClient, err := ssh.Dial("tcp", s.host+":"+s.port, &clientConfig)
@@ -141,17 +87,18 @@ func (s *SCP) open() (err error) {
 		return fmt.Errorf("Failed to ssh %s@%s -p %s: %v", s.username, s.host, s.port, err)
 	}
 
+	s.client = sshClient
+
 	// mkdir
-	if err := sshRun(sshClient, fmt.Sprintf("mkdir -p %s", s.path)); err != nil {
+	if err := s.run(fmt.Sprintf("mkdir -p %s", s.path)); err != nil {
 		return err
 	}
 
-	s.client = sshClient
 	return nil
 }
 
-func sshRun(client *ssh.Client, cmd string) error {
-	session, err := client.NewSession()
+func (s *SCP) run(cmd string) error {
+	session, err := s.client.NewSession()
 	if err != nil {
 		return fmt.Errorf("Failed to create session: %v", err)
 	}
@@ -178,7 +125,7 @@ func (s *SCP) upload(fileKey string) error {
 		fileKeys = s.fileKeys
 		remoteDir := filepath.Join(s.path, filepath.Base(s.archivePath))
 		// mkdir
-		if err := sshRun(s.client, fmt.Sprintf("mkdir -p %s", remoteDir)); err != nil {
+		if err := s.run(fmt.Sprintf("mkdir -p %s", remoteDir)); err != nil {
 			return err
 		}
 	} else {
@@ -187,11 +134,10 @@ func (s *SCP) upload(fileKey string) error {
 		fileKeys = append(fileKeys, fileKey)
 	}
 
-	//defer s.client.Session.Close()
 	for _, key := range fileKeys {
 		filePath := filepath.Join(filepath.Dir(s.archivePath), key)
 		remotePath := filepath.Join(s.path, key)
-		if err := upload(s.client, filePath, remotePath); err != nil {
+		if err := s.up(filePath, remotePath); err != nil {
 			return err
 		}
 	}
@@ -200,10 +146,10 @@ func (s *SCP) upload(fileKey string) error {
 	return nil
 }
 
-func upload(sshClient *ssh.Client, localPath, remotePath string) error {
+func (s *SCP) up(localPath, remotePath string) error {
 	logger := logger.Tag("SCP")
 
-	client, err := scp.NewClientBySSH(sshClient)
+	client, err := scp.NewClientBySSH(s.client)
 	if err != nil {
 		return err
 	}
@@ -235,9 +181,87 @@ func (s *SCP) delete(fileKey string) (err error) {
 	if strings.HasSuffix(fileKey, "/") {
 		rmCmd = "rmdir"
 	}
-	if err := sshRun(s.client, fmt.Sprintf("%s %s", rmCmd, remotePath)); err != nil {
+	if err := s.run(fmt.Sprintf("%s %s", rmCmd, remotePath)); err != nil {
 		return err
 	}
 
 	return
+}
+
+type sshConfig struct {
+	username    string
+	password    string
+	privateKey  string
+	passpharase string
+}
+
+func newSSHClientConfig(c sshConfig) ssh.ClientConfig {
+	logger := logger.Tag("SSH")
+
+	var auths []ssh.AuthMethod
+	keyCallBack := ssh.InsecureIgnoreHostKey()
+
+	// PrivateKeyWithPassphrase, PrivateKey
+	logger.Debugf("PrivateKey: %s", c.privateKey)
+	if len(c.passpharase) != 0 {
+		if cc, err := auth.PrivateKeyWithPassphrase(
+			c.username,
+			[]byte(c.passpharase),
+			c.privateKey,
+			keyCallBack,
+		); err != nil {
+			logger.Debugf("PrivateKey with passpharase failed: %v", err)
+		} else {
+			auths = append(auths, cc.Auth...)
+			logger.Debug("Added passpharase private key")
+		}
+	} else {
+		if cc, err := auth.PrivateKey(
+			c.username,
+			c.privateKey,
+			keyCallBack,
+		); err != nil {
+			logger.Debugf("PrivateKey failed: %v", err)
+		} else {
+			auths = append(auths, cc.Auth...)
+			logger.Debug("Added private key")
+		}
+	}
+
+	// private key has higher priority than SSH agent here since crypto/ssh will only try the first instance of a particular RFC 4252 method.
+	// https://pkg.go.dev/golang.org/x/crypto/ssh#ClientConfig
+	if len(auths) == 0 {
+		// SshAgent
+		if cc, err := auth.SshAgent(
+			c.username,
+			keyCallBack,
+		); err != nil {
+			logger.Debugf("SSH agent failed: %v", err)
+		} else {
+			auths = append(auths, cc.Auth...)
+			logger.Debug("Added SSH agent")
+		}
+	}
+
+	// PasswordKey
+	if len(c.password) != 0 {
+		if cc, err := auth.PasswordKey(
+			c.username,
+			c.password,
+			keyCallBack,
+		); err != nil {
+			logger.Debugf("SSH agent failed: %v", err)
+		} else {
+			auths = append(auths, cc.Auth...)
+			logger.Debug("Added password key")
+		}
+	}
+
+	logger.Debugf("Auths: %#v", auths)
+
+	return ssh.ClientConfig{
+		User:            c.username,
+		Auth:            auths,
+		HostKeyCallback: keyCallBack,
+	}
 }

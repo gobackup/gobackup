@@ -90,6 +90,8 @@ func runModel(model config.ModelConfig, archivePath string, storageConfig config
 		s = &FTP{Base: base}
 	case "scp":
 		s = &SCP{Base: base}
+	case "sftp":
+		s = &SFTP{Base: base}
 	case "oss":
 		s = &OSS{Base: base}
 	case "gcs":
