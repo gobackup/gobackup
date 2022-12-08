@@ -71,6 +71,7 @@ Use `tar` command to archive many file or path into a `.tar` file.
 - Local
 - FTP
 - SCP - Upload via SSH copy
+- SFTP
 - [Amazon S3](https://aws.amazon.com/s3)
 - [Aliyun OSS](https://www.aliyun.com/product/oss)
 - [Google Cloud Storage](https://cloud.google.com/storage)
