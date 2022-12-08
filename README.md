@@ -79,7 +79,7 @@ Use `tar` command to archive many file or path into a `.tar` file.
 - [QCloud COS](https://cloud.tencent.com/product/cos)
 - [UCloud US3](https://docs.ucloud.cn/ufile/introduction/concept)
 - [Qiniu Kodo](https://www.qiniu.com/products/kodo)
-- [WebDav](http://www.webdav.org)
+- [WebDAV](http://www.webdav.org)
 
 ## Install (macOS / Linux)
 
