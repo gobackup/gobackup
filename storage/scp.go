@@ -38,7 +38,7 @@ type SSH struct {
 
 // SCP storage
 //
-// type: sftp
+// type: scp
 type SCP struct {
 	Base
 	SSH
