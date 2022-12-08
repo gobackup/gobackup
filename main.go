@@ -8,13 +8,14 @@ import (
 	"path/filepath"
 	"syscall"
 
+	"github.com/sevlyar/go-daemon"
+	"github.com/spf13/viper"
+	"github.com/urfave/cli/v2"
+
 	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/logger"
 	"github.com/huacnlee/gobackup/model"
 	"github.com/huacnlee/gobackup/scheduler"
-	"github.com/sevlyar/go-daemon"
-	"github.com/spf13/viper"
-	"github.com/urfave/cli/v2"
 )
 
 const (
@@ -22,8 +23,7 @@ const (
 )
 
 var (
-	modelName  = ""
-	configFile = ""
+	configFile string
 	version    = "master"
 	signal     = flag.String("s", "", `Send signal to the daemon:
   quit — graceful shutdown
@@ -69,21 +69,17 @@ func main() {
 		{
 			Name: "perform",
 			Flags: buildFlags([]cli.Flag{
-				&cli.StringFlag{
-					Name:        "model",
-					Aliases:     []string{"m"},
-					Usage:       "Model name that you want perform",
-					Destination: &modelName,
+				&cli.StringSliceFlag{
+					Name:    "model",
+					Aliases: []string{"m"},
+					Usage:   "Model name that you want perform",
 				},
 			}),
 			Action: func(ctx *cli.Context) error {
-				config.Init(configFile)
-
-				if len(modelName) == 0 {
-					performAll()
-				} else {
-					performOne(modelName)
-				}
+				var modelNames []string
+				initApplication()
+				modelNames = append(ctx.StringSlice("model"), ctx.Args().Slice()...)
+				perform(modelNames)
 
 				return nil
 			},
@@ -145,27 +141,24 @@ func main() {
 
 func initApplication() {
 	config.Init(configFile)
-
 }
 
-func performAll() {
-	for _, modelConfig := range config.Models {
-		m := model.Model{
-			Config: modelConfig,
+func perform(modelNames []string) {
+	var models []*model.Model
+	if len(modelNames) == 0 {
+		// perform all
+		models = model.GetModels()
+	} else {
+		for _, name := range modelNames {
+			if m := model.GetModelByName(name); m == nil {
+				logger.Fatalf("Model %s not found in %s", name, viper.ConfigFileUsed())
+			} else {
+				models = append(models, m)
+			}
 		}
+	}
+
+	for _, m := range models {
 		m.Perform()
 	}
-}
-
-func performOne(modelName string) {
-	modelConfig := config.GetModelByName(modelName)
-	if modelConfig == nil {
-		return
-	}
-	logger.Fatalf("Model %s not found in %s", modelName, viper.ConfigFileUsed())
-
-	m := model.Model{
-		Config: *modelConfig,
-	}
-	m.Perform()
 }

@@ -88,3 +88,25 @@ func (m Model) cleanup() {
 		logger.Errorf("Cleanup temp dir %s error: %v", tempDir, err)
 	}
 }
+
+// GetModelByName get model by name
+func GetModelByName(name string) *Model {
+	modelConfig := config.GetModelConfigByName(name)
+	if modelConfig == nil {
+		return nil
+	}
+	return &Model{
+		Config: *modelConfig,
+	}
+}
+
+// GetModels get models
+func GetModels() (models []*Model) {
+	for _, modelConfig := range config.Models {
+		m := Model{
+			Config: modelConfig,
+		}
+		models = append(models, &m)
+	}
+	return
+}
