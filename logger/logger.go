@@ -45,11 +45,20 @@ func newLogger() Logger {
 	return Logger{_logFlag, *_myLog}
 }
 
+func NewTagLogger(tag string) *Logger {
+	logger := newLogger().Tag(color.CyanString(fmt.Sprintf("[%s] ", tag)))
+	return &logger
+}
+
 func Tag(tag string) Logger {
 	return sharedLogger.Tag(color.CyanString(fmt.Sprintf("[%s] ", tag)))
 }
 
 func (logger Logger) Tag(tag string) Logger {
+	if t := logger.myLog.Prefix(); len(t) != 0 {
+		// prefix tag
+		tag = fmt.Sprintf("%s%s", t, color.CyanString(fmt.Sprintf("[%s] ", tag)))
+	}
 	logger.myLog.SetPrefix(tag)
 	return logger
 }
