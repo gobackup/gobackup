@@ -18,6 +18,7 @@ type SQLite struct {
 	Base
 	path     string
 	database string
+	logger   *logger.Logger
 }
 
 func (db *SQLite) perform() error {
@@ -30,7 +31,7 @@ func (db *SQLite) perform() error {
 }
 
 func (db *SQLite) dump() error {
-	logger := logger.Tag("SQLite")
+	logger := db.logger
 
 	dumpFilePath := filepath.Join(db.dumpPath, db.database+".sql")
 	logger.Info("-> Dumping SQLite...")

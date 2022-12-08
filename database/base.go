@@ -13,6 +13,8 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+var baseLogger *logger.Logger
+
 // Base database
 type Base struct {
 	model    config.ModelConfig
@@ -28,6 +30,8 @@ type Database interface {
 }
 
 func newBase(model config.ModelConfig, dbConfig config.SubConfig) (base Base) {
+	logger := baseLogger
+
 	base = Base{
 		model:    model,
 		dbConfig: dbConfig,
@@ -42,8 +46,9 @@ func newBase(model config.ModelConfig, dbConfig config.SubConfig) (base Base) {
 	return
 }
 
-func runHook(action, script string) error {
-	logger := logger.Tag("Database")
+func (base Base) runHook(action, script string) error {
+	logger := baseLogger
+
 	if len(script) == 0 {
 		return nil
 	}
@@ -74,21 +79,26 @@ func runHook(action, script string) error {
 
 // New - initialize Database
 func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
-	logger := logger.Tag("Database")
+	logger := baseLogger
 
 	base := newBase(model, dbConfig)
 	var db Database
 	switch dbConfig.Type {
 	case "mysql":
-		db = &MySQL{Base: base}
+		log := logger.Tag("MySQL")
+		db = &MySQL{Base: base, logger: &log}
 	case "redis":
-		db = &Redis{Base: base}
+		log := logger.Tag("Redis")
+		db = &Redis{Base: base, logger: &log}
 	case "postgresql":
-		db = &PostgreSQL{Base: base}
+		log := logger.Tag("PostgreSQL")
+		db = &PostgreSQL{Base: base, logger: &log}
 	case "mongodb":
-		db = &MongoDB{Base: base}
+		log := logger.Tag("MongoDB")
+		db = &MongoDB{Base: base, logger: &log}
 	case "sqlite":
-		db = &SQLite{Base: base}
+		log := logger.Tag("SQLite")
+		db = &SQLite{Base: base, logger: &log}
 	default:
 		logger.Warn(fmt.Errorf("model: %s databases.%s config `type: %s`, but is not implement", model.Name, dbConfig.Name, dbConfig.Type))
 		return
@@ -98,7 +108,7 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 
 	// before perform
 	beforeScript := dbConfig.Viper.GetString("before_script")
-	if err := runHook("dump before_script", beforeScript); err != nil {
+	if err := base.runHook("dump before_script", beforeScript); err != nil {
 		return err
 	}
 
@@ -132,7 +142,7 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 	}
 
 	// after perform
-	if err := runHook("dump after_script", afterScript); err != nil {
+	if err := base.runHook("dump after_script", afterScript); err != nil {
 		return err
 	}
 
@@ -140,7 +150,9 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 }
 
 // Run databases
-func Run(model config.ModelConfig) error {
+func Run(model config.ModelConfig, logger logger.Logger) error {
+	log := logger.Tag("Database")
+	baseLogger = &log
 	if len(model.Databases) == 0 {
 		return nil
 	}

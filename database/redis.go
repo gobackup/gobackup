@@ -37,6 +37,7 @@ type Redis struct {
 	invokeSave bool
 	// path of rdb file, example: /var/lib/redis/dump.rdb
 	rdbPath string
+	logger  *logger.Logger
 }
 
 var (
@@ -44,7 +45,7 @@ var (
 )
 
 func (db *Redis) perform() (err error) {
-	logger := logger.Tag("Redis")
+	logger := db.logger
 
 	viper := db.viper
 	viper.SetDefault("rdb_path", "/var/db/redis/dump.rdb")
@@ -118,7 +119,7 @@ func (db *Redis) prepare() error {
 }
 
 func (db *Redis) save() error {
-	logger := logger.Tag("Redis")
+	logger := db.logger
 
 	if !db.invokeSave {
 		return nil
@@ -138,7 +139,7 @@ func (db *Redis) save() error {
 }
 
 func (db *Redis) sync() error {
-	logger := logger.Tag("Redis")
+	logger := db.logger
 
 	dumpFilePath := path.Join(db.dumpPath, "dump.rdb")
 	logger.Info("Syncing redis dump to", dumpFilePath)
@@ -155,7 +156,7 @@ func (db *Redis) sync() error {
 }
 
 func (db *Redis) copy() error {
-	logger := logger.Tag("Redis")
+	logger := db.logger
 
 	logger.Info("Copying redis dump to", db.dumpPath)
 	_, err := helper.Exec("cp", db.rdbPath, db.dumpPath)

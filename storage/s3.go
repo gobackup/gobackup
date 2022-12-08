@@ -34,6 +34,7 @@ type S3 struct {
 	bucket string
 	path   string
 	client *s3manager.Uploader
+	logger *logger.Logger
 }
 
 func (s S3) providerName() string {
@@ -106,6 +107,8 @@ func (s *S3) init() {
 
 func (s *S3) open() (err error) {
 	s.init()
+	log := baseLogger.Tag(s.providerName())
+	s.logger = &log
 
 	cfg := aws.NewConfig()
 	endpoint := s.viper.GetString("endpoint")
@@ -143,7 +146,7 @@ func (s *S3) close() {
 }
 
 func (s *S3) upload(fileKey string) (err error) {
-	logger := logger.Tag(s.providerName())
+	logger := s.logger
 
 	var fileKeys []string
 	if len(s.fileKeys) != 0 {

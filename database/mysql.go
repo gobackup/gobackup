@@ -28,6 +28,7 @@ type MySQL struct {
 	username          string
 	password          string
 	additionalOptions []string
+	logger            *logger.Logger
 }
 
 func (db *MySQL) perform() (err error) {
@@ -90,7 +91,7 @@ func (db *MySQL) dumpArgs() []string {
 }
 
 func (db *MySQL) dump() error {
-	logger := logger.Tag("MySQL")
+	logger := db.logger
 
 	logger.Info("-> Dumping MySQL...")
 	_, err := helper.Exec("mysqldump", db.dumpArgs()...)

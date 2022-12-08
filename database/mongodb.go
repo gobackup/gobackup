@@ -27,6 +27,7 @@ type MongoDB struct {
 	password string
 	authdb   string
 	oplog    bool
+	logger   *logger.Logger
 }
 
 var (
@@ -102,7 +103,7 @@ func (db *MongoDB) oplogOption() string {
 }
 
 func (db *MongoDB) dump() error {
-	logger := logger.Tag("MongoDB")
+	logger := db.logger
 
 	out, err := helper.Exec(db.mongodump())
 	if err != nil {

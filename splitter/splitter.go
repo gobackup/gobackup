@@ -14,8 +14,8 @@ import (
 )
 
 // Run splitter
-func Run(archivePath string, model config.ModelConfig) (archiveDirPath string, err error) {
-	logger := logger.Tag("Splitter")
+func Run(archivePath string, model config.ModelConfig, logger logger.Logger) (archiveDirPath string, err error) {
+	logger = logger.Tag("Splitter")
 
 	splitter := model.Splitter
 	if splitter == nil {

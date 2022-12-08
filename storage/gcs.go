@@ -31,6 +31,7 @@ type GCS struct {
 	path    string
 	timeout time.Duration
 	client  *storage.Client
+	logger  *logger.Logger
 }
 
 func (s *GCS) open() (err error) {
@@ -67,7 +68,7 @@ func (s *GCS) close() {
 }
 
 func (s *GCS) upload(fileKey string) (err error) {
-	logger := logger.Tag("GCS")
+	logger := s.logger
 
 	var ctx = context.Background()
 	var cancel context.CancelFunc

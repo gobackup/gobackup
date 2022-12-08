@@ -25,6 +25,7 @@ type WebDAV struct {
 	username string
 	password string
 	client   *gowebdav.Client
+	logger   *logger.Logger
 }
 
 func (s *WebDAV) open() error {
@@ -50,7 +51,7 @@ func (s *WebDAV) open() error {
 func (s *WebDAV) close() {}
 
 func (s *WebDAV) upload(fileKey string) error {
-	logger := logger.Tag("WebDAV")
+	logger := s.logger
 	logger.Info("-> Uploading...")
 
 	var fileKeys []string
@@ -90,7 +91,7 @@ func (s *WebDAV) upload(fileKey string) error {
 }
 
 func (s *WebDAV) delete(fileKey string) error {
-	logger := logger.Tag("WebDAV")
+	logger := s.logger
 	remotePath := path.Join(s.path, fileKey)
 	logger.Info("-> remove", remotePath)
 	return s.client.Remove(remotePath)

@@ -11,8 +11,8 @@ import (
 )
 
 // Run archive
-func Run(model config.ModelConfig) (err error) {
-	logger := logger.Tag("Archive")
+func Run(model config.ModelConfig, logger logger.Logger) (err error) {
+	logger = logger.Tag("Archive")
 
 	if model.Archive == nil {
 		return nil

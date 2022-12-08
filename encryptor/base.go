@@ -28,8 +28,8 @@ func newBase(archivePath string, model config.ModelConfig) (base Base) {
 }
 
 // Run compressor
-func Run(archivePath string, model config.ModelConfig) (encryptPath string, err error) {
-	logger := logger.Tag("Encryptor")
+func Run(archivePath string, model config.ModelConfig, logger logger.Logger) (encryptPath string, err error) {
+	logger = logger.Tag("Encryptor")
 
 	base := newBase(archivePath, model)
 	var enc Encryptor

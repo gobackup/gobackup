@@ -10,6 +10,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+var baseLogger *logger.Logger
+
 // Base storage
 // When `archivePath` is a directory, `fileKeys` stores files in the `archivePath` with directory prefix
 type Base struct {
@@ -55,12 +57,13 @@ func newBase(model config.ModelConfig, archivePath string, storageConfig config.
 		}
 	}
 
+	log := baseLogger.Tag("Cycler")
 	base = Base{
 		model:       model,
 		archivePath: archivePath,
 		fileKeys:    keys,
 		viper:       storageConfig.Viper,
-		cycler:      &Cycler{name: cyclerName},
+		cycler:      &Cycler{name: cyclerName, logger: &log},
 	}
 
 	if base.viper != nil {
@@ -72,8 +75,7 @@ func newBase(model config.ModelConfig, archivePath string, storageConfig config.
 
 // run storage
 func runModel(model config.ModelConfig, archivePath string, storageConfig config.SubConfig) (err error) {
-	logger := logger.Tag("Storage")
-
+	logger := baseLogger
 	newFileKey := filepath.Base(archivePath)
 	base, err := newBase(model, archivePath, storageConfig)
 	if err != nil {
@@ -83,19 +85,26 @@ func runModel(model config.ModelConfig, archivePath string, storageConfig config
 	var s Storage
 	switch storageConfig.Type {
 	case "local":
-		s = &Local{Base: base}
+		log := logger.Tag("Local")
+		s = &Local{Base: base, logger: &log}
 	case "webdav":
-		s = &WebDAV{Base: base}
+		log := logger.Tag("WebDAV")
+		s = &WebDAV{Base: base, logger: &log}
 	case "ftp":
-		s = &FTP{Base: base}
+		log := logger.Tag("FTP")
+		s = &FTP{Base: base, logger: &log}
 	case "scp":
-		s = &SCP{Base: base}
+		log := logger.Tag("SCP")
+		s = &SCP{Base: base, logger: &log}
 	case "sftp":
-		s = &SFTP{Base: base}
+		log := logger.Tag("SFTP")
+		s = &SFTP{Base: base, logger: &log}
 	case "oss":
-		s = &OSS{Base: base}
+		log := logger.Tag("OSS")
+		s = &OSS{Base: base, logger: &log}
 	case "gcs":
-		s = &GCS{Base: base}
+		log := logger.Tag("GCS")
+		s = &GCS{Base: base, logger: &log}
 	case "s3":
 		s = &S3{Base: base, Service: "s3"}
 	case "b2":
@@ -132,7 +141,9 @@ func runModel(model config.ModelConfig, archivePath string, storageConfig config
 }
 
 // Run storage
-func Run(model config.ModelConfig, archivePath string) (err error) {
+func Run(model config.ModelConfig, archivePath string, logger logger.Logger) (err error) {
+	log := logger.Tag("Storage")
+	baseLogger = &log
 	for _, storageConfig := range model.Storages {
 		err := runModel(model, archivePath, storageConfig)
 		if err != nil {

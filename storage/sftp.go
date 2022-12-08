@@ -24,6 +24,7 @@ type SFTP struct {
 	SSH
 	path   string
 	client *sftp.Client
+	logger *logger.Logger
 }
 
 func (s *SFTP) open() error {
@@ -86,7 +87,7 @@ func (s *SFTP) close() {
 }
 
 func (s *SFTP) upload(fileKey string) error {
-	logger := logger.Tag("SFTP")
+	logger := s.logger
 
 	var fileKeys []string
 	if len(s.fileKeys) != 0 {
@@ -118,7 +119,7 @@ func (s *SFTP) upload(fileKey string) error {
 }
 
 func (s *SFTP) up(localPath, remotePath string) error {
-	logger := logger.Tag("SFTP")
+	logger := s.logger
 
 	file, err := os.Open(localPath)
 	if err != nil {
@@ -145,7 +146,7 @@ func (s *SFTP) up(localPath, remotePath string) error {
 }
 
 func (s *SFTP) delete(fileKey string) error {
-	logger := logger.Tag("SFTP")
+	logger := s.logger
 
 	remotePath := path.Join(s.path, fileKey)
 	logger.Info("-> remove", remotePath)

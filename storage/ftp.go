@@ -31,8 +31,8 @@ type FTP struct {
 	port     string
 	username string
 	password string
-
-	client *ftp.ServerConn
+	client   *ftp.ServerConn
+	logger   *logger.Logger
 }
 
 func (s *FTP) open() error {
@@ -70,7 +70,7 @@ func (s *FTP) close() {
 }
 
 func (s *FTP) mkdir(rpath string) error {
-	logger := logger.Tag("FTP")
+	logger := s.logger
 	_, err := s.client.GetEntry(rpath)
 	logger.Debugf("GetEntry %s: %v", rpath, err)
 	if err != nil {
@@ -88,7 +88,7 @@ func (s *FTP) mkdir(rpath string) error {
 }
 
 func (s *FTP) upload(fileKey string) error {
-	logger := logger.Tag("FTP")
+	logger := s.logger
 	logger.Info("-> Uploading...")
 
 	var fileKeys []string
@@ -128,7 +128,7 @@ func (s *FTP) upload(fileKey string) error {
 }
 
 func (s *FTP) delete(fileKey string) error {
-	logger := logger.Tag("FTP")
+	logger := s.logger
 	remotePath := path.Join(s.path, fileKey)
 	logger.Info("-> remove", remotePath)
 	if !strings.HasSuffix(fileKey, "/") {

@@ -30,6 +30,7 @@ type PostgreSQL struct {
 	password    string
 	dumpCommand string
 	args        string
+	logger      *logger.Logger
 }
 
 func (db PostgreSQL) perform() (err error) {
@@ -89,7 +90,7 @@ func (db *PostgreSQL) prepare() (err error) {
 }
 
 func (db *PostgreSQL) dump() error {
-	logger := logger.Tag("PostgreSQL")
+	logger := db.logger
 
 	dumpFilePath := path.Join(db.dumpPath, db.database+".sql")
 	logger.Info("-> Dumping PostgreSQL...")

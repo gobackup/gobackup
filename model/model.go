@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/viper"
@@ -19,12 +18,12 @@ import (
 // Model class
 type Model struct {
 	Config config.ModelConfig
+	Logger *logger.Logger
 }
 
 // Perform model
 func (m Model) Perform() {
-	logger := logger.Tag(fmt.Sprintf("Model: %s", m.Config.Name))
-
+	logger := m.Logger
 	logger.Info("WorkDir:", m.Config.DumpPath)
 
 	defer func() {
@@ -35,39 +34,39 @@ func (m Model) Perform() {
 		m.cleanup()
 	}()
 
-	err := database.Run(m.Config)
+	err := database.Run(m.Config, *logger)
 	if err != nil {
 		logger.Error(err)
 		return
 	}
 
 	if m.Config.Archive != nil {
-		err = archive.Run(m.Config)
+		err = archive.Run(m.Config, *logger)
 		if err != nil {
 			logger.Error(err)
 			return
 		}
 	}
 
-	archivePath, err := compressor.Run(m.Config)
+	archivePath, err := compressor.Run(m.Config, *logger)
 	if err != nil {
 		logger.Error(err)
 		return
 	}
 
-	archivePath, err = encryptor.Run(archivePath, m.Config)
+	archivePath, err = encryptor.Run(archivePath, m.Config, *logger)
 	if err != nil {
 		logger.Error(err)
 		return
 	}
 
-	archivePath, err = splitter.Run(archivePath, m.Config)
+	archivePath, err = splitter.Run(archivePath, m.Config, *logger)
 	if err != nil {
 		logger.Error(err)
 		return
 	}
 
-	err = storage.Run(m.Config, archivePath)
+	err = storage.Run(m.Config, archivePath, *logger)
 	if err != nil {
 		logger.Error(err)
 		return
@@ -77,7 +76,7 @@ func (m Model) Perform() {
 
 // Cleanup model temp files
 func (m Model) cleanup() {
-	logger := logger.Tag("Model")
+	logger := m.Logger
 
 	tempDir := m.Config.TempPath
 	if viper.GetBool("useTempWorkDir") {
@@ -97,6 +96,7 @@ func GetModelByName(name string) *Model {
 	}
 	return &Model{
 		Config: *modelConfig,
+		Logger: logger.NewTagLogger(name),
 	}
 }
 
@@ -105,6 +105,7 @@ func GetModels() (models []*Model) {
 	for _, modelConfig := range config.Models {
 		m := Model{
 			Config: modelConfig,
+			Logger: logger.NewTagLogger(modelConfig.Name),
 		}
 		models = append(models, &m)
 	}

@@ -44,6 +44,7 @@ type SCP struct {
 	SSH
 	path   string
 	client *ssh.Client
+	logger *logger.Logger
 }
 
 func (s *SCP) open() (err error) {
@@ -116,7 +117,7 @@ func (s *SCP) close() {
 }
 
 func (s *SCP) upload(fileKey string) error {
-	logger := logger.Tag("SCP")
+	logger := s.logger
 
 	var fileKeys []string
 	if len(s.fileKeys) != 0 {
@@ -147,7 +148,7 @@ func (s *SCP) upload(fileKey string) error {
 }
 
 func (s *SCP) up(localPath, remotePath string) error {
-	logger := logger.Tag("SCP")
+	logger := s.logger
 
 	client, err := scp.NewClientBySSH(s.client)
 	if err != nil {
@@ -173,7 +174,7 @@ func (s *SCP) up(localPath, remotePath string) error {
 }
 
 func (s *SCP) delete(fileKey string) (err error) {
-	logger := logger.Tag("SCP")
+	logger := s.logger
 
 	remotePath := path.Join(s.path, fileKey)
 	logger.Info("-> remove", remotePath)
@@ -196,7 +197,7 @@ type sshConfig struct {
 }
 
 func newSSHClientConfig(c sshConfig) ssh.ClientConfig {
-	logger := logger.Tag("SSH")
+	logger := baseLogger.Tag("SSH")
 
 	var auths []ssh.AuthMethod
 	keyCallBack := ssh.InsecureIgnoreHostKey()

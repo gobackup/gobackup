@@ -39,8 +39,8 @@ func newBase(model config.ModelConfig) (base Base) {
 }
 
 // Run compressor
-func Run(model config.ModelConfig) (archivePath string, err error) {
-	logger := logger.Tag("Compressor")
+func Run(model config.ModelConfig, logger logger.Logger) (archivePath string, err error) {
+	logger = logger.Tag("Compressor")
 
 	base := newBase(model)
 

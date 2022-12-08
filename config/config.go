@@ -17,7 +17,8 @@ var (
 	// Models configs
 	Models []ModelConfig
 	// gobackup base dir
-	GoBackupDir string = getGoBackupDir()
+	GoBackupDir  string = getGoBackupDir()
+	configLogger *logger.Logger
 )
 
 type ScheduleConfig struct {
@@ -81,7 +82,9 @@ type SubConfig struct {
 // - ~/.gobackup/gobackup.yml
 // - /etc/gobackup/gobackup.yml
 func Init(configFile string) {
-	logger := logger.Tag("Config")
+	log := logger.Tag("Config")
+	configLogger := &log
+	logger := configLogger
 
 	viper.SetConfigType("yaml")
 
@@ -136,6 +139,7 @@ func Init(configFile string) {
 }
 
 func loadModel(key string) (model ModelConfig) {
+	logger := configLogger
 	model.Name = key
 	model.TempPath = filepath.Join(viper.GetString("workdir"), fmt.Sprintf("%d", time.Now().UnixNano()))
 	model.DumpPath = filepath.Join(model.TempPath, key)
@@ -196,6 +200,7 @@ func loadDatabasesConfig(model *ModelConfig) {
 }
 
 func loadStoragesConfig(model *ModelConfig) {
+	logger := configLogger
 	storageConfigs := map[string]SubConfig{}
 	// Backward compatible with `store_with` config
 	storeWith := model.Viper.Sub("store_with")

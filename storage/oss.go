@@ -32,6 +32,7 @@ type OSS struct {
 	timeout         int
 	client          *oss.Bucket
 	threads         int
+	logger          *logger.Logger
 }
 
 var (
@@ -40,7 +41,7 @@ var (
 )
 
 func (s *OSS) open() (err error) {
-	logger := logger.Tag("OSS")
+	logger := s.logger
 
 	s.viper.SetDefault("endpoint", "oss-cn-beijing.aliyuncs.com")
 	s.viper.SetDefault("max_retries", 3)
@@ -87,7 +88,7 @@ func (s *OSS) close() {
 }
 
 func (s *OSS) upload(fileKey string) (err error) {
-	logger := logger.Tag("OSS")
+	logger := s.logger
 
 	var fileKeys []string
 	if len(s.fileKeys) != 0 {

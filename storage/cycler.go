@@ -29,6 +29,7 @@ type Cycler struct {
 	name     string
 	packages PackageList
 	isLoaded bool
+	logger   *logger.Logger
 }
 
 func (c *Cycler) add(fileKey string, fileKeys []string) {
@@ -50,7 +51,7 @@ func (c *Cycler) shiftByKeep(keep int) (first *Package) {
 }
 
 func (c *Cycler) run(fileKey string, fileKeys []string, keep int, deletePackage func(fileKey string) error) {
-	logger := logger.Tag("Cycler")
+	logger := c.logger
 
 	cyclerFileName := filepath.Join(cyclerPath, c.name+".json")
 
@@ -85,7 +86,7 @@ func (c *Cycler) run(fileKey string, fileKeys []string, keep int, deletePackage 
 }
 
 func (c *Cycler) load(cyclerFileName string) {
-	logger := logger.Tag("Cycler")
+	logger := c.logger
 
 	if err := helper.MkdirP(cyclerPath); err != nil {
 		logger.Errorf("Failed to mkdir cycler path %s: %v", cyclerPath, err)
@@ -113,7 +114,7 @@ func (c *Cycler) load(cyclerFileName string) {
 }
 
 func (c *Cycler) save(cyclerFileName string) {
-	logger := logger.Tag("Cycler")
+	logger := c.logger
 
 	if !c.isLoaded {
 		logger.Warn("Skip save cycler.json because it is not loaded")

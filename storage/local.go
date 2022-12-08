@@ -15,6 +15,7 @@ import (
 type Local struct {
 	Base
 	destPath string
+	logger   *logger.Logger
 }
 
 func (s *Local) open() error {
@@ -25,7 +26,7 @@ func (s *Local) open() error {
 func (s *Local) close() {}
 
 func (s *Local) upload(fileKey string) (err error) {
-	logger := logger.Tag("Local")
+	logger := s.logger
 
 	_, err = helper.Exec("cp", "-a", s.archivePath, s.destPath)
 	if err != nil {
