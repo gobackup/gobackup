@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/huacnlee/gobackup/helper"
-	"github.com/huacnlee/gobackup/logger"
+	"github.com/gobackup/gobackup/helper"
+	"github.com/gobackup/gobackup/logger"
 )
 
 // SQLite database

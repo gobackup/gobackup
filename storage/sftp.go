@@ -12,8 +12,8 @@ import (
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 
-	"github.com/huacnlee/gobackup/helper"
-	"github.com/huacnlee/gobackup/logger"
+	"github.com/gobackup/gobackup/helper"
+	"github.com/gobackup/gobackup/logger"
 )
 
 // SFTP storage
