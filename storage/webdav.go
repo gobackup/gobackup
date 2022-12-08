@@ -8,7 +8,7 @@ import (
 
 	"github.com/studio-b12/gowebdav"
 
-	"github.com/huacnlee/gobackup/logger"
+	"github.com/gobackup/gobackup/logger"
 )
 
 // WebDAV storage

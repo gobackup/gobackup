@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/huacnlee/gobackup/config"
-	"github.com/huacnlee/gobackup/logger"
+	"github.com/gobackup/gobackup/config"
+	"github.com/gobackup/gobackup/logger"
 	"github.com/spf13/viper"
 )
 

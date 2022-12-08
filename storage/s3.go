@@ -13,8 +13,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/gobackup/gobackup/logger"
 	"github.com/hako/durafmt"
-	"github.com/huacnlee/gobackup/logger"
 )
 
 // S3 - Amazon S3 storage

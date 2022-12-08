@@ -4,8 +4,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/huacnlee/gobackup/helper"
-	"github.com/huacnlee/gobackup/logger"
+	"github.com/gobackup/gobackup/helper"
+	"github.com/gobackup/gobackup/logger"
 )
 
 // Local storage

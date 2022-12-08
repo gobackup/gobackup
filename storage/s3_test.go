@@ -3,7 +3,7 @@ package storage
 import (
 	"testing"
 
-	"github.com/huacnlee/gobackup/config"
+	"github.com/gobackup/gobackup/config"
 	"github.com/longbridgeapp/assert"
 	"github.com/spf13/viper"
 )

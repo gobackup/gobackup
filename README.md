@@ -4,8 +4,8 @@
 <h1 align="center">GoBackup</h1>
 <p align="center">CLI tool for backup your databases, files to FTP / SCP / S3 / GCS and other cloud storages.</p>
 <p align="center">
-   <a href="https://github.com/huacnlee/gobackup/actions?query=workflow%3AGo"><img src="https://github.com/huacnlee/gobackup/workflows/Go/badge.svg" alt="Build Status" /></a>
-   <a href="https://github.com/huacnlee/gobackup/releases"><img src="https://img.shields.io/github/v/release/huacnlee/gobackup?label=Version&color=1" alt="GitHub release (latest by date)"></a>
+   <a href="https://github.com/gobackup/gobackup/actions?query=workflow%3AGo"><img src="https://github.com/gobackup/gobackup/workflows/Go/badge.svg" alt="Build Status" /></a>
+   <a href="https://github.com/gobackup/gobackup/releases"><img src="https://img.shields.io/github/v/release/gobackup/gobackup?label=Version&color=1" alt="GitHub release (latest by date)"></a>
    <a href="https://hub.docker.com/r/huacnlee/gobackup"><img src="https://img.shields.io/docker/v/huacnlee/gobackup?label=Docker&color=blue" alt="Docker Image Version (latest server)"></a>
 </p>
 </p>
@@ -84,7 +84,7 @@ Use `tar` command to archive many file or path into a `.tar` file.
 ## Install (macOS / Linux)
 
 ```shell
-curl -sSL https://git.io/gobackup | sh
+curl -sSL https://gobackup.github.io/install | sh
 ```
 
 after that, you will get `/usr/local/bin/gobackup` command.

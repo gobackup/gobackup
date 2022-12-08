@@ -14,8 +14,8 @@ import (
 	"github.com/bramvdbogaerde/go-scp/auth"
 	"golang.org/x/crypto/ssh"
 
-	"github.com/huacnlee/gobackup/helper"
-	"github.com/huacnlee/gobackup/logger"
+	"github.com/gobackup/gobackup/helper"
+	"github.com/gobackup/gobackup/logger"
 )
 
 // SCP storage

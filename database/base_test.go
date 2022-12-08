@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/huacnlee/gobackup/config"
+	"github.com/gobackup/gobackup/config"
 	"github.com/longbridgeapp/assert"
 )
 

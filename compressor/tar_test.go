@@ -3,7 +3,7 @@ package compressor
 import (
 	"testing"
 
-	"github.com/huacnlee/gobackup/helper"
+	"github.com/gobackup/gobackup/helper"
 	"github.com/longbridgeapp/assert"
 )
 

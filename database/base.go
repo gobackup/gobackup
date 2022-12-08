@@ -8,9 +8,9 @@ import (
 	"github.com/google/shlex"
 	"github.com/spf13/viper"
 
-	"github.com/huacnlee/gobackup/config"
-	"github.com/huacnlee/gobackup/helper"
-	"github.com/huacnlee/gobackup/logger"
+	"github.com/gobackup/gobackup/config"
+	"github.com/gobackup/gobackup/helper"
+	"github.com/gobackup/gobackup/logger"
 )
 
 // Base database
