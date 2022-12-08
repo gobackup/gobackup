@@ -18,26 +18,32 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
-// SCP storage
+// SSH
 //
-// type: scp
-// host: 192.168.1.2
+// host:
 // port: 22
-// username: root
+// username:
 // password:
 // timeout: 300
 // private_key: ~/.ssh/id_rsa
 // passpharase:
-type SCP struct {
-	Base
-	path        string
+type SSH struct {
 	host        string
 	port        string
 	privateKey  string
 	passpharase string
 	username    string
 	password    string
-	client      *ssh.Client
+}
+
+// SCP storage
+//
+// type: sftp
+type SCP struct {
+	Base
+	SSH
+	path   string
+	client *ssh.Client
 }
 
 func (s *SCP) open() (err error) {
@@ -81,13 +87,105 @@ func (s *SCP) open() (err error) {
 		return fmt.Errorf("Failed to ssh %s@%s -p %s: %v", s.username, s.host, s.port, err)
 	}
 
+	s.client = sshClient
+
 	// mkdir
-	if err := sshRun(sshClient, fmt.Sprintf("mkdir -p %s", s.path)); err != nil {
+	if err := s.run(fmt.Sprintf("mkdir -p %s", s.path)); err != nil {
 		return err
 	}
 
-	s.client = sshClient
 	return nil
+}
+
+func (s *SCP) run(cmd string) error {
+	session, err := s.client.NewSession()
+	if err != nil {
+		return fmt.Errorf("Failed to create session: %v", err)
+	}
+	defer session.Close()
+
+	if err := session.Run(cmd); err != nil {
+		return fmt.Errorf("Failed to run %s: %v", cmd, err)
+	}
+
+	return nil
+}
+
+func (s *SCP) close() {
+	s.client.Close()
+}
+
+func (s *SCP) upload(fileKey string) error {
+	logger := logger.Tag("SCP")
+
+	var fileKeys []string
+	if len(s.fileKeys) != 0 {
+		// directory
+		// 2022.12.04.07.09.47/2022.12.04.07.09.47.tar.xz-000
+		fileKeys = s.fileKeys
+		remoteDir := filepath.Join(s.path, filepath.Base(s.archivePath))
+		// mkdir
+		if err := s.run(fmt.Sprintf("mkdir -p %s", remoteDir)); err != nil {
+			return err
+		}
+	} else {
+		// file
+		// 2022.12.04.07.09.25.tar.xz
+		fileKeys = append(fileKeys, fileKey)
+	}
+
+	for _, key := range fileKeys {
+		filePath := filepath.Join(filepath.Dir(s.archivePath), key)
+		remotePath := filepath.Join(s.path, key)
+		if err := s.up(filePath, remotePath); err != nil {
+			return err
+		}
+	}
+
+	logger.Info("Store succeeded")
+	return nil
+}
+
+func (s *SCP) up(localPath, remotePath string) error {
+	logger := logger.Tag("SCP")
+
+	client, err := scp.NewClientBySSH(s.client)
+	if err != nil {
+		return err
+	}
+	if err := client.Connect(); err != nil {
+		return err
+	}
+	defer client.Close()
+
+	file, err := os.Open(localPath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	logger.Info("-> scp to", remotePath)
+	if err := client.CopyFromFile(context.Background(), *file, remotePath, "0644"); err != nil {
+		return fmt.Errorf("Store %s failed: %v", remotePath, err)
+	}
+	logger.Infof("Store %s succeeded", remotePath)
+	return nil
+}
+
+func (s *SCP) delete(fileKey string) (err error) {
+	logger := logger.Tag("SCP")
+
+	remotePath := path.Join(s.path, fileKey)
+	logger.Info("-> remove", remotePath)
+	rmCmd := "rm"
+	if strings.HasSuffix(fileKey, "/") {
+		rmCmd = "rmdir"
+	}
+	if err := s.run(fmt.Sprintf("%s %s", rmCmd, remotePath)); err != nil {
+		return err
+	}
+
+	return
 }
 
 type sshConfig struct {
@@ -166,96 +264,4 @@ func newSSHClientConfig(c sshConfig) ssh.ClientConfig {
 		Auth:            auths,
 		HostKeyCallback: keyCallBack,
 	}
-}
-
-func sshRun(client *ssh.Client, cmd string) error {
-	session, err := client.NewSession()
-	if err != nil {
-		return fmt.Errorf("Failed to create session: %v", err)
-	}
-	defer session.Close()
-
-	if err := session.Run(cmd); err != nil {
-		return fmt.Errorf("Failed to run %s: %v", cmd, err)
-	}
-
-	return nil
-}
-
-func (s *SCP) close() {
-	s.client.Close()
-}
-
-func (s *SCP) upload(fileKey string) error {
-	logger := logger.Tag("SCP")
-
-	var fileKeys []string
-	if len(s.fileKeys) != 0 {
-		// directory
-		// 2022.12.04.07.09.47/2022.12.04.07.09.47.tar.xz-000
-		fileKeys = s.fileKeys
-		remoteDir := filepath.Join(s.path, filepath.Base(s.archivePath))
-		// mkdir
-		if err := sshRun(s.client, fmt.Sprintf("mkdir -p %s", remoteDir)); err != nil {
-			return err
-		}
-	} else {
-		// file
-		// 2022.12.04.07.09.25.tar.xz
-		fileKeys = append(fileKeys, fileKey)
-	}
-
-	//defer s.client.Session.Close()
-	for _, key := range fileKeys {
-		filePath := filepath.Join(filepath.Dir(s.archivePath), key)
-		remotePath := filepath.Join(s.path, key)
-		if err := upload(s.client, filePath, remotePath); err != nil {
-			return err
-		}
-	}
-
-	logger.Info("Store succeeded")
-	return nil
-}
-
-func upload(sshClient *ssh.Client, localPath, remotePath string) error {
-	logger := logger.Tag("SCP")
-
-	client, err := scp.NewClientBySSH(sshClient)
-	if err != nil {
-		return err
-	}
-	if err := client.Connect(); err != nil {
-		return err
-	}
-	defer client.Close()
-
-	file, err := os.Open(localPath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	logger.Info("-> scp to", remotePath)
-	if err := client.CopyFromFile(context.Background(), *file, remotePath, "0644"); err != nil {
-		return fmt.Errorf("Store %s failed: %v", remotePath, err)
-	}
-	logger.Infof("Store %s succeeded", remotePath)
-	return nil
-}
-
-func (s *SCP) delete(fileKey string) (err error) {
-	logger := logger.Tag("SCP")
-
-	remotePath := path.Join(s.path, fileKey)
-	logger.Info("-> remove", remotePath)
-	rmCmd := "rm"
-	if strings.HasSuffix(fileKey, "/") {
-		rmCmd = "rmdir"
-	}
-	if err := sshRun(s.client, fmt.Sprintf("%s %s", rmCmd, remotePath)); err != nil {
-		return err
-	}
-
-	return
 }
