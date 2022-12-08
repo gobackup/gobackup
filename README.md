@@ -14,7 +14,6 @@ GoBackup is a fullstack backup tool design for application servers, to backup yo
 
 > Inspired by [backup/backup](https://github.com/backup/backup) and replace it for without Ruby dependency.
 
-
 [![asciicast](https://asciinema.org/a/543564.svg)](https://asciinema.org/a/543564)
 
 You can write a config file, run `gobackup perform` command by once to dump database as file, archive config files, and then package them into a single file.
@@ -42,6 +41,7 @@ https://gobackup.github.io
 - PostgreSQL
 - Redis - `mode: sync/copy`
 - MongoDB
+- SQLite
 
 ### Archive
 
