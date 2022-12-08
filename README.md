@@ -41,6 +41,7 @@ https://gobackup.github.io/
 - PostgreSQL
 - Redis - `mode: sync/copy`
 - MongoDB
+- SQLite
 
 ### Archive
 
