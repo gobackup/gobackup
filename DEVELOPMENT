@@ -10,7 +10,7 @@ $ brew install dep
 ## Get Source
 
 ```
-$ git clone https://github.com/huacnlee/gobackup.git
+$ git clone https://github.com/gobackup/gobackup.git
 $ cd gobackup
 $ go get
 ```

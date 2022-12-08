@@ -12,7 +12,7 @@ get_latest_release() {
     awk 'BEGIN{FS=": |,|\""}; /tag_name/{print $5}'
 }
 
-repo="huacnlee/gobackup"
+repo="gobackup/gobackup"
 version="$(get_latest_release "${repo}")"  # v1.2.0
 platform="$(uname | tr "[A-Z]" "[a-z]")"  # Linux => linux
 arch="$(uname -m | sed 's/x86_64/amd64/')"  # x86_64 => amd64

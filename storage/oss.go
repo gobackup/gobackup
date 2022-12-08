@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+	"github.com/gobackup/gobackup/logger"
 	"github.com/hako/durafmt"
-	"github.com/huacnlee/gobackup/logger"
 )
 
 // OSS - Aliyun OSS storage

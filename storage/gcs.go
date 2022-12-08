@@ -14,7 +14,7 @@ import (
 	"github.com/hako/durafmt"
 	"google.golang.org/api/option"
 
-	"github.com/huacnlee/gobackup/logger"
+	"github.com/gobackup/gobackup/logger"
 )
 
 // GCS - Google Clound storage

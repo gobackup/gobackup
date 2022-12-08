@@ -3,7 +3,7 @@ package compressor
 import (
 	"os/exec"
 
-	"github.com/huacnlee/gobackup/helper"
+	"github.com/gobackup/gobackup/helper"
 )
 
 type Tar struct {

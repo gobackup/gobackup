@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/viper"
 
-	"github.com/huacnlee/gobackup/logger"
+	"github.com/gobackup/gobackup/logger"
 )
 
 var (

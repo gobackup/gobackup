@@ -1,4 +1,4 @@
-module github.com/huacnlee/gobackup
+module github.com/gobackup/gobackup
 
 go 1.18
 

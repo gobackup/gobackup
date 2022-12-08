@@ -12,10 +12,10 @@ import (
 	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
 
-	"github.com/huacnlee/gobackup/config"
-	"github.com/huacnlee/gobackup/logger"
-	"github.com/huacnlee/gobackup/model"
-	"github.com/huacnlee/gobackup/scheduler"
+	"github.com/gobackup/gobackup/config"
+	"github.com/gobackup/gobackup/logger"
+	"github.com/gobackup/gobackup/model"
+	"github.com/gobackup/gobackup/scheduler"
 )
 
 const (

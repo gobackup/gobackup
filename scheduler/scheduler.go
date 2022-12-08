@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/go-co-op/gocron"
-	"github.com/huacnlee/gobackup/config"
-	"github.com/huacnlee/gobackup/logger"
-	"github.com/huacnlee/gobackup/model"
+	"github.com/gobackup/gobackup/config"
+	"github.com/gobackup/gobackup/logger"
+	"github.com/gobackup/gobackup/model"
 )
 
 var (

@@ -6,14 +6,14 @@ import (
 
 	"github.com/spf13/viper"
 
-	"github.com/huacnlee/gobackup/archive"
-	"github.com/huacnlee/gobackup/compressor"
-	"github.com/huacnlee/gobackup/config"
-	"github.com/huacnlee/gobackup/database"
-	"github.com/huacnlee/gobackup/encryptor"
-	"github.com/huacnlee/gobackup/logger"
-	"github.com/huacnlee/gobackup/splitter"
-	"github.com/huacnlee/gobackup/storage"
+	"github.com/gobackup/gobackup/archive"
+	"github.com/gobackup/gobackup/compressor"
+	"github.com/gobackup/gobackup/config"
+	"github.com/gobackup/gobackup/database"
+	"github.com/gobackup/gobackup/encryptor"
+	"github.com/gobackup/gobackup/logger"
+	"github.com/gobackup/gobackup/splitter"
+	"github.com/gobackup/gobackup/storage"
 )
 
 // Model class
