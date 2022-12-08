@@ -36,7 +36,6 @@ func (db PostgreSQL) perform() (err error) {
 	viper := db.viper
 	viper.SetDefault("host", "localhost")
 	viper.SetDefault("port", 5432)
-	viper.SetDefault("params", "")
 
 	db.host = viper.GetString("host")
 	db.port = viper.GetString("port")
