@@ -174,24 +174,9 @@ models:
 
 ```bash
 $ gobackup perform
-2022/11/30 13:11:28 [Model: ruby_china] WorkDir: /tmp/gobackup/1669785088876548728/ruby_china
-2022/11/30 13:11:28 [Database] => database | postgresql : postgresql
-2022/11/30 13:11:28 [PostgreSQL] -> Dumping PostgreSQL...
-2022/11/30 13:11:39 [PostgreSQL] dump path: /tmp/gobackup/1669785088876548728/ruby_china/postgresql/postgresql/ruby-china.sql
-2022/11/30 13:11:39 [Database] => database | redis : redis
-2022/11/30 13:11:39 [Redis] -> Invoke save...
-2022/11/30 13:11:39 [Redis] Copying redis dump to /tmp/gobackup/1669785088876548728/ruby_china/redis/redis
-2022/11/30 13:11:40 [Archive] => includes 7 rules
-2022/11/30 13:11:41 [Compressor] => Compress | tgz
-2022/11/30 13:12:09 [Compressor] -> /tmp/gobackup/1669785088876548728/2022.11.30.13.11.41.tar.gz
-2022/11/30 13:12:09 [Encryptor] => Encrypt | openssl
-2022/11/30 13:12:15 [Encryptor] -> /tmp/gobackup/1669785088876548728/2022.11.30.13.11.41.tar.gz.enc
-2022/11/30 13:12:15 [Storage] => Storage | oss
-2022/11/30 13:12:15 [OSS] endpoint: oss-cn-hongkong.aliyuncs.com
-2022/11/30 13:12:15 [OSS] bucket: ruby-china-backup
-2022/11/30 13:12:15 [OSS] -> Uploading backups/2022.11.30.13.11.41.tar.gz.enc...
-2022/11/30 13:12:15 [Model] Cleanup temp dir...
 ```
+
+[![asciicast](https://asciinema.org/a/543564.svg)](https://asciinema.org/a/543564)
 
 ## Backup schedule
 
