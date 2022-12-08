@@ -14,6 +14,9 @@ GoBackup is a fullstack backup tool design for application servers, to backup yo
 
 > Inspired by [backup/backup](https://github.com/backup/backup) and replace it for without Ruby dependency.
 
+
+[![asciicast](https://asciinema.org/a/543564.svg)](https://asciinema.org/a/543564)
+
 You can write a config file, run `gobackup perform` command by once to dump database as file, archive config files, and then package them into a single file.
 
 It's allow you store the backup file to local, FTP, SCP, S3 or other cloud storages.
@@ -81,7 +84,7 @@ Use `tar` command to archive many file or path into a `.tar` file.
 - [Qiniu Kodo](https://www.qiniu.com/products/kodo)
 - [WebDAV](http://www.webdav.org)
 
-## Install (macOS / Linux)
+## Installation
 
 ```shell
 curl -sSL https://gobackup.github.io/install | sh
@@ -172,19 +175,19 @@ models:
 
 ## Usage
 
+### Perform backup
+
 ```bash
 $ gobackup perform
 ```
 
-[![asciicast](https://asciinema.org/a/543564.svg)](https://asciinema.org/a/543564)
-
-## Backup schedule
+### Backup schedule
 
 GoBackup built in a daemon mode, you can use `gobackup start` to start it.
 
 You can configure the `schedule` for each models, it will run backup task at the time you set.
 
-### For example
+#### For example
 
 Configure your schedule in `gobackup.yml`
 
@@ -225,7 +228,7 @@ models:
         password: password
 ```
 
-And then start daemon:
+### Start daemon
 
 ```bash
 gobackup start
@@ -233,7 +236,7 @@ gobackup start
 
 > NOTE: If you wants start without daemon, use `gobackup run` instead.
 
-## Signal handling
+### Signal handling
 
 GoBackup will handle the following signals:
 
