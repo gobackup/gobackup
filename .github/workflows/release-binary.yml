@@ -1,4 +1,4 @@
-name: goreleaser
+name: Release Binary
 
 on:
   push:
