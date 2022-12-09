@@ -133,11 +133,25 @@ func runModel(model config.ModelConfig, archivePath string, storageConfig config
 
 // Run storage
 func Run(model config.ModelConfig, archivePath string) (err error) {
+	logger := logger.Tag("Storage")
+	var hasSuccess bool
+	n := len(model.Storages)
 	for _, storageConfig := range model.Storages {
 		err := runModel(model, archivePath, storageConfig)
 		if err != nil {
-			return err
+			if n == 1 {
+				return err
+			} else {
+				logger.Error(err)
+				continue
+			}
+		} else {
+			hasSuccess = true
 		}
+	}
+
+	if !hasSuccess {
+		return fmt.Errorf("All storages are failed")
 	}
 
 	return nil
