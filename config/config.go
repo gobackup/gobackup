@@ -200,7 +200,7 @@ func loadStoragesConfig(model *ModelConfig) {
 	// Backward compatible with `store_with` config
 	storeWith := model.Viper.Sub("store_with")
 	if storeWith != nil {
-		logger.Warn(`[Deprecated] "store_with" is deprecated now, please use "storages" which supports multiple storages. cycler config which usually located in "~/.gobackup/cycler" and named "MODEL.json" should be renamed to "MODEL_STORAGENAME.json", or cycler will start from scratch.`)
+		logger.Warn(`[Deprecated] "store_with" is deprecated now, please use "storages" which supports multiple storages. Cycler config which usually located in "~/.gobackup/cycler" and named "MODEL.json" should be renamed to "MODEL_STORAGENAME.json", or cycler will start from scratch.`)
 		storageConfigs["store_with"] = SubConfig{
 			Name:  "",
 			Type:  model.Viper.GetString("store_with.type"),
