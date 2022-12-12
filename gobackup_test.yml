@@ -106,15 +106,18 @@ models:
       password: 123456
       salt: false
       openssl: true
+    notifiers:
+      feishu:
+        type: feishu
+        url: https://open.feishu.cn/open-apis/bot/v2/hook/a8fb64fa-8f28-46f5-ba7a-c2d0a54a7871
+      dingtalk:
+        type: dingtalk
+        url: https://oapi.dingtalk.com/robot/send?access_token=102f9b03e717078acf830a692e78a07092aca8b6a7fc3f5c2c048baf25de1370
     storages:
-      azure:
-        type: azure
-        keep: 20
-        account: my-storage-account
-        timeout: 300
-        tenant_id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-        client_id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-        client_secret: xxxxxxxx
+      local:
+        type: local
+        keep: 10
+        path: /Users/jason/Downloads/backup1
     archive:
       includes:
         - /Users/jason/work/imageproxy
