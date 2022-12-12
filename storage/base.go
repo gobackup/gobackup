@@ -110,6 +110,8 @@ func runModel(model config.ModelConfig, archivePath string, storageConfig config
 		s = &S3{Base: base, Service: "r2"}
 	case "spaces":
 		s = &S3{Base: base, Service: "spaces"}
+	case "azure":
+		s = &Azure{Base: base}
 	default:
 		return fmt.Errorf("[%s] storage type has not implement", storageConfig.Type)
 	}

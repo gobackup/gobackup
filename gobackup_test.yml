@@ -28,6 +28,21 @@ models:
         username: ubuntu
         password: password
         timeout: 300
+      s3:
+        type: s3
+        keep: 20
+        bucket: gobackup-test
+        region: ap-southeast-1
+        path: backups
+        access_key_id: xxxxxxxx
+        secret_access_key: xxxxxxxxxxxx
+      azure:
+        type: azure
+        account: my-storage-account
+        # container: gobackup
+        tenant_id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+        client_id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+        client_secret: xxxxxxxx
     databases:
       dummy_test:
         type: mysql
@@ -71,27 +86,16 @@ models:
   test_model:
     compress_with:
       type: tgz
-    store_with:
-      type: ftp
-      keep: 15
-      path: /backup1/foo
-      host: your-host.com
-      port: 21
-      timeout: 30
-      username: user1
-      password: pass1
-  test_s3:
-    compress_with:
-      type: tgz
     storages:
-      s3_southeast:
-        type: s3
-        keep: 20
-        bucket: gobackup-test
-        region: ap-southeast-1
-        path: backups
-        access_key_id: Ohsgwk86h2ks
-        secret_access_key: Ojsiw729wujhKdhwsIIOw9173
+      ftp:
+        type: ftp
+        keep: 15
+        path: /backup1/foo
+        host: your-host.com
+        port: 21
+        timeout: 30
+        username: user1
+        password: pass1
   demo:
     schedule:
       every: "30s"
@@ -103,14 +107,14 @@ models:
       salt: false
       openssl: true
     storages:
-      s3_kodo:
-        type: kodo
+      azure:
+        type: azure
         keep: 20
-        bucket: movieso
-        path: backups
+        account: my-storage-account
         timeout: 300
-        access_key_id:
-        secret_access_key:
+        tenant_id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+        client_id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+        client_secret: xxxxxxxx
     archive:
       includes:
         - /Users/jason/work/imageproxy
