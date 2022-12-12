@@ -12,6 +12,7 @@ import (
 	"github.com/gobackup/gobackup/database"
 	"github.com/gobackup/gobackup/encryptor"
 	"github.com/gobackup/gobackup/logger"
+	"github.com/gobackup/gobackup/notifier"
 	"github.com/gobackup/gobackup/splitter"
 	"github.com/gobackup/gobackup/storage"
 )
@@ -22,8 +23,17 @@ type Model struct {
 }
 
 // Perform model
-func (m Model) Perform() {
+func (m Model) Perform() (err error) {
 	logger := logger.Tag(fmt.Sprintf("Model: %s", m.Config.Name))
+
+	defer func() {
+		if err != nil {
+			logger.Error(err)
+			notifier.Failure(m.Config, err.Error())
+		} else {
+			notifier.Success(m.Config)
+		}
+	}()
 
 	logger.Info("WorkDir:", m.Config.DumpPath)
 
@@ -35,44 +45,39 @@ func (m Model) Perform() {
 		m.cleanup()
 	}()
 
-	err := database.Run(m.Config)
+	err = database.Run(m.Config)
 	if err != nil {
-		logger.Error(err)
 		return
 	}
 
 	if m.Config.Archive != nil {
 		err = archive.Run(m.Config)
 		if err != nil {
-			logger.Error(err)
 			return
 		}
 	}
 
 	archivePath, err := compressor.Run(m.Config)
 	if err != nil {
-		logger.Error(err)
 		return
 	}
 
 	archivePath, err = encryptor.Run(archivePath, m.Config)
 	if err != nil {
-		logger.Error(err)
 		return
 	}
 
 	archivePath, err = splitter.Run(archivePath, m.Config)
 	if err != nil {
-		logger.Error(err)
 		return
 	}
 
 	err = storage.Run(m.Config, archivePath)
 	if err != nil {
-		logger.Error(err)
 		return
 	}
 
+	return nil
 }
 
 // Cleanup model temp files

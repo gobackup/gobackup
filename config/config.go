@@ -58,6 +58,7 @@ type ModelConfig struct {
 	Splitter     *viper.Viper
 	Databases    map[string]SubConfig
 	Storages     map[string]SubConfig
+	Notifiers    map[string]SubConfig
 	Viper        *viper.Viper
 }
 
@@ -164,6 +165,8 @@ func loadModel(key string) (model ModelConfig) {
 		logger.Fatalf("No storage found in model %s", model.Name)
 	}
 
+	loadNotifiersConfig(&model)
+
 	return
 }
 
@@ -218,6 +221,19 @@ func loadStoragesConfig(model *ModelConfig) {
 		}
 	}
 	model.Storages = storageConfigs
+}
+
+func loadNotifiersConfig(model *ModelConfig) {
+	subViper := model.Viper.Sub("notifiers")
+	model.Notifiers = map[string]SubConfig{}
+	for key := range model.Viper.GetStringMap("notifiers") {
+		dbViper := subViper.Sub(key)
+		model.Notifiers[key] = SubConfig{
+			Name:  key,
+			Type:  dbViper.GetString("type"),
+			Viper: dbViper,
+		}
+	}
 }
 
 // GetModelConfigByName get model config by name

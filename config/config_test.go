@@ -12,7 +12,7 @@ func init() {
 
 func TestModelsLength(t *testing.T) {
 	assert.Equal(t, Exist, true)
-	assert.Equal(t, len(Models), 5)
+	assert.Equal(t, len(Models), 4)
 }
 
 func TestModel(t *testing.T) {
