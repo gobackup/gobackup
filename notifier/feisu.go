@@ -17,7 +17,7 @@ type feishuPayloadContent struct {
 func NewFeishu(base *Base) *Webhook {
 	return &Webhook{
 		Base:        *base,
-		Service:     "feishu",
+		Service:     "Feishu",
 		method:      "POST",
 		contentType: "application/json",
 		buildBody: func(title, message string) ([]byte, error) {

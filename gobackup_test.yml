@@ -116,6 +116,9 @@ models:
       discord:
         type: discord
         url: https://discordapp.com/api/webhooks/1051827238108135424/lWrAw9okY-6LCimnWlHn3pKMr-e3rr4fWn5rKgcjfn92n_RiZbRK9M7Kse-esKDBepV2
+      slack:
+        type: slack
+        url: https://hooks.slack.com/services/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
     storages:
       local:
         type: local

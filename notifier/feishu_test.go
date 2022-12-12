@@ -10,6 +10,7 @@ func Test_Feishu(t *testing.T) {
 	base := &Base{}
 
 	s := NewFeishu(base)
+	assert.Equal(t, "Feishu", s.Service)
 	assert.Equal(t, "POST", s.method)
 	assert.Equal(t, "application/json", s.contentType)
 

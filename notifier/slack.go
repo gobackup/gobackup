@@ -5,19 +5,19 @@ import (
 	"fmt"
 )
 
-type discordPayload struct {
-	Content string `json:"content"`
+type slackPayload struct {
+	Text string `json:"text"`
 }
 
-func NewDiscord(base *Base) *Webhook {
+func NewSlack(base *Base) *Webhook {
 	return &Webhook{
 		Base:        *base,
-		Service:     "Discord",
+		Service:     "Slack",
 		method:      "POST",
 		contentType: "application/json",
 		buildBody: func(title, message string) ([]byte, error) {
-			payload := discordPayload{
-				Content: fmt.Sprintf("%s\n\n%s", title, message),
+			payload := slackPayload{
+				Text: fmt.Sprintf("%s\n\n%s", title, message),
 			}
 
 			return json.Marshal(payload)

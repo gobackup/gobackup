@@ -17,7 +17,7 @@ type dingtalkPayloadText struct {
 func NewDingtalk(base *Base) *Webhook {
 	return &Webhook{
 		Base:        *base,
-		Service:     "feishu",
+		Service:     "DingTalk",
 		method:      "POST",
 		contentType: "application/json",
 		buildBody: func(title, message string) ([]byte, error) {

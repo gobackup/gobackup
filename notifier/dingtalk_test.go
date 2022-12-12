@@ -10,6 +10,7 @@ func Test_Dingtalk(t *testing.T) {
 	base := &Base{}
 
 	s := NewDingtalk(base)
+	assert.Equal(t, "DingTalk", s.Service)
 	assert.Equal(t, "POST", s.method)
 	assert.Equal(t, "application/json", s.contentType)
 

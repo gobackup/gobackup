@@ -45,6 +45,8 @@ func newNotifier(name string, config config.SubConfig) (Notifier, *Base, error) 
 		return NewDingtalk(base), base, nil
 	case "discord":
 		return NewDiscord(base), base, nil
+	case "slack":
+		return NewSlack(base), base, nil
 	}
 
 	return nil, nil, fmt.Errorf("Notifier: %s is not supported", name)
