@@ -22,5 +22,12 @@ func NewDiscord(base *Base) *Webhook {
 
 			return json.Marshal(payload)
 		},
+		checkResult: func(status int, body []byte) error {
+			if status != 200 {
+				return fmt.Errorf("status: %d, body: %s", status, string(body))
+			}
+
+			return nil
+		},
 	}
 }

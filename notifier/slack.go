@@ -9,6 +9,8 @@ type slackPayload struct {
 	Text string `json:"text"`
 }
 
+// type: slack
+// url: https://hooks.slack.com/services/QC0UDT3L8/C58B274E5D0/pwFViFlRXon4WWxo30wevzyR
 func NewSlack(base *Base) *Webhook {
 	return &Webhook{
 		Base:        *base,
@@ -21,6 +23,13 @@ func NewSlack(base *Base) *Webhook {
 			}
 
 			return json.Marshal(payload)
+		},
+		checkResult: func(status int, body []byte) error {
+			if status != 200 {
+				return fmt.Errorf("status: %d, body: %s", status, string(body))
+			}
+
+			return nil
 		},
 	}
 }
