@@ -27,5 +27,5 @@ func Test_Feishu(t *testing.T) {
 	assert.EqualError(t, err, "status: 403, body: "+respBody)
 
 	err = s.checkResult(200, []byte(respBody))
-	assert.EqualError(t, err, "status: 200, body: "+respBody)
+	assert.NoError(t, err)
 }
