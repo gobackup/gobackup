@@ -26,7 +26,7 @@ var (
 )
 
 func newNotifier(name string, config config.SubConfig) (Notifier, *Base, error) {
-	base := Base{
+	base := &Base{
 		viper: config.Viper,
 		Name:  name,
 	}
@@ -38,11 +38,13 @@ func newNotifier(name string, config config.SubConfig) (Notifier, *Base, error) 
 
 	switch config.Type {
 	case "webhook":
-		return &Webhook{Base: base}, &base, nil
+		return &Webhook{Base: *base}, base, nil
 	case "feishu":
-		return NewFeishu(&base), &base, nil
+		return NewFeishu(base), base, nil
 	case "dingtalk":
-		return NewDingtalk(&base), &base, nil
+		return NewDingtalk(base), base, nil
+	case "discord":
+		return NewDiscord(base), base, nil
 	}
 
 	return nil, nil, fmt.Errorf("Notifier: %s is not supported", name)

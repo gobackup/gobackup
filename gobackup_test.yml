@@ -112,7 +112,10 @@ models:
         url: https://open.feishu.cn/open-apis/bot/v2/hook/a8fb64fa-8f28-46f5-ba7a-c2d0a54a7871
       dingtalk:
         type: dingtalk
-        url: https://oapi.dingtalk.com/robot/send?access_token=102f9b03e717078acf830a692e78a07092aca8b6a7fc3f5c2c048baf25de1370
+        url: https://oapi.dingtalk.com/robot/send?access_token=102f9b03e717078acf830a692e78a07092aca8b6a7fc3f5c2c048baf25de1370r
+      discord:
+        type: discord
+        url: https://discordapp.com/api/webhooks/1051827238108135424/lWrAw9okY-6LCimnWlHn3pKMr-e3rr4fWn5rKgcjfn92n_RiZbRK9M7Kse-esKDBepV2
     storages:
       local:
         type: local
