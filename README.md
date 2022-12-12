@@ -43,38 +43,16 @@ https://gobackup.github.io
 - MongoDB
 - SQLite
 
-### Archive
-
-Use `tar` command to archive many file or path into a `.tar` file.
-
-### Compressor
-
-| Type                            | Extension   | Parallel Support by |
-| ------------------------------- | ----------- | ------------------- |
-| `gz`, `tgz`, `taz`, `tar.gz`    | `.tar.gz`   | pigz                |
-| `Z`, `taZ`, `tar.Z`             | `.tar.Z`    |                     |
-| `bz2`, `tbz`, `tbz2`, `tar.bz2` | `.tar.bz2`  | pbzip2              |
-| `lz`, `tar.lz`                  | `.tar.lz`   |                     |
-| `lzma`, `tlz`, `tar.lzma`       | `.tar.lzma` |                     |
-| `lzo`, `tar.lzo`                | `.tar.lzo`  |                     |
-| `xz`, `txz`, `tar.xz`           | `.tar.xz`   | pixz                |
-| `zst`, `tzst`, `tar.zst`        | `.tar.zst`  |                     |
-| `tar`                           | `.tar`      |                     |
-| default                         | `.tar`      |                     |
-
-### Encryptor
-
-- OpenSSL - `aes-256-cbc` encrypt
-
 ### Storages
 
 - Local
 - FTP
-- SCP - Upload via SSH copy
 - SFTP
+- SCP - Upload via SSH copy
 - [Amazon S3](https://aws.amazon.com/s3)
 - [Aliyun OSS](https://www.aliyun.com/product/oss)
 - [Google Cloud Storage](https://cloud.google.com/storage)
+- [Azure Blob Storage](https://azure.microsoft.com/en-us/products/storage/blobs)
 - [Backblaze B2 Cloud Storage](https://www.backblaze.com/b2)
 - [Cloudflare R2](https://www.cloudflare.com/products/r2)
 - [DigitalOcean Spaces](https://www.digitalocean.com/products/spaces)
@@ -82,6 +60,18 @@ Use `tar` command to archive many file or path into a `.tar` file.
 - [UCloud US3](https://docs.ucloud.cn/ufile/introduction/concept)
 - [Qiniu Kodo](https://www.qiniu.com/products/kodo)
 - [WebDAV](http://www.webdav.org)
+
+## Notifier
+
+> since: 1.5.0
+
+Send notification when backup has success or failed.
+
+- Discord
+- Slack
+- Feishu
+- DingTalk
+- GitHub (Comment on Issue)
 
 ## Installation
 
