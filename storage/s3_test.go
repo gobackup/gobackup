@@ -19,7 +19,7 @@ func Test_providerName(t *testing.T) {
 		"us3":    {"UCloud US3", "s3-cn-bj.ufileos.com", "s3-cn-bj"},
 		"cos":    {"QCloud COS", "cos.ap-nanjing.myqcloud.com", "ap-nanjing"},
 		"kodo":   {"Qiniu Kodo", "s3-cn-east-1.qiniucs.com", "cn-east-1"},
-		"r2":     {"Cloudflare R2", "us-east-1.r2.cloudflarestorage.com", "us-east-1"},
+		"r2":     {"Cloudflare R2", ".r2.cloudflarestorage.com", "us-east-1"},
 		"spaces": {"DigitalOcean Spaces", "nyc1.digitaloceanspaces.com", "nyc1"},
 	}
 

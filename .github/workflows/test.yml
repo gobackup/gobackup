@@ -1,8 +1,15 @@
 name: Build & Test
-on: [push]
+on:
+  pull_request:
+  push:
+    branches:
+      - "*"
+    tags:
+      - "*"
 jobs:
   build:
-    name: Build
+    name: Test
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     runs-on: ubuntu-latest
     env:
       GO_ENV: test
