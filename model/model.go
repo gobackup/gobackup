@@ -47,39 +47,33 @@ func (m Model) Perform() (err error) {
 
 	err = database.Run(m.Config)
 	if err != nil {
-		logger.Error(err)
 		return
 	}
 
 	if m.Config.Archive != nil {
 		err = archive.Run(m.Config)
 		if err != nil {
-			logger.Error(err)
 			return
 		}
 	}
 
 	archivePath, err := compressor.Run(m.Config)
 	if err != nil {
-		logger.Error(err)
 		return
 	}
 
 	archivePath, err = encryptor.Run(archivePath, m.Config)
 	if err != nil {
-		logger.Error(err)
 		return
 	}
 
 	archivePath, err = splitter.Run(archivePath, m.Config)
 	if err != nil {
-		logger.Error(err)
 		return
 	}
 
 	err = storage.Run(m.Config, archivePath)
 	if err != nil {
-		logger.Error(err)
 		return
 	}
 
