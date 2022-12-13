@@ -21,6 +21,7 @@ func Test_providerName(t *testing.T) {
 		"kodo":   {"Qiniu Kodo", "s3-cn-east-1.qiniucs.com", "cn-east-1"},
 		"r2":     {"Cloudflare R2", ".r2.cloudflarestorage.com", "us-east-1"},
 		"spaces": {"DigitalOcean Spaces", "nyc1.digitaloceanspaces.com", "nyc1"},
+		"bos":    {"Baidu BOS", "s3.bj.bcebos.com", "bj"},
 	}
 
 	base, _ := newBase(config.ModelConfig{}, "test", config.SubConfig{})
