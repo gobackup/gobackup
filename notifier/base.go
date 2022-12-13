@@ -37,6 +37,8 @@ func newNotifier(name string, config config.SubConfig) (Notifier, *Base, error) 
 	base.onFailure = base.viper.GetBool("on_failure")
 
 	switch config.Type {
+	case "mail":
+		return NewMail(base), base, nil
 	case "webhook":
 		return &Webhook{Base: *base}, base, nil
 	case "feishu":
@@ -49,6 +51,10 @@ func newNotifier(name string, config config.SubConfig) (Notifier, *Base, error) 
 		return NewSlack(base), base, nil
 	case "github":
 		return NewGitHub(base), base, nil
+	case "telegram":
+		return NewTelegram(base), base, nil
+	case "postmark":
+		return NewPostmark(base), base, nil
 	}
 
 	return nil, nil, fmt.Errorf("Notifier: %s is not supported", name)
