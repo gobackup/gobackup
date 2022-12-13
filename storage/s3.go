@@ -52,6 +52,8 @@ func (s S3) providerName() string {
 		return "Cloudflare R2"
 	case "spaces":
 		return "DigitalOcean Spaces"
+	case "bos":
+		return "Baidu BOS"
 	}
 
 	return "AWS S3"
@@ -73,6 +75,8 @@ func (s S3) defaultRegion() string {
 		return "us-east-1"
 	case "spaces":
 		return "nyc1"
+	case "bos":
+		return "bj"
 	}
 
 	return "us-east-1"
@@ -92,6 +96,8 @@ func (s S3) defaultEndpoint() *string {
 		return aws.String(fmt.Sprintf("%s.r2.cloudflarestorage.com", s.viper.GetString("account_id")))
 	case "spaces":
 		return aws.String(fmt.Sprintf("%s.digitaloceanspaces.com", s.viper.GetString("region")))
+	case "bos":
+		return aws.String(fmt.Sprintf("s3.%s.bcebos.com", s.viper.GetString("region")))
 	}
 
 	return aws.String("")

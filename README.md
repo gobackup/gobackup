@@ -59,6 +59,7 @@ https://gobackup.github.io
 - [QCloud COS](https://cloud.tencent.com/product/cos)
 - [UCloud US3](https://docs.ucloud.cn/ufile/introduction/concept)
 - [Qiniu Kodo](https://www.qiniu.com/products/kodo)
+- [Baidu BOS](https://cloud.baidu.com/product/bos.html)
 - [WebDAV](http://www.webdav.org)
 
 ## Notifier

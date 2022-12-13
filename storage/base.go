@@ -110,6 +110,8 @@ func runModel(model config.ModelConfig, archivePath string, storageConfig config
 		s = &S3{Base: base, Service: "r2"}
 	case "spaces":
 		s = &S3{Base: base, Service: "spaces"}
+	case "bos":
+		s = &S3{Base: base, Service: "bos"}
 	case "azure":
 		s = &Azure{Base: base}
 	default:
