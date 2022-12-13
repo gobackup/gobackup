@@ -39,7 +39,7 @@ func Test_NewGitHub(t *testing.T) {
 	}
 
 	s := NewGitHub(base)
-	s.viper.Set("access_token", "foo_bar_dar")
+	s.viper.Set("token", "this-is-github-access-token")
 	s.viper.Set("url", "https://github.com/huacnlee/gobackup/issues/111")
 
 	assert.Equal(t, "GitHub Comment", s.Service)
@@ -59,7 +59,7 @@ func Test_NewGitHub(t *testing.T) {
 	assert.Equal(t, "https://api.github.com/repos/huacnlee/gobackup/issues/111/comments", url)
 
 	headers := s.buildHeaders()
-	assert.Equal(t, "Bearer foo_bar_dar", headers["Authorization"])
+	assert.Equal(t, "Bearer this-is-github-access-token", headers["Authorization"])
 
 	respBody := `{"message":"Must have admin rights to Repository.","documentation_url":"https://docs.github.com/rest"}`
 	err = s.checkResult(404, []byte(respBody))

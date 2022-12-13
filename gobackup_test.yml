@@ -122,7 +122,7 @@ models:
       github:
         type: github
         url: https://github.com/gobackup/gobackup/pull/111
-        access_token: xxxxxxxxxxxx
+        token: xxxxxxxxxxxx
       telegram:
         type: telegram
         chat_id: "@gobackuptest"
