@@ -40,7 +40,7 @@ func newNotifier(name string, config config.SubConfig) (Notifier, *Base, error) 
 	case "mail":
 		return NewMail(base), base, nil
 	case "webhook":
-		return &Webhook{Base: *base}, base, nil
+		return NewWebhook(base), base, nil
 	case "feishu":
 		return NewFeishu(base), base, nil
 	case "dingtalk":
