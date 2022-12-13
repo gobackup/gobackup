@@ -40,5 +40,5 @@ func Test_Mail(t *testing.T) {
 	assert.Equal(t, "smtp.myhost.com:587", mail.getAddr())
 
 	body := mail.buildBody("This is title", "This is body")
-	assert.Equal(t, "From: from@myhost.com\nTo: to@myhost.com,to1@myhost.com\nSubject: This is title\nContent-Type: text/plain; charset=\"utf-8\"\nContent-Transfer-Encoding: base64\nVGhpcyBpcyBib2R5", body)
+	assert.Equal(t, "Content-Transfer-Encoding: base64\nContent-Type: text/plain; charset=\"utf-8\"\nFrom: from@myhost.com\nSubject: This is title\nTo: to@myhost.com,to1@myhost.com\nVGhpcyBpcyBib2R5", body)
 }

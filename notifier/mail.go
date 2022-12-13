@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/smtp"
+	"sort"
 	"strings"
 
 	"github.com/gobackup/gobackup/logger"
@@ -53,17 +54,24 @@ func (s Mail) getAuth() smtp.Auth {
 }
 
 func (s Mail) buildBody(title string, message string) string {
-	header := make(map[string]string)
-	header["From"] = s.from
-	header["To"] = strings.Join(s.to, ",")
-	header["Subject"] = title
-	header["Content-Type"] = `text/plain; charset="utf-8"`
-	header["Content-Transfer-Encoding"] = "base64"
+	headers := make(map[string]string)
+	headers["From"] = s.from
+	headers["To"] = strings.Join(s.to, ",")
+	headers["Subject"] = title
+	headers["Content-Type"] = `text/plain; charset="utf-8"`
+	headers["Content-Transfer-Encoding"] = "base64"
+
+	// Sort headers by key
+	var keys []string
+	for k := range headers {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
 
 	headerTexts := []string{}
 
-	for k, v := range header {
-		headerTexts = append(headerTexts, fmt.Sprintf("%s: %s", k, v))
+	for _, k := range keys {
+		headerTexts = append(headerTexts, fmt.Sprintf("%s: %s", k, headers[k]))
 	}
 
 	return fmt.Sprintf("%s\n%s", strings.Join(headerTexts, "\n"), base64.StdEncoding.EncodeToString([]byte(message)))
