@@ -9,11 +9,13 @@ on:
 jobs:
   build:
     name: Test
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     runs-on: ubuntu-latest
     env:
       GO_ENV: test
     steps:
+      - name: Skip Duplicate Actions
+        uses: fkirc/skip-duplicate-actions@v5.3.0
+
       - name: Set up Go
         uses: actions/setup-go@v1
         with:

@@ -67,11 +67,15 @@ https://gobackup.github.io
 
 Send notification when backup has success or failed.
 
+- Mail (SMTP)
+- Webhook
 - Discord
 - Slack
 - Feishu
 - DingTalk
 - GitHub (Comment on Issue)
+- Telegram
+- Postmark
 
 ## Installation
 

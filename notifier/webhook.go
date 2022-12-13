@@ -1,6 +1,7 @@
 package notifier
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -22,6 +23,43 @@ type Webhook struct {
 	buildHeaders    func() map[string]string
 }
 
+type webhookPayload struct {
+	Title   string `json:"title"`
+	Message string `json:"message"`
+}
+
+func NewWebhook(base *Base) *Webhook {
+	base.viper.SetDefault("method", "POST")
+
+	return &Webhook{
+		Base:        *base,
+		Service:     "Webhook",
+		method:      base.viper.GetString("method"),
+		contentType: "application/json",
+		buildBody: func(title, message string) ([]byte, error) {
+			return json.Marshal(webhookPayload{
+				Title:   title,
+				Message: message,
+			})
+		},
+		buildHeaders: func() map[string]string {
+			headers := make(map[string]string)
+			for key, value := range base.viper.GetStringMapString("headers") {
+				headers[key] = value
+			}
+
+			return headers
+		},
+		checkResult: func(status int, responseBody []byte) error {
+			if status == 200 {
+				return nil
+			}
+
+			return fmt.Errorf("status: %d, body: %s", status, string(responseBody))
+		},
+	}
+}
+
 func (s *Webhook) getLogger() logger.Logger {
 	return logger.Tag(fmt.Sprintf("Notifier: %s", s.Service))
 }
@@ -38,8 +76,6 @@ func (s *Webhook) webhookURL() (string, error) {
 
 func (s *Webhook) notify(title string, message string) error {
 	logger := s.getLogger()
-
-	s.viper.SetDefault("method", "POST")
 
 	url, err := s.webhookURL()
 	if err != nil {
