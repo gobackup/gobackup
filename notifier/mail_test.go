@@ -12,16 +12,16 @@ func Test_Mail(t *testing.T) {
 		viper: viper.New(),
 	}
 
-	base.viper.Set("from", "from@myhost.com")
+	base.viper.Set("username", "user@myhost.com")
 	base.viper.Set("to", "to@myhost.com,to1@myhost.com")
 	base.viper.Set("password", "this-is-password")
 	base.viper.Set("host", "smtp.myhost.com")
 
 	mail := NewMail(&base)
 
-	assert.Equal(t, "from@myhost.com", mail.from)
+	assert.Equal(t, "user@myhost.com", mail.from)
 	assert.Equal(t, []string{"to@myhost.com", "to1@myhost.com"}, mail.to)
-	assert.Equal(t, mail.from, mail.username)
+	assert.Equal(t, "user@myhost.com", mail.username)
 	assert.Equal(t, "this-is-password", mail.password)
 	assert.Equal(t, "smtp.myhost.com", mail.host)
 	assert.Equal(t, "25", mail.port)
@@ -31,14 +31,14 @@ func Test_Mail(t *testing.T) {
 	auth := mail.getAuth()
 	assert.NotNil(t, auth)
 
-	base.viper.Set("username", "foobar")
+	base.viper.Set("from", "from@myhost.com")
 	base.viper.Set("port", "587")
 
 	mail = NewMail(&base)
-	assert.Equal(t, "foobar", mail.username)
+	assert.Equal(t, "from@myhost.com", mail.from)
 	assert.Equal(t, "587", mail.port)
 	assert.Equal(t, "smtp.myhost.com:587", mail.getAddr())
 
 	body := mail.buildBody("This is title", "This is body")
-	assert.Equal(t, "To: to@myhost.com,to1@myhost.com\r\nSubject: This is title\r\n\r\nThis is body\r\n", body)
+	assert.Equal(t, "From: from@myhost.com\nTo: to@myhost.com,to1@myhost.com\nSubject: This is title\nContent-Type: text/plain; charset=\"utf-8\"\nContent-Transfer-Encoding: base64\nVGhpcyBpcyBib2R5", body)
 }

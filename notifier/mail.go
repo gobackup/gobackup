@@ -1,9 +1,12 @@
 package notifier
 
 import (
+	"encoding/base64"
 	"fmt"
 	"net/smtp"
 	"strings"
+
+	"github.com/gobackup/gobackup/logger"
 )
 
 type Mail struct {
@@ -17,18 +20,24 @@ type Mail struct {
 }
 
 func NewMail(base *Base) *Mail {
+	logger := logger.Tag("Notifier: mail")
 	mail := &Mail{}
 
 	base.viper.SetDefault("port", "25")
 
-	mail.from = base.viper.GetString("from")
-	mail.to = strings.Split(base.viper.GetString("to"), ",")
-	if len(base.viper.GetString("username")) > 0 {
-		mail.username = base.viper.GetString("username")
-	} else {
-		mail.username = mail.from
-	}
+	mail.username = base.viper.GetString("username")
 	mail.password = base.viper.GetString("password")
+
+	mail.to = strings.Split(base.viper.GetString("to"), ",")
+	if len(base.viper.GetString("username")) == 0 {
+		logger.Fatalf("username is required for mail notifier")
+	}
+
+	mail.from = base.viper.GetString("from")
+	if len(mail.from) == 0 {
+		mail.from = mail.username
+	}
+
 	mail.host = base.viper.GetString("host")
 	mail.port = base.viper.GetString("port")
 
@@ -44,10 +53,20 @@ func (s Mail) getAuth() smtp.Auth {
 }
 
 func (s Mail) buildBody(title string, message string) string {
-	return fmt.Sprintf("To: %s\r\n"+
-		"Subject: %s\r\n"+
-		"\r\n"+
-		"%s\r\n", strings.Join(s.to, ","), title, message)
+	header := make(map[string]string)
+	header["From"] = s.from
+	header["To"] = strings.Join(s.to, ",")
+	header["Subject"] = title
+	header["Content-Type"] = `text/plain; charset="utf-8"`
+	header["Content-Transfer-Encoding"] = "base64"
+
+	headerTexts := []string{}
+
+	for k, v := range header {
+		headerTexts = append(headerTexts, fmt.Sprintf("%s: %s", k, v))
+	}
+
+	return fmt.Sprintf("%s\n%s", strings.Join(headerTexts, "\n"), base64.StdEncoding.EncodeToString([]byte(message)))
 }
 
 func (s *Mail) notify(title string, message string) error {
