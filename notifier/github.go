@@ -64,7 +64,7 @@ func NewGitHub(base *Base) *Webhook {
 		},
 		buildHeaders: func() map[string]string {
 			return map[string]string{
-				"Authorization": fmt.Sprintf("Bearer %s", base.viper.GetString("access_token")),
+				"Authorization": fmt.Sprintf("Bearer %s", base.viper.GetString("token")),
 			}
 		},
 		checkResult: func(status int, body []byte) error {
