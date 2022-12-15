@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
+	"github.com/dustin/go-humanize"
 	"github.com/hako/durafmt"
 	"google.golang.org/api/option"
 
@@ -107,7 +108,7 @@ func (s *GCS) upload(fileKey string) (err error) {
 		object := s.client.Bucket(s.bucket).Object(remotePath).If(storage.Conditions{DoesNotExist: true})
 		writer := object.NewWriter(ctx)
 
-		logger.Info(fmt.Sprintf("-> Uploading %s (%d MiB)...", remotePath, info.Size()/(1024*1024)))
+		logger.Infof("-> Uploading (%s)...", humanize.Bytes(uint64(info.Size())))
 
 		start := time.Now()
 

@@ -13,8 +13,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/gobackup/gobackup/logger"
+	"github.com/dustin/go-humanize"
 	"github.com/hako/durafmt"
+
+	"github.com/gobackup/gobackup/logger"
 )
 
 // S3 - Amazon S3 storage
@@ -184,7 +186,7 @@ func (s *S3) upload(fileKey string) (err error) {
 			Body:   f,
 		}
 
-		logger.Info(fmt.Sprintf("-> Uploading (%d MiB)...", info.Size()/(1024*1024)))
+		logger.Infof("-> Uploading (%s)...", humanize.Bytes(uint64(info.Size())))
 
 		start := time.Now()
 

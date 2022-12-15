@@ -9,10 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hako/durafmt"
-
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
+	"github.com/dustin/go-humanize"
+	"github.com/hako/durafmt"
+
 	"github.com/gobackup/gobackup/logger"
 )
 
@@ -114,7 +115,7 @@ func (s *Azure) upload(fileKey string) (err error) {
 
 		remotePath := key
 
-		logger.Info(fmt.Sprintf("-> Uploading %s (%d MiB)...", remotePath, info.Size()/(1024*1024)))
+		logger.Infof("-> Uploading (%s)...", humanize.Bytes(uint64(info.Size())))
 
 		start := time.Now()
 		if _, err = s.client.UploadFile(ctx, s.container, remotePath, f, nil); err != nil {
