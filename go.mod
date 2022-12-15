@@ -9,6 +9,7 @@ require (
 	github.com/aliyun/aliyun-oss-go-sdk v2.1.8+incompatible
 	github.com/aws/aws-sdk-go v1.15.77
 	github.com/bramvdbogaerde/go-scp v1.2.0
+	github.com/dustin/go-humanize v1.0.0
 	github.com/fatih/color v0.0.0-20170523135355-570b54cabe6b
 	github.com/go-co-op/gocron v1.18.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
