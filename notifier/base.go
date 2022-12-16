@@ -55,6 +55,8 @@ func newNotifier(name string, config config.SubConfig) (Notifier, *Base, error) 
 		return NewTelegram(base), base, nil
 	case "postmark":
 		return NewPostmark(base), base, nil
+	case "sendgrid":
+		return NewSendGrid(base), base, nil
 	}
 
 	return nil, nil, fmt.Errorf("Notifier: %s is not supported", name)
