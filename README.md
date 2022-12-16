@@ -77,6 +77,7 @@ Send notification when backup has success or failed.
 - GitHub (Comment on Issue)
 - Telegram
 - Postmark
+- SendGrid
 
 ## Installation
 

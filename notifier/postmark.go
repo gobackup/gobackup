@@ -16,8 +16,8 @@ type postmarkPayload struct {
 }
 
 type postmarkResult struct {
-	ErrorCode int    `json:"ErrorCode"`
-	Message   string `json:"Message"`
+	Code    int    `json:"ErrorCode"`
+	Message string `json:"Message"`
 }
 
 // NewPostmark
@@ -61,7 +61,7 @@ func NewPostmark(base *Base) *Webhook {
 				return err
 			}
 
-			if result.ErrorCode != 0 {
+			if result.Code != 0 {
 				return fmt.Errorf("status: %d, body: %s", status, string(body))
 			}
 
