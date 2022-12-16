@@ -5,8 +5,8 @@ import (
 	"fmt"
 )
 
-// postmarkPayload
-// https://postmarkapp.com/developer/user-guide/send-email-with-api
+// sendgridPayload
+// https://docs.sendgrid.com/api-reference/mail-send/mail-send
 type sendgridPayload struct {
 	Personalizations []map[string]sendgridPersonalization `json:"personalizations"`
 	From             sendgridEmailInfo                    `json:"from"`
@@ -29,7 +29,7 @@ type sendgridContent struct {
 // type: sendgrid
 // from: from@your-host.com
 // to: your-email@xxx.com
-// token: xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+// token: xxxxxxxxxxxxxxxxxxx
 func NewSendGrid(base *Base) *Webhook {
 	return &Webhook{
 		Base:        *base,
