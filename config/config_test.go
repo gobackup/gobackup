@@ -1,18 +1,21 @@
 package config
 
 import (
+	"os"
 	"testing"
 
 	"github.com/longbridgeapp/assert"
 )
 
 func init() {
+	os.Setenv("S3_ACCESS_KEY_ID", "xxxxxxxxxxxxxxxxxxxx")
+	os.Setenv("S3_SECRET_ACCESS_KEY", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 	Init("../gobackup_test.yml")
 }
 
 func TestModelsLength(t *testing.T) {
 	assert.Equal(t, Exist, true)
-	assert.Equal(t, len(Models), 4)
+	assert.Equal(t, len(Models), 5)
 }
 
 func TestModel(t *testing.T) {
@@ -117,4 +120,12 @@ func Test_ScheduleConfig_String(t *testing.T) {
 		Enabled: false,
 	}
 	assert.Equal(t, schedule.String(), "disabled")
+}
+
+func TestExpandEnv(t *testing.T) {
+	model := GetModelConfigByName("expand_env")
+
+	assert.Equal(t, model.Storages["s3"].Type, "s3")
+	assert.Equal(t, model.Storages["s3"].Viper.GetString("access_key_id"), "xxxxxxxxxxxxxxxxxxxx")
+	assert.Equal(t, model.Storages["s3"].Viper.GetString("secret_access_key"), "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 }
