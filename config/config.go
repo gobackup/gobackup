@@ -123,12 +123,12 @@ func Init(configFile string) {
 			logger.Errorf("Load %s failed: %v", dotEnv, err)
 			return
 		}
+	}
 
-		cfg, _ := os.ReadFile(viperConfigFile)
-		if err := viper.ReadConfig(strings.NewReader(os.ExpandEnv(string(cfg)))); err != nil {
-			logger.Errorf("Load expanded config failed: %v", err)
-			return
-		}
+	cfg, _ := os.ReadFile(viperConfigFile)
+	if err := viper.ReadConfig(strings.NewReader(os.ExpandEnv(string(cfg)))); err != nil {
+		logger.Errorf("Load expanded config failed: %v", err)
+		return
 	}
 
 	viper.Set("useTempWorkDir", false)
