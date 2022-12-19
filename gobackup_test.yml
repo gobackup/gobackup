@@ -96,6 +96,19 @@ models:
         timeout: 30
         username: user1
         password: pass1
+  expand_env:
+    databases:
+      postgresql:
+        type: postgresql
+        database: demo
+    storages:
+      s3:
+        type: s3
+        bucket: gobackup-test
+        region: ap-southeast-1
+        path: backups
+        access_key_id: $S3_ACCESS_KEY_ID
+        secret_access_key: ${S3_SECRET_ACCESS_KEY}
   demo:
     schedule:
       every: "30s"
@@ -118,16 +131,3 @@ models:
       excludes:
         - /home/ubuntu/.ssh/known_hosts
         - /etc/logrotate.d/syslog
-  expand_env:
-    databases:
-      postgresql:
-        type: postgresql
-        database: demo
-    storages:
-      s3:
-        type: s3
-        bucket: gobackup-test
-        region: ap-southeast-1
-        path: backups
-        access_key_id: $S3_ACCESS_KEY_ID
-        secret_access_key: ${S3_SECRET_ACCESS_KEY}

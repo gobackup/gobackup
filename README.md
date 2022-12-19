@@ -76,6 +76,7 @@ Send notification when backup has success or failed.
 - DingTalk
 - GitHub (Comment on Issue)
 - Telegram
+- AWS SES
 - Postmark
 - SendGrid
 

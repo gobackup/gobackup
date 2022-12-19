@@ -98,6 +98,8 @@ func main() {
 
 				dm := &daemon.Context{
 					LogFileName: filepath.Join(config.GoBackupDir, "gobackup.log"),
+					PidFileName: filepath.Join(config.GoBackupDir, "gobackup.pid"),
+					PidFilePerm: 0644,
 					WorkDir:     "./",
 					Args:        args,
 				}
