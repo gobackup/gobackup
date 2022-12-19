@@ -10,7 +10,6 @@ import (
 
 type SES struct {
 	Base
-	region string
 	client *ses.SES
 }
 
@@ -18,7 +17,6 @@ type SES struct {
 // region: us-east-1
 // access_key_id: your-access-key-id
 // secret_access_key: your-secret-access-key
-// url: https://hooks.slack.com/services/QC0UDT3L8/C58B274E5D0/pwFViFlRXon4WWxo30wevzyR
 func NewSES(base *Base) *SES {
 	cfg := aws.NewConfig()
 	base.viper.SetDefault("region", "us-east-1")
