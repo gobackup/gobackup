@@ -17,7 +17,7 @@ import (
 // host: localhost
 // port: 5432
 // socket:
-// database: test
+// database:
 // username:
 // password:
 type PostgreSQL struct {

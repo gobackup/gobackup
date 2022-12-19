@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 
 	"github.com/gobackup/gobackup/logger"
@@ -112,6 +114,21 @@ func Init(configFile string) {
 	if info, _ := os.Stat(viperConfigFile); info.Mode()&(1<<2) != 0 {
 		// max permission: 0770
 		logger.Warnf("Other users are able to access %s with mode %v", viperConfigFile, info.Mode())
+	}
+
+	// load .env if exists in the same direcotry of used config file and expand variables in the config
+	dotEnv := filepath.Join(filepath.Dir(viperConfigFile), ".env")
+	if _, err := os.Stat(dotEnv); err == nil {
+		if err := godotenv.Load(dotEnv); err != nil {
+			logger.Errorf("Load %s failed: %v", dotEnv, err)
+			return
+		}
+	}
+
+	cfg, _ := os.ReadFile(viperConfigFile)
+	if err := viper.ReadConfig(strings.NewReader(os.ExpandEnv(string(cfg)))); err != nil {
+		logger.Errorf("Load expanded config failed: %v", err)
+		return
 	}
 
 	viper.Set("useTempWorkDir", false)
