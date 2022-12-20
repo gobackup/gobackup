@@ -18,8 +18,8 @@ type Encryptor interface {
 	perform() (encryptPath string, err error)
 }
 
-func newBase(archivePath string, model config.ModelConfig) (base Base) {
-	base = Base{
+func newBase(archivePath string, model config.ModelConfig) (base *Base) {
+	base = &Base{
 		archivePath: archivePath,
 		model:       model,
 		viper:       model.EncryptWith.Viper,
@@ -35,18 +35,18 @@ func Run(archivePath string, model config.ModelConfig) (encryptPath string, err 
 	var enc Encryptor
 	switch model.EncryptWith.Type {
 	case "openssl":
-		enc = &OpenSSL{Base: base}
+		enc = NewOpenSSL(base)
 	default:
 		encryptPath = archivePath
 		return
 	}
 
-	logger.Info("=> Encrypt | " + model.EncryptWith.Type)
+	logger.Info("encrypt | " + model.EncryptWith.Type)
 	encryptPath, err = enc.perform()
 	if err != nil {
 		return
 	}
-	logger.Info("->", encryptPath)
+	logger.Info("encrypted:", encryptPath)
 
 	// save Extension
 	model.Viper.Set("Ext", model.Viper.GetString("Ext")+".enc")

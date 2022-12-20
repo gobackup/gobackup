@@ -119,6 +119,7 @@ models:
       password: 123456
       salt: false
       openssl: true
+      args: -pbkdf2
     notifiers:
     storages:
       local:

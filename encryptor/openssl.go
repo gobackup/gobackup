@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gobackup/gobackup/helper"
+	"github.com/gobackup/gobackup/logger"
 )
 
 // OpenSSL encryptor for use openssl aes-256-cbc
@@ -11,39 +12,40 @@ import (
 // - base64: false
 // - salt: true
 // - password:
-// - pbkdf2: true
-// - iter: 10000
+// - args:
 type OpenSSL struct {
 	Base
-	salt     bool
-	base64   bool
-	iter     int
-	pbkdf2   bool
-	password string
+	salt        bool
+	base64      bool
+	password    string
+	args        string
+	encryptPath string
+}
+
+func NewOpenSSL(base *Base) *OpenSSL {
+	base.viper.SetDefault("salt", true)
+	base.viper.SetDefault("base64", false)
+	base.viper.SetDefault("args", "")
+
+	return &OpenSSL{
+		Base:        *base,
+		salt:        base.viper.GetBool("salt"),
+		base64:      base.viper.GetBool("base64"),
+		password:    base.viper.GetString("password"),
+		args:        base.viper.GetString("args"),
+		encryptPath: base.archivePath + ".enc",
+	}
 }
 
 func (enc *OpenSSL) perform() (encryptPath string, err error) {
-	sslViper := enc.viper
-	sslViper.SetDefault("salt", true)
-	sslViper.SetDefault("base64", false)
-	sslViper.SetDefault("iter", 10000)
-	sslViper.SetDefault("pbkdf2", true)
-
-	enc.salt = sslViper.GetBool("salt")
-	enc.base64 = sslViper.GetBool("base64")
-	enc.password = sslViper.GetString("password")
-	enc.pbkdf2 = sslViper.GetBool("pbkdf2")
-	enc.password = sslViper.GetString("password")
-
 	if len(enc.password) == 0 {
 		err = fmt.Errorf("password option is required")
 		return
 	}
 
-	encryptPath = enc.archivePath + ".enc"
-
 	opts := enc.options()
-	opts = append(opts, "-in", enc.archivePath, "-out", encryptPath)
+	opts = append(opts, "-in", enc.archivePath, "-out", enc.encryptPath)
+	logger.Infof("openssl %s", opts)
 	_, err = helper.Exec("openssl", opts...)
 	return
 }
@@ -56,12 +58,10 @@ func (enc *OpenSSL) options() (opts []string) {
 	if enc.salt {
 		opts = append(opts, "-salt")
 	}
-	if enc.iter > 0 {
-		opts = append(opts, "-iter", fmt.Sprintf("%d", enc.iter))
+	if len(enc.args) > 0 {
+		opts = append(opts, enc.args)
 	}
-	if enc.pbkdf2 {
-		opts = append(opts, "-pbkdf2")
-	}
+
 	opts = append(opts, `-k`, enc.password)
 	return opts
 }
