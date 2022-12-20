@@ -118,8 +118,7 @@ models:
       type: openssl
       password: 123456
       salt: false
-      openssl: true
-      args: -pbkdf2
+      chiper: rc4
     notifiers:
     storages:
       local:

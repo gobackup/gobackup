@@ -2,13 +2,14 @@ package encryptor
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/gobackup/gobackup/helper"
-	"github.com/gobackup/gobackup/logger"
 )
 
 // OpenSSL encryptor for use openssl aes-256-cbc
 //
+// - chiper: aes-256-cbc
 // - base64: false
 // - salt: true
 // - password:
@@ -19,6 +20,7 @@ type OpenSSL struct {
 	base64      bool
 	password    string
 	args        string
+	chiper      string
 	encryptPath string
 }
 
@@ -26,6 +28,7 @@ func NewOpenSSL(base *Base) *OpenSSL {
 	base.viper.SetDefault("salt", true)
 	base.viper.SetDefault("base64", false)
 	base.viper.SetDefault("args", "")
+	base.viper.SetDefault("chiper", "aes-256-cbc")
 
 	return &OpenSSL{
 		Base:        *base,
@@ -33,6 +36,7 @@ func NewOpenSSL(base *Base) *OpenSSL {
 		base64:      base.viper.GetBool("base64"),
 		password:    base.viper.GetString("password"),
 		args:        base.viper.GetString("args"),
+		chiper:      base.viper.GetString("chiper"),
 		encryptPath: base.archivePath + ".enc",
 	}
 }
@@ -45,13 +49,16 @@ func (enc *OpenSSL) perform() (encryptPath string, err error) {
 
 	opts := enc.options()
 	opts = append(opts, "-in", enc.archivePath, "-out", enc.encryptPath)
-	logger.Infof("openssl %s", opts)
 	_, err = helper.Exec("openssl", opts...)
-	return
+	if err != nil {
+		err = fmt.Errorf("OpenSSL encrypt failed: %s `openssl %s`", strings.TrimSpace(err.Error()), strings.Join(opts, " "))
+		return "", err
+	}
+	return enc.encryptPath, nil
 }
 
 func (enc *OpenSSL) options() (opts []string) {
-	opts = append(opts, "aes-256-cbc")
+	opts = append(opts, enc.chiper)
 	if enc.base64 {
 		opts = append(opts, "-base64")
 	}
