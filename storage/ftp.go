@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/textproto"
 	"os"
@@ -24,13 +25,19 @@ import (
 // timeout: 30
 // username:
 // password:
+// tls:
+// explicit_tls:
+// no_check_certificate:
 type FTP struct {
 	Base
-	path     string
-	host     string
-	port     string
-	username string
-	password string
+	path              string
+	host              string
+	port              string
+	username          string
+	password          string
+	tls               bool
+	explicitTLS       bool
+	skipVerifyTLSCert bool
 
 	client *ftp.ServerConn
 }
@@ -45,13 +52,33 @@ func (s *FTP) open() error {
 	s.path = s.viper.GetString("path")
 	s.username = s.viper.GetString("username")
 	s.password = s.viper.GetString("password")
+	s.tls = s.viper.GetBool("tls")
+	s.explicitTLS = s.viper.GetBool("explicit_tls")
+	s.skipVerifyTLSCert = s.viper.GetBool("no_check_certificate")
 
 	if len(s.host) == 0 || len(s.username) == 0 || len(s.password) == 0 {
 		return fmt.Errorf("FTP host, username or password is empty")
 	}
 
+	var options []ftp.DialOption
 	timeout := s.viper.GetDuration("timeout") * time.Second
-	client, err := ftp.Dial(s.host+":"+s.port, ftp.DialWithTimeout(timeout))
+	options = append(options, ftp.DialWithTimeout(timeout))
+
+	// FTP Over TLS / FTPS
+	var tlsConfig *tls.Config
+	if s.tls || s.explicitTLS {
+		tlsConfig = &tls.Config{
+			ServerName:         s.host,
+			InsecureSkipVerify: s.skipVerifyTLSCert,
+		}
+	}
+	if s.tls {
+		options = append(options, ftp.DialWithTLS(tlsConfig))
+	} else if s.explicitTLS {
+		options = append(options, ftp.DialWithExplicitTLS(tlsConfig))
+	}
+
+	client, err := ftp.Dial(s.host+":"+s.port, options...)
 	if err != nil {
 		return err
 	}
