@@ -17,16 +17,20 @@ import (
 // username:
 // password:
 // authdb:
+// collection:
+// gzip:
 // oplog: false
 type MongoDB struct {
 	Base
-	host     string
-	port     string
-	database string
-	username string
-	password string
-	authdb   string
-	oplog    bool
+	host       string
+	port       string
+	database   string
+	username   string
+	password   string
+	authdb     string
+	collection string
+	gzip       bool
+	oplog      bool
 }
 
 var (
@@ -44,6 +48,8 @@ func (db *MongoDB) perform() (err error) {
 	db.database = viper.GetString("database")
 	db.username = viper.GetString("username")
 	db.password = viper.GetString("password")
+	db.collection = viper.GetString("collection")
+	db.gzip = viper.GetBool("gzip")
 	db.oplog = viper.GetBool("oplog")
 	db.authdb = viper.GetString("authdb")
 
@@ -59,6 +65,8 @@ func (db *MongoDB) mongodump() string {
 		db.nameOption() + " " +
 		db.credentialOptions() + " " +
 		db.connectivityOptions() + " " +
+		db.collectionOption() + " " +
+		db.gzipOption() + " " +
 		db.oplogOption() + " " +
 		"--out=" + db.dumpPath
 }
@@ -91,6 +99,22 @@ func (db *MongoDB) connectivityOptions() string {
 	}
 
 	return strings.Join(opts, " ")
+}
+
+func (db *MongoDB) collectionOption() string {
+	if len(db.collection) > 0 {
+		return "--collection="+db.collection
+	}
+
+	return ""
+}
+
+func (db *MongoDB) gzipOption() string {
+	if db.gzip {
+		return "--gzip"
+	}
+
+	return ""
 }
 
 func (db *MongoDB) oplogOption() string {
