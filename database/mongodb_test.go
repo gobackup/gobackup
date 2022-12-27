@@ -37,9 +37,9 @@ func TestMongoDB_connectivityOptions(t *testing.T) {
 
 func TestMongoDB_oplogOption(t *testing.T) {
 	db := &MongoDB{oplog: true}
-	assert.Equal(t, db.oplogOption(), "--oplog")
+	assert.Equal(t, db.additionOption(), "--oplog")
 	db.oplog = false
-	assert.Equal(t, db.oplogOption(), "")
+	assert.Equal(t, db.additionOption(), "")
 }
 
 func TestMongoDB_mongodump(t *testing.T) {
@@ -55,7 +55,8 @@ func TestMongoDB_mongodump(t *testing.T) {
 		password: "bar",
 		authdb:   "sssbbb",
 		oplog:    true,
+		args:     "--collection foo --gzip",
 	}
-	expect := "mongodump --db=hello --username=foo --password=bar --authenticationDatabase=sssbbb --host=127.0.0.1 --port=4567 --oplog --out=/tmp/gobackup/test"
+	expect := "mongodump --db=hello --username=foo --password=bar --authenticationDatabase=sssbbb --host=127.0.0.1 --port=4567 --oplog --collection foo --gzip --out=/tmp/gobackup/test"
 	assert.Equal(t, db.mongodump(), expect)
 }

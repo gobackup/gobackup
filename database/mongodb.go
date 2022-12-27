@@ -62,7 +62,7 @@ func (db *MongoDB) mongodump() string {
 		db.nameOption() + " " +
 		db.credentialOptions() + " " +
 		db.connectivityOptions() + " " +
-		db.oplogOption() + " " +
+		db.additionOption() + " " +
 		"--out=" + db.dumpPath
 }
 
@@ -92,19 +92,21 @@ func (db *MongoDB) connectivityOptions() string {
 	if len(db.port) > 0 {
 		opts = append(opts, "--port="+db.port+"")
 	}
-	if len(db.args) > 0 {
-		dumpArgs = append(dumpArgs, db.args)
-	}
 
 	return strings.Join(opts, " ")
 }
 
-func (db *MongoDB) oplogOption() string {
+func (db *MongoDB) additionOption() string {
+	opts := []string{}
 	if db.oplog {
-		return "--oplog"
+		opts = append(opts, "--oplog")
 	}
 
-	return ""
+	if len(db.args) > 0 {
+		opts = append(opts, db.args)
+	}
+
+	return strings.Join(opts, " ")
 }
 
 func (db *MongoDB) dump() error {
