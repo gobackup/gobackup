@@ -17,9 +17,8 @@ import (
 // username:
 // password:
 // authdb:
-// collection:
-// gzip:
 // oplog: false
+// args:
 type MongoDB struct {
 	Base
 	host     string
