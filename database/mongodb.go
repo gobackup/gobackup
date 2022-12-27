@@ -22,15 +22,14 @@ import (
 // oplog: false
 type MongoDB struct {
 	Base
-	host       string
-	port       string
-	database   string
-	username   string
-	password   string
-	authdb     string
-	collection string
-	gzip       bool
-	oplog      bool
+	host     string
+	port     string
+	database string
+	username string
+	password string
+	authdb   string
+	oplog    bool
+	args     string
 }
 
 var (
@@ -48,10 +47,9 @@ func (db *MongoDB) perform() (err error) {
 	db.database = viper.GetString("database")
 	db.username = viper.GetString("username")
 	db.password = viper.GetString("password")
-	db.collection = viper.GetString("collection")
-	db.gzip = viper.GetBool("gzip")
 	db.oplog = viper.GetBool("oplog")
 	db.authdb = viper.GetString("authdb")
+	db.args = viper.GetString("args")
 
 	err = db.dump()
 	if err != nil {
@@ -65,8 +63,6 @@ func (db *MongoDB) mongodump() string {
 		db.nameOption() + " " +
 		db.credentialOptions() + " " +
 		db.connectivityOptions() + " " +
-		db.collectionOption() + " " +
-		db.gzipOption() + " " +
 		db.oplogOption() + " " +
 		"--out=" + db.dumpPath
 }
@@ -97,24 +93,11 @@ func (db *MongoDB) connectivityOptions() string {
 	if len(db.port) > 0 {
 		opts = append(opts, "--port="+db.port+"")
 	}
+	if len(db.args) > 0 {
+		dumpArgs = append(dumpArgs, db.args)
+	}
 
 	return strings.Join(opts, " ")
-}
-
-func (db *MongoDB) collectionOption() string {
-	if len(db.collection) > 0 {
-		return "--collection="+db.collection
-	}
-
-	return ""
-}
-
-func (db *MongoDB) gzipOption() string {
-	if db.gzip {
-		return "--gzip"
-	}
-
-	return ""
 }
 
 func (db *MongoDB) oplogOption() string {
