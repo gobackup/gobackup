@@ -94,13 +94,13 @@ func notify(model config.ModelConfig, title, message string, notifyType int) err
 }
 
 func Success(model config.ModelConfig) error {
-	title := fmt.Sprintf("[GoBackup] Backup of %s completed successfully", model.Name)
+	title := fmt.Sprintf("[GoBackup] OK: Backup %s has successfully", model.Name)
 	message := fmt.Sprintf("Backup of %s completed successfully at %s", model.Name, time.Now().Local())
 	return notify(model, title, message, notifyTypeSuccess)
 }
 
 func Failure(model config.ModelConfig, reason string) error {
-	title := fmt.Sprintf("[GoBackup] Backup of %s failed", model.Name)
+	title := fmt.Sprintf("[GoBackup] Err: Backup %s has failed", model.Name)
 	message := fmt.Sprintf("Backup of %s failed at %s:\n\n%s", model.Name, time.Now().Local(), reason)
 
 	return notify(model, title, message, notifyTypeFailure)
