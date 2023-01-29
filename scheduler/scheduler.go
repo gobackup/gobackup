@@ -44,12 +44,10 @@ func Start() error {
 		scheduler.Do(func() {
 			logger.Info("------------------------------------------------")
 			logger.Info("performing", modelConfig.Name, "...")
-			for _, modelConfig := range config.Models {
-				m := model.Model{
-					Config: modelConfig,
-				}
-				m.Perform()
+			m := model.Model{
+				Config: modelConfig,
 			}
+			m.Perform()
 			logger.Info("------------------------------------------------")
 		})
 	}
