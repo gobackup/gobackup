@@ -2,11 +2,12 @@ package scheduler
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/go-co-op/gocron"
 	"github.com/gobackup/gobackup/config"
-	"github.com/gobackup/gobackup/logger"
+	superlogger "github.com/gobackup/gobackup/logger"
 	"github.com/gobackup/gobackup/model"
 )
 
@@ -16,9 +17,11 @@ var (
 
 // Start scheduler
 func Start() error {
-	logger := logger.Tag("Scheduler")
+	logger := superlogger.Tag("Scheduler")
 
 	mycron = gocron.NewScheduler(time.Local)
+
+	mu := sync.Mutex{}
 
 	for _, modelConfig := range config.Models {
 		if !modelConfig.Schedule.Enabled {
@@ -41,15 +44,19 @@ func Start() error {
 			}
 		}
 
-		scheduler.Do(func() {
-			logger.Info("------------------------------------------------")
-			logger.Info("performing", modelConfig.Name, "...")
+		scheduler.Do(func(modelConfig config.ModelConfig) {
+			defer mu.Unlock()
+			logger := superlogger.Tag(fmt.Sprintf("Scheduler: %s", modelConfig.Name))
+
+			logger.Info("Performing...")
+
 			m := model.Model{
 				Config: modelConfig,
 			}
+			mu.Lock()
 			m.Perform()
-			logger.Info("------------------------------------------------")
-		})
+			logger.Info("Done.")
+		}, modelConfig)
 	}
 
 	mycron.StartAsync()
