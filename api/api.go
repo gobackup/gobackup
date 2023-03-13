@@ -9,6 +9,10 @@ import (
 
 func AuthRequired(token string) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if gin.Mode() == "dev" {
+			return
+		}
+
 		auth := c.Request.Header.Get("Authorization")
 
 		if auth != token {
@@ -36,7 +40,7 @@ func StartHTTP(version string, apiToken string) error {
 func setupRouter(version string, apiToken string) *gin.Engine {
 	r := gin.Default()
 
-	r.GET("/", func(c *gin.Context) {
+	r.GET("/status", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "GoBackup is running.",
 			"version": version,
@@ -44,20 +48,17 @@ func setupRouter(version string, apiToken string) *gin.Engine {
 	})
 
 	group := r.Group("/api")
-	group.Use(AuthRequired(apiToken))
 
-	group.POST("/perform", perform)
-	group.GET("/status", status)
+	group.GET("/config", AuthRequired(apiToken), getConfig)
+	group.POST("/perform", AuthRequired(apiToken), perform)
 
 	return r
 }
 
-func status(c *gin.Context) {
-	infos := gin.H{
-		"models": len(model.GetModels()),
-	}
-
-	c.JSON(200, infos)
+func getConfig(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"models": viper.Get("models"),
+	})
 }
 
 func perform(c *gin.Context) {

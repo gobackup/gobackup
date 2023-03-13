@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -8,31 +9,77 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/longbridgeapp/assert"
+	"github.com/spf13/viper"
 )
 
-func assertResponseJSON(t *testing.T, w *httptest.ResponseRecorder, status int, data map[string]any) {
+var (
+	testAPIToken = "foo-bar-dar"
+	headers      = map[string]string{
+		"Authorization": testAPIToken,
+	}
+)
+
+func assertMatchJSON(t *testing.T, expected map[string]any, actual string) {
 	t.Helper()
 
-	expectedJSON, err := json.Marshal(data)
+	expectedJSON, err := json.Marshal(expected)
 	assert.NoError(t, err)
+	assert.Equal(t, string(expectedJSON), actual)
+}
 
-	assert.Equal(t, w.Code, status)
+func invokeHttp(method string, path string, headers map[string]string, data map[string]any) (statusCode int, body string) {
+	r := setupRouter("master", testAPIToken)
+	w := httptest.NewRecorder()
 
-	assert.Equal(t, w.Body.String(), string(expectedJSON))
+	bodyBytes, err := json.Marshal(data)
+	if err != nil {
+		panic(err)
+	}
+
+	req, _ := http.NewRequest(method, path, bytes.NewBuffer(bodyBytes))
+	for key := range headers {
+		req.Header.Add(key, headers[key])
+	}
+
+	r.ServeHTTP(w, req)
+
+	return w.Code, w.Body.String()
+}
+
+func TestWithoutAPIToken(t *testing.T) {
+	code, body := invokeHttp("GET", "/api/config", nil, nil)
+	assert.Equal(t, 403, code)
+	assertMatchJSON(t, gin.H{"error": "Access denied"}, body)
 }
 
 func TestAPIStatus(t *testing.T) {
-	r := setupRouter("master", "foo-bar-dar")
+	code, body := invokeHttp("GET", "/status", nil, nil)
 
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/api/status", nil)
-	r.ServeHTTP(w, req)
+	assert.Equal(t, 200, code)
+	assertMatchJSON(t, gin.H{"message": "GoBackup is running.", "version": "master"}, body)
+}
 
-	assertResponseJSON(t, w, 403, gin.H{"error": "Access denied"})
+func TestAPIGetModels(t *testing.T) {
+	models := map[string]any{
+		"foo": map[string]any{
+			"archive": map[string]any{
+				"excludes": []string{"/home/ubuntu/.ssh/known_hosts", "/etc/logrotate.d/syslog"},
+			},
+			"databases": map[string]any{
+				"dummy_test": map[string]any{
+					"type":     "mysql",
+					"host":     "localhost",
+					"port":     3306,
+					"database": "dummy_test",
+				},
+			},
+		},
+	}
 
-	w = httptest.NewRecorder()
-	req.Header.Add("Authorization", "foo-bar-dar")
-	r.ServeHTTP(w, req)
+	viper.Set("models", models)
 
-	assertResponseJSON(t, w, 200, gin.H{"models": 0})
+	code, body := invokeHttp("GET", "/api/config", headers, nil)
+
+	assert.Equal(t, 200, code)
+	assertMatchJSON(t, gin.H{"models": models}, body)
 }
