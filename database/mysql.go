@@ -71,15 +71,6 @@ func (db *MySQL) init() (err error) {
 	return nil
 }
 
-func (db *MySQL) perform() (err error) {
-	if err = db.init(); err != nil {
-		return err
-	}
-
-	err = db.dump()
-	return
-}
-
 func (db *MySQL) build() string {
 	dumpArgs := []string{}
 	if len(db.host) > 0 {
@@ -117,7 +108,7 @@ func (db *MySQL) build() string {
 	return "mysqldump" + " " + strings.Join(dumpArgs, " ")
 }
 
-func (db *MySQL) dump() error {
+func (db *MySQL) perform() error {
 	logger := logger.Tag("MySQL")
 
 	logger.Info("-> Dumping MySQL...")

@@ -57,18 +57,6 @@ func (db *MongoDB) init() (err error) {
 	return nil
 }
 
-func (db *MongoDB) perform() (err error) {
-	if err := db.init(); err != nil {
-		return err
-	}
-
-	err = db.dump()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (db *MongoDB) build() string {
 	return mongodumpCli + " " +
 		db.nameOption() + " " +
@@ -125,7 +113,7 @@ func (db *MongoDB) additionOption() string {
 	return strings.Join(opts, " ")
 }
 
-func (db *MongoDB) dump() error {
+func (db *MongoDB) perform() error {
 	logger := logger.Tag("MongoDB")
 
 	out, err := helper.Exec(db.build())

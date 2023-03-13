@@ -74,25 +74,6 @@ func (db *Redis) init() (err error) {
 	return nil
 }
 
-func (db *Redis) perform() (err error) {
-	if err = db.init(); err != nil {
-		return
-	}
-
-	if db.mode == redisModeCopy {
-		if !helper.IsExistsPath(db.rdbPath) {
-			return fmt.Errorf("Redis RDB file: %s does not exist", db.rdbPath)
-		}
-	}
-
-	err = db.dump()
-	if err != nil {
-		return
-	}
-
-	return
-}
-
 func (db *Redis) build() string {
 	if db.mode == redisModeCopy {
 		return strings.Join([]string{
@@ -122,7 +103,13 @@ func (db *Redis) build() string {
 	return strings.Join(args, " ")
 }
 
-func (db *Redis) dump() (err error) {
+func (db *Redis) perform() (err error) {
+	if db.mode == redisModeCopy {
+		if !helper.IsExistsPath(db.rdbPath) {
+			return fmt.Errorf("Redis RDB file: %s does not exist", db.rdbPath)
+		}
+	}
+
 	if err = db.trySave(); err != nil {
 		return
 	}

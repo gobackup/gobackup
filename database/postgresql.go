@@ -72,15 +72,6 @@ func (db *PostgreSQL) init() (err error) {
 	return nil
 }
 
-func (db *PostgreSQL) perform() (err error) {
-	if err = db.init(); err != nil {
-		return
-	}
-
-	err = db.dump()
-	return
-}
-
 func (db *PostgreSQL) build() string {
 	// pg_dump command
 	var dumpArgs []string
@@ -119,7 +110,7 @@ func (db *PostgreSQL) build() string {
 	return "pg_dump " + strings.Join(dumpArgs, " ")
 }
 
-func (db *PostgreSQL) dump() error {
+func (db *PostgreSQL) perform() error {
 	logger := logger.Tag("PostgreSQL")
 
 	logger.Info("-> Dumping PostgreSQL...")
