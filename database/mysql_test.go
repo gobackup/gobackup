@@ -22,7 +22,9 @@ func TestMySQL_init(t *testing.T) {
 	viper.Set("args", "--foo --bar --dar")
 
 	base := newBase(
-		config.ModelConfig{},
+		config.ModelConfig{
+			DumpPath: "/data/backups",
+		},
 		// Creating a new base object.
 		config.SubConfig{
 			Type:  "mysql",
@@ -38,18 +40,18 @@ func TestMySQL_init(t *testing.T) {
 	err := db.init()
 	assert.NoError(t, err)
 	script := db.build()
-	assert.Equal(t, script, "mysqldump --host 1.2.3.4 --port 1234 -u user1 -ppass1 --ignore-table=my_db.aa --ignore-table=my_db.bb --foo --bar --dar my_db foo bar --result-file=mysql/mysql1/my_db.sql")
+	assert.Equal(t, script, "mysqldump --host 1.2.3.4 --port 1234 -u user1 -ppass1 --ignore-table=my_db.aa --ignore-table=my_db.bb --foo --bar --dar my_db foo bar --result-file=/data/backups/mysql/mysql1/my_db.sql")
 
 	viper.Set("additional_options", "--bar --foo")
 	err = db.init()
 	assert.NoError(t, err)
-	assert.Equal(t, db.build(), "mysqldump --host 1.2.3.4 --port 1234 -u user1 -ppass1 --ignore-table=my_db.aa --ignore-table=my_db.bb --bar --foo my_db foo bar --result-file=mysql/mysql1/my_db.sql")
+	assert.Equal(t, db.build(), "mysqldump --host 1.2.3.4 --port 1234 -u user1 -ppass1 --ignore-table=my_db.aa --ignore-table=my_db.bb --bar --foo my_db foo bar --result-file=/data/backups/mysql/mysql1/my_db.sql")
 }
 
 func TestMySQL_dumpArgsWithAdditionalOptions(t *testing.T) {
 	base := newBase(
 		config.ModelConfig{
-			DumpPath: "/tmp/gobackup/test",
+			DumpPath: "/data/backups/",
 		},
 		config.SubConfig{
 			Type: "mysql",
@@ -65,7 +67,7 @@ func TestMySQL_dumpArgsWithAdditionalOptions(t *testing.T) {
 		args:     "--single-transaction --quick",
 	}
 
-	assert.Equal(t, db.build(), "mysqldump --host 127.0.0.2 --port 6378 -p*&^92' --single-transaction --quick dummy_test --result-file=/tmp/gobackup/test/mysql/mysql1/dummy_test.sql")
+	assert.Equal(t, db.build(), "mysqldump --host 127.0.0.2 --port 6378 -p*&^92' --single-transaction --quick dummy_test --result-file=/data/backups/mysql/mysql1/dummy_test.sql")
 }
 
 func TestMySQLPerform(t *testing.T) {

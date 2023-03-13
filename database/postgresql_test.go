@@ -20,7 +20,9 @@ func TestPostgreSQL_init(t *testing.T) {
 	viper.Set("args", "--foo --bar --dar")
 
 	base := newBase(
-		config.ModelConfig{},
+		config.ModelConfig{
+			DumpPath: "/data/backups/",
+		},
 		// Creating a new base object.
 		config.SubConfig{
 			Type:  "postgresql",
@@ -36,7 +38,7 @@ func TestPostgreSQL_init(t *testing.T) {
 	err := db.init()
 	assert.NoError(t, err)
 
-	assert.Equal(t, db.build(), "pg_dump --host=1.2.3.4 --port=1234 --username=user1 --table=foo --table=bar --exclude-table=aa --exclude-table=bb --foo --bar --dar my_db -f postgresql/postgresql1/my_db.sql")
+	assert.Equal(t, db.build(), "pg_dump --host=1.2.3.4 --port=1234 --username=user1 --table=foo --table=bar --exclude-table=aa --exclude-table=bb --foo --bar --dar my_db -f /data/backups/postgresql/postgresql1/my_db.sql")
 }
 
 func Test_PostgreSQL_prepareForSocket(t *testing.T) {

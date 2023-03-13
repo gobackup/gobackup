@@ -22,7 +22,9 @@ func TestMongoDB_init(t *testing.T) {
 	viper.Set("args", "--foo --bar --dar")
 
 	base := newBase(
-		config.ModelConfig{},
+		config.ModelConfig{
+			DumpPath: "/data/backups",
+		},
 		// Creating a new base object.
 		config.SubConfig{
 			Type:  "mongodb",
@@ -38,7 +40,7 @@ func TestMongoDB_init(t *testing.T) {
 	err := db.init()
 	assert.NoError(t, err)
 
-	assert.Equal(t, db.build(), "mongodump --db=my_db --username=user1 --password=pass1 --authenticationDatabase=sssbbb --host=1.2.3.4 --port=1234 --oplog --excludeCollection=aa --excludeCollection=bb --foo --bar --dar --out=mongodb/mongodb1")
+	assert.Equal(t, db.build(), "mongodump --db=my_db --username=user1 --password=pass1 --authenticationDatabase=sssbbb --host=1.2.3.4 --port=1234 --oplog --excludeCollection=aa --excludeCollection=bb --foo --bar --dar --out=/data/backups/mongodb/mongodb1")
 
 }
 
