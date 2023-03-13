@@ -17,25 +17,28 @@ import (
 // username:
 // password:
 // authdb:
+// exclude_tables:
 // oplog: false
 // args:
 type MongoDB struct {
 	Base
-	host     string
-	port     string
-	database string
-	username string
-	password string
-	authdb   string
-	oplog    bool
-	args     string
+	host          string
+	port          string
+	database      string
+	username      string
+	password      string
+	authdb        string
+	tables        []string
+	excludeTables []string
+	oplog         bool
+	args          string
 }
 
 var (
 	mongodumpCli = "mongodump"
 )
 
-func (db *MongoDB) perform() (err error) {
+func (db *MongoDB) init() (err error) {
 	viper := db.viper
 	viper.SetDefault("oplog", false)
 	viper.SetDefault("host", "127.0.0.1")
@@ -48,16 +51,13 @@ func (db *MongoDB) perform() (err error) {
 	db.password = viper.GetString("password")
 	db.oplog = viper.GetBool("oplog")
 	db.authdb = viper.GetString("authdb")
+	db.excludeTables = viper.GetStringSlice("exclude_tables")
 	db.args = viper.GetString("args")
 
-	err = db.dump()
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
-func (db *MongoDB) mongodump() string {
+func (db *MongoDB) build() string {
 	return mongodumpCli + " " +
 		db.nameOption() + " " +
 		db.credentialOptions() + " " +
@@ -102,6 +102,10 @@ func (db *MongoDB) additionOption() string {
 		opts = append(opts, "--oplog")
 	}
 
+	for _, table := range db.excludeTables {
+		opts = append(opts, "--excludeCollection="+table)
+	}
+
 	if len(db.args) > 0 {
 		opts = append(opts, db.args)
 	}
@@ -109,10 +113,10 @@ func (db *MongoDB) additionOption() string {
 	return strings.Join(opts, " ")
 }
 
-func (db *MongoDB) dump() error {
+func (db *MongoDB) perform() error {
 	logger := logger.Tag("MongoDB")
 
-	out, err := helper.Exec(db.mongodump())
+	out, err := helper.Exec(db.build())
 	if err != nil {
 		return fmt.Errorf("-> Dump error: %s", err)
 	}

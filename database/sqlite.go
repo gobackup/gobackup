@@ -1,8 +1,6 @@
 package database
 
 import (
-	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -18,27 +16,40 @@ type SQLite struct {
 	Base
 	path     string
 	database string
+
+	_dumpFilePath string
 }
 
-func (db *SQLite) perform() error {
+func (db *SQLite) init() error {
 	viper := db.viper
 
 	db.path = helper.ExplandHome(viper.GetString("path"))
 	db.database = strings.TrimSuffix(filepath.Base(db.path), filepath.Ext(db.path))
 
-	return db.dump()
+	db._dumpFilePath = filepath.Join(db.dumpPath, db.database+".sql")
+
+	return nil
 }
 
-func (db *SQLite) dump() error {
+func (db *SQLite) build() string {
+	args := []string{
+		"sqlite3",
+		db.path,
+		".dump",
+		">",
+		db._dumpFilePath,
+	}
+	return strings.Join(args, " ")
+}
+
+func (db *SQLite) perform() error {
 	logger := logger.Tag("SQLite")
 
-	dumpFilePath := filepath.Join(db.dumpPath, db.database+".sql")
 	logger.Info("-> Dumping SQLite...")
-	if out, err := helper.Exec(fmt.Sprintf("sqlite3 %s .dump", db.path)); err != nil {
-		return err
-	} else if err := os.WriteFile(dumpFilePath, []byte(out), 0644); err != nil {
+	if _, err := helper.Exec(db.build()); err != nil {
 		return err
 	}
-	logger.Info("dump path:", dumpFilePath)
+
+	logger.Info("dump path:", db._dumpFilePath)
 	return nil
 }

@@ -13,26 +13,36 @@ import (
 
 // PostgreSQL database
 //
-// type: postgresql
-// host: localhost
-// port: 5432
-// socket:
-// database:
-// username:
-// password:
+// ref:
+// https://www.postgresql.org/docs/current/app-pgdump.html
+//
+// # Keys
+//
+//   - type: postgresql
+//   - host: localhost
+//   - port: 5432
+//   - socket:
+//   - database:
+//   - username:
+//   - password:
+//   - tables:
+//   - exclude_tables:
+//   - args:
 type PostgreSQL struct {
 	Base
-	host        string
-	port        string
-	socket      string
-	database    string
-	username    string
-	password    string
-	dumpCommand string
-	args        string
+	host          string
+	port          string
+	socket        string
+	database      string
+	username      string
+	tables        []string
+	excludeTables []string
+	password      string
+	args          string
+	_dumpFilePath string
 }
 
-func (db PostgreSQL) perform() (err error) {
+func (db *PostgreSQL) init() (err error) {
 	viper := db.viper
 	viper.SetDefault("host", "localhost")
 	viper.SetDefault("port", 5432)
@@ -43,7 +53,15 @@ func (db PostgreSQL) perform() (err error) {
 	db.database = viper.GetString("database")
 	db.username = viper.GetString("username")
 	db.password = viper.GetString("password")
+	db.tables = viper.GetStringSlice("tables")
+	db.excludeTables = viper.GetStringSlice("exclude_tables")
 	db.args = viper.GetString("args")
+
+	if len(db.database) == 0 {
+		return fmt.Errorf("PostgreSQL database config is required")
+	}
+
+	db._dumpFilePath = path.Join(db.dumpPath, db.database+".sql")
 
 	// socket
 	if len(db.socket) != 0 {
@@ -51,20 +69,13 @@ func (db PostgreSQL) perform() (err error) {
 		db.port = ""
 	}
 
-	if err = db.prepare(); err != nil {
-		return
-	}
-
-	err = db.dump()
-	return
+	return nil
 }
 
-func (db *PostgreSQL) prepare() (err error) {
+func (db *PostgreSQL) build() string {
 	// pg_dump command
 	var dumpArgs []string
-	if len(db.database) == 0 {
-		return fmt.Errorf("PostgreSQL database config is required")
-	}
+
 	if len(db.host) > 0 {
 		dumpArgs = append(dumpArgs, "--host="+db.host)
 	}
@@ -79,27 +90,38 @@ func (db *PostgreSQL) prepare() (err error) {
 	if len(db.username) > 0 {
 		dumpArgs = append(dumpArgs, "--username="+db.username)
 	}
+
+	// include / exclude tables
+	if len(db.tables) > 0 {
+		dumpArgs = append(dumpArgs, "--table="+strings.Join(db.tables, " --table="))
+	}
+
+	if len(db.excludeTables) > 0 {
+		dumpArgs = append(dumpArgs, "--exclude-table="+strings.Join(db.excludeTables, " --exclude-table="))
+	}
+
 	if len(db.args) > 0 {
 		dumpArgs = append(dumpArgs, db.args)
 	}
 
-	db.dumpCommand = "pg_dump " + strings.Join(dumpArgs, " ") + " " + db.database
+	dumpArgs = append(dumpArgs, db.database)
+	dumpArgs = append(dumpArgs, "-f", db._dumpFilePath)
 
-	return nil
+	return "pg_dump " + strings.Join(dumpArgs, " ")
 }
 
-func (db *PostgreSQL) dump() error {
+func (db *PostgreSQL) perform() error {
 	logger := logger.Tag("PostgreSQL")
 
-	dumpFilePath := path.Join(db.dumpPath, db.database+".sql")
 	logger.Info("-> Dumping PostgreSQL...")
 	if len(db.password) > 0 {
 		os.Setenv("PGPASSWORD", db.password)
 	}
-	_, err := helper.Exec(db.dumpCommand, "-f", dumpFilePath)
+
+	_, err := helper.Exec(db.build())
 	if err != nil {
 		return err
 	}
-	logger.Info("dump path:", dumpFilePath)
+	logger.Info("dump path:", db._dumpFilePath)
 	return nil
 }

@@ -24,6 +24,9 @@ type Base struct {
 
 // Database interface
 type Database interface {
+	// Init database config, prepare all things
+	init() error
+	// Peform backup
 	perform() error
 }
 
@@ -106,6 +109,10 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 	onExit := dbConfig.Viper.GetString("on_exit")
 
 	// perform
+	if err = db.init(); err != nil {
+		return
+	}
+
 	err = db.perform()
 	if err != nil {
 		logger.Info("Dump failed")
