@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"path"
+	"strings"
 
 	"github.com/gobackup/gobackup/helper"
 	"github.com/gobackup/gobackup/logger"
@@ -79,7 +80,7 @@ func (db *MySQL) perform() (err error) {
 	return
 }
 
-func (db *MySQL) dumpArgs() []string {
+func (db *MySQL) build() string {
 	dumpArgs := []string{}
 	if len(db.host) > 0 {
 		dumpArgs = append(dumpArgs, "--host", db.host)
@@ -112,14 +113,15 @@ func (db *MySQL) dumpArgs() []string {
 
 	dumpFilePath := path.Join(db.dumpPath, db.database+".sql")
 	dumpArgs = append(dumpArgs, "--result-file="+dumpFilePath)
-	return dumpArgs
+
+	return "mysqldump" + " " + strings.Join(dumpArgs, " ")
 }
 
 func (db *MySQL) dump() error {
 	logger := logger.Tag("MySQL")
 
 	logger.Info("-> Dumping MySQL...")
-	_, err := helper.Exec("mysqldump", db.dumpArgs()...)
+	_, err := helper.Exec(db.build())
 	if err != nil {
 		return fmt.Errorf("-> Dump error: %s", err)
 	}

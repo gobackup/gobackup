@@ -57,6 +57,10 @@ func (db *PostgreSQL) init() (err error) {
 	db.excludeTables = viper.GetStringSlice("exclude_tables")
 	db.args = viper.GetString("args")
 
+	if len(db.database) == 0 {
+		return fmt.Errorf("PostgreSQL database config is required")
+	}
+
 	db._dumpFilePath = path.Join(db.dumpPath, db.database+".sql")
 
 	// socket
@@ -77,12 +81,10 @@ func (db *PostgreSQL) perform() (err error) {
 	return
 }
 
-func (db *PostgreSQL) build() (command string, err error) {
+func (db *PostgreSQL) build() string {
 	// pg_dump command
 	var dumpArgs []string
-	if len(db.database) == 0 {
-		return "", fmt.Errorf("PostgreSQL database config is required")
-	}
+
 	if len(db.host) > 0 {
 		dumpArgs = append(dumpArgs, "--host="+db.host)
 	}
@@ -114,9 +116,7 @@ func (db *PostgreSQL) build() (command string, err error) {
 	dumpArgs = append(dumpArgs, db.database)
 	dumpArgs = append(dumpArgs, "-f", db._dumpFilePath)
 
-	dumpCommand := "pg_dump " + strings.Join(dumpArgs, " ")
-
-	return dumpCommand, nil
+	return "pg_dump " + strings.Join(dumpArgs, " ")
 }
 
 func (db *PostgreSQL) dump() error {
@@ -127,12 +127,7 @@ func (db *PostgreSQL) dump() error {
 		os.Setenv("PGPASSWORD", db.password)
 	}
 
-	cmd, err := db.build()
-	if err != nil {
-		return err
-	}
-
-	_, err = helper.Exec(cmd)
+	_, err := helper.Exec(db.build())
 	if err != nil {
 		return err
 	}

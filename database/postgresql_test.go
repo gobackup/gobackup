@@ -36,10 +36,7 @@ func TestPostgreSQL_init(t *testing.T) {
 	err := db.init()
 	assert.NoError(t, err)
 
-	cmd, err := db.build()
-	assert.NoError(t, err)
-
-	assert.Equal(t, cmd, "pg_dump --host=1.2.3.4 --port=1234 --username=user1 --table=foo --table=bar --exclude-table=aa --exclude-table=bb --foo --bar --dar my_db -f postgresql/postgresql1/my_db.sql")
+	assert.Equal(t, db.build(), "pg_dump --host=1.2.3.4 --port=1234 --username=user1 --table=foo --table=bar --exclude-table=aa --exclude-table=bb --foo --bar --dar my_db -f postgresql/postgresql1/my_db.sql")
 }
 
 func Test_PostgreSQL_prepareForSocket(t *testing.T) {
@@ -50,8 +47,5 @@ func Test_PostgreSQL_prepareForSocket(t *testing.T) {
 		_dumpFilePath: "/tmp/foo.sql",
 	}
 
-	cmd, err := db.build()
-	assert.NoError(t, err)
-
-	assert.Equal(t, cmd, "pg_dump --host=/var/run/postgresql --port=5432 --foo foo -f /tmp/foo.sql")
+	assert.Equal(t, db.build(), "pg_dump --host=/var/run/postgresql --port=5432 --foo foo -f /tmp/foo.sql")
 }
