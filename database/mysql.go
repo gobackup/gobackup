@@ -3,7 +3,6 @@ package database
 import (
 	"fmt"
 	"path"
-	"strings"
 
 	"github.com/gobackup/gobackup/helper"
 	"github.com/gobackup/gobackup/logger"
@@ -18,19 +17,21 @@ import (
 // database:
 // username: root
 // password:
-// additional_options:
+// args:
 type MySQL struct {
 	Base
-	host              string
-	port              string
-	socket            string
-	database          string
-	username          string
-	password          string
-	additionalOptions []string
+	host          string
+	port          string
+	socket        string
+	database      string
+	username      string
+	password      string
+	tables        []string
+	excludeTables []string
+	args          string
 }
 
-func (db *MySQL) perform() (err error) {
+func (db *MySQL) init() (err error) {
 	viper := db.viper
 	viper.SetDefault("host", "127.0.0.1")
 	viper.SetDefault("username", "root")
@@ -42,9 +43,17 @@ func (db *MySQL) perform() (err error) {
 	db.database = viper.GetString("database")
 	db.username = viper.GetString("username")
 	db.password = viper.GetString("password")
-	addOpts := viper.GetString("additional_options")
-	if len(addOpts) > 0 {
-		db.additionalOptions = strings.Split(addOpts, " ")
+
+	db.tables = viper.GetStringSlice("tables")
+	db.excludeTables = viper.GetStringSlice("exclude_tables")
+
+	if len(viper.GetString("args")) > 0 {
+		db.args = viper.GetString("args")
+	}
+
+	if len(viper.GetString("additional_options")) > 0 {
+		logger.Warn("[Deprecated] `additional_options` is deprecated, please use `args` instead")
+		db.args = viper.GetString("additional_options")
 	}
 
 	// mysqldump command
@@ -56,6 +65,14 @@ func (db *MySQL) perform() (err error) {
 	if len(db.socket) != 0 {
 		db.host = ""
 		db.port = ""
+	}
+
+	return nil
+}
+
+func (db *MySQL) perform() (err error) {
+	if err = db.init(); err != nil {
+		return err
 	}
 
 	err = db.dump()
@@ -79,11 +96,20 @@ func (db *MySQL) dumpArgs() []string {
 	if len(db.password) > 0 {
 		dumpArgs = append(dumpArgs, `-p`+db.password)
 	}
-	if len(db.additionalOptions) > 0 {
-		dumpArgs = append(dumpArgs, db.additionalOptions...)
+
+	for _, table := range db.excludeTables {
+		dumpArgs = append(dumpArgs, "--ignore-table="+db.database+"."+table)
+	}
+
+	if len(db.args) > 0 {
+		dumpArgs = append(dumpArgs, db.args)
 	}
 
 	dumpArgs = append(dumpArgs, db.database)
+	if len(db.tables) > 0 {
+		dumpArgs = append(dumpArgs, db.tables...)
+	}
+
 	dumpFilePath := path.Join(db.dumpPath, db.database+".sql")
 	dumpArgs = append(dumpArgs, "--result-file="+dumpFilePath)
 	return dumpArgs
