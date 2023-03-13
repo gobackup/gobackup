@@ -28,7 +28,6 @@ type MongoDB struct {
 	username      string
 	password      string
 	authdb        string
-	tables        []string
 	excludeTables []string
 	oplog         bool
 	args          string
