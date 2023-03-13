@@ -8,10 +8,12 @@ import (
 	"path/filepath"
 	"syscall"
 
+	"github.com/google/uuid"
 	"github.com/sevlyar/go-daemon"
 	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
 
+	"github.com/gobackup/gobackup/api"
 	"github.com/gobackup/gobackup/config"
 	"github.com/gobackup/gobackup/logger"
 	"github.com/gobackup/gobackup/model"
@@ -29,6 +31,8 @@ var (
   quit — graceful shutdown
   stop — fast shutdown
   reload — reloading the configuration file`)
+	// API Token, will reset after restart
+	apiToken string
 )
 
 func buildFlags(flags []cli.Flag) []cli.Flag {
@@ -55,6 +59,7 @@ func reloadHandler(sig os.Signal) error {
 }
 
 func main() {
+	apiToken = uuid.NewString()
 	app := cli.NewApp()
 
 	app.Version = version
@@ -126,12 +131,7 @@ func main() {
 				initApplication()
 				scheduler.Start()
 
-				err := daemon.ServeSignals()
-				if err != nil {
-					log.Printf("Error: %s", err.Error())
-				}
-
-				log.Println("daemon terminated")
+				api.StartHTTP(version, apiToken)
 
 				return nil
 			},
