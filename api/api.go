@@ -1,6 +1,8 @@
 package api
 
 import (
+	"sort"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gobackup/gobackup/logger"
 	"github.com/gobackup/gobackup/model"
@@ -56,8 +58,14 @@ func setupRouter(version string, apiToken string) *gin.Engine {
 }
 
 func getConfig(c *gin.Context) {
+	models := []string{}
+	for _, m := range model.GetModels() {
+		models = append(models, m.Config.Name)
+	}
+	sort.Strings(models)
+
 	c.JSON(200, gin.H{
-		"models": viper.Get("models"),
+		"models": models,
 	})
 }
 

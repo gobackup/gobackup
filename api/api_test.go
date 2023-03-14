@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gobackup/gobackup/config"
 	"github.com/longbridgeapp/assert"
-	"github.com/spf13/viper"
 )
 
 var (
@@ -18,6 +18,10 @@ var (
 		"Authorization": testAPIToken,
 	}
 )
+
+func init() {
+	config.Init("../gobackup_test.yml")
+}
 
 func assertMatchJSON(t *testing.T, expected map[string]any, actual string) {
 	t.Helper()
@@ -60,26 +64,8 @@ func TestAPIStatus(t *testing.T) {
 }
 
 func TestAPIGetModels(t *testing.T) {
-	models := map[string]any{
-		"foo": map[string]any{
-			"archive": map[string]any{
-				"excludes": []string{"/home/ubuntu/.ssh/known_hosts", "/etc/logrotate.d/syslog"},
-			},
-			"databases": map[string]any{
-				"dummy_test": map[string]any{
-					"type":     "mysql",
-					"host":     "localhost",
-					"port":     3306,
-					"database": "dummy_test",
-				},
-			},
-		},
-	}
-
-	viper.Set("models", models)
-
 	code, body := invokeHttp("GET", "/api/config", headers, nil)
 
 	assert.Equal(t, 200, code)
-	assertMatchJSON(t, gin.H{"models": models}, body)
+	assertMatchJSON(t, gin.H{"models": []string{"base_test", "demo", "expand_env", "normal_files", "test_model"}}, body)
 }
