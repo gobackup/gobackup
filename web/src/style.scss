@@ -4,9 +4,29 @@
 
 body {
   font-size: 14px;
-  @apply bg-gray-50;
+  @apply bg-gray-50 text-gray-900;
 }
 
-.btn {
-  @apply text-xs border rounded-sm border-gray-300 py-1 px-2 hover:bg-gray-200 active:bg-gray-300 shadow-sm;
+.footer {
+  @apply text-center self-center mt-4 text-base flex justify-between max-w-3xl mx-auto px-2 text-gray-600;
+
+  .links {
+    @apply space-x-1;
+
+    .ricon {
+      @apply text-xl text-gray-800 hover:text-gray-900;
+    }
+  }
+}
+
+.ricon {
+  font-size: 1em;
+}
+
+.ant-btn {
+  @apply inline-flex items-center;
+
+  .ricon + span {
+    margin-left: 4px;
+  }
 }
