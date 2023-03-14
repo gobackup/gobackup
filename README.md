@@ -130,7 +130,7 @@ Example config: [gobackup_test.yml](https://github.com/huacnlee/gobackup/blob/ma
 models:
   gitlab_app:
     databases:
-      gitlab:
+      gitlab_db:
         type: postgresql
         database: gitlab_production
         username: gitlab
@@ -141,7 +141,7 @@ models:
         rdb_path: /var/db/redis/dump.rdb
         invoke_save: true
     storages:
-      scp1:
+      s3:
         type: s3
         bucket: my_app_backup
         region: us-east-1
