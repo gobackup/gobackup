@@ -4,10 +4,9 @@ on:
   push:
     tags:
       - "*"
-    branches:
-      - "v2"
 jobs:
   goreleaser:
+    name: "Release Binary"
     if: github.repository == 'gobackup/gobackup'
     runs-on: ubuntu-latest
     steps:
@@ -18,7 +17,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.18
+          go-version: 1.20
       - name: "Build Web"
         run: |
           cd web

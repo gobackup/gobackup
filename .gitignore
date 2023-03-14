@@ -21,3 +21,4 @@ log/
 .idea
 *.log
 .env
+.DS_Store
