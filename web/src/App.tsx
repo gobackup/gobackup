@@ -83,9 +83,14 @@ const ModelList = ({}) => {
         className="flex items-center justify-between py-2 px-4 hover:bg-gray-50"
       >
         <div className="divider-y text-base">
-          <div className="text-base font-medium">{modelKey}</div>
+          <div className="text-base font-medium uppercase">{modelKey}</div>
           {scheduleEnable && (
             <div className="text-green text-sm">{model.schedule_info}</div>
+          )}
+          {model.description && (
+            <div className="text-gray-400 truncate text-xs my-1">
+              {model.description}
+            </div>
           )}
         </div>
         <div className="flex items-center space-x-1">
@@ -110,7 +115,7 @@ const ModelList = ({}) => {
   };
 
   return (
-    <div className="rounded w-full xl:w-[500px] border border-gray-200">
+    <div className="rounded w-full xl:w-[600px] border border-gray-200">
       <div className="text-lg text-gray-600 p-2 px-4 bg-gray-100 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="text-text">Models</div>

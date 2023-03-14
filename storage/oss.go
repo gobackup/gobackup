@@ -125,24 +125,34 @@ func (s *OSS) delete(fileKey string) error {
 
 func (s *OSS) list(parent string) (fileItems []FileItem, err error) {
 	remotePath := filepath.Join(s.path, parent)
-	items, err := s.client.ListObjectsV2(oss.Prefix(remotePath))
-	if err != nil {
-		return
-	}
 
 	fileItems = []FileItem{}
-	for _, item := range items.Objects {
-		fileItems = append(fileItems, FileItem{
-			Filename:     filepath.Join(remotePath, item.Key),
-			LastModified: item.LastModified,
-			Size:         item.Size,
-		})
+
+	continueToken := ""
+	for {
+		lsRes, err := s.client.ListObjectsV2(oss.Prefix(remotePath), oss.ContinuationToken(continueToken))
+		if err != nil {
+			return nil, err
+		}
+
+		for _, item := range lsRes.Objects {
+			fileItems = append(fileItems, FileItem{
+				Filename:     item.Key,
+				LastModified: item.LastModified,
+				Size:         item.Size,
+			})
+		}
+
+		if lsRes.IsTruncated {
+			continueToken = lsRes.NextContinuationToken
+		} else {
+			break
+		}
 	}
 
 	return
 }
 
 func (s *OSS) download(fileKey string) (string, error) {
-	remotePath := filepath.Join(s.path, fileKey)
-	return s.client.SignURL(remotePath, oss.HTTPGet, int64(1*time.Hour))
+	return s.client.SignURL(fileKey, oss.HTTPGet, int64(1*time.Hour))
 }

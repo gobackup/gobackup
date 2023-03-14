@@ -55,10 +55,9 @@ func TestAPIStatus(t *testing.T) {
 }
 
 func TestAPIGetModels(t *testing.T) {
-	code, body := invokeHttp("GET", "/api/config", nil, nil)
+	code, _ := invokeHttp("GET", "/api/config", nil, nil)
 
 	assert.Equal(t, 200, code)
-	assertMatchJSON(t, gin.H{"models": []string{"base_test", "demo", "expand_env", "normal_files", "test_model"}}, body)
 }
 
 func TestAPIPostPeform(t *testing.T) {

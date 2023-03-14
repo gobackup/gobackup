@@ -37,10 +37,14 @@ body {
   }
 }
 
+:root {
+  --max-content-height: calc(100vh - 230px);
+}
+
 .log-wrapper {
   @apply relative w-full;
 
-  height: calc(100vh - 300px);
+  height: var(--max-content-height);
 
   .react-lazylog-searchbar {
     @apply rounded-t border-b  border-b-gray-900 shadow-md;
@@ -48,4 +52,9 @@ body {
   .ReactVirtualized__List {
     @apply rounded-b;
   }
+}
+
+.file-browser-container {
+  height: var(--max-content-height);
+  @apply rounded overflow-y-scroll border shadow-sm mt-4 divide-y divide-gray-100;
 }

@@ -22,6 +22,7 @@ func TestModel(t *testing.T) {
 	model := GetModelConfigByName("base_test")
 
 	assert.Equal(t, model.Name, "base_test")
+	assert.Equal(t, model.Description, "This is base test.")
 
 	// compress_with
 	assert.Equal(t, model.CompressWith.Type, "tgz")
@@ -31,6 +32,7 @@ func TestModel(t *testing.T) {
 	assert.Equal(t, model.EncryptWith.Type, "openssl")
 	assert.NotNil(t, model.EncryptWith.Viper)
 
+	assert.Equal(t, model.DefaultStorage, "local")
 	assert.Equal(t, model.Storages["local"].Type, "local")
 	assert.Equal(t, model.Storages["local"].Viper.GetString("path"), "/Users/jason/Downloads/backup1")
 

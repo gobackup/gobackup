@@ -103,6 +103,7 @@ func getConfig(c *gin.Context) {
 	models := map[string]any{}
 	for _, m := range model.GetModels() {
 		models[m.Config.Name] = gin.H{
+			"description":   m.Config.Description,
 			"schedule":      m.Config.Schedule,
 			"schedule_info": m.Config.Schedule.String(),
 		}
@@ -171,7 +172,7 @@ func download(c *gin.Context) {
 	}
 
 	downloadURL, err := storage.Download(m.Config, file)
-	if err != nil {
+	if err != nil || len(downloadURL) == 0 {
 		c.AbortWithStatusJSON(500, gin.H{"message": err.Error()})
 		return
 	}

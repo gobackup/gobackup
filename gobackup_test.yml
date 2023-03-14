@@ -7,6 +7,7 @@ web:
   password: 123456
 models:
   base_test:
+    description: "This is base test."
     schedule:
       # At 04:05 on Sunday.
       cron: "5 4 * * sun"

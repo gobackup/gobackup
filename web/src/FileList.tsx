@@ -42,7 +42,7 @@ const FileList: FC<{}> = () => {
     const fsize = filesize(file.size || 0, { base: 2 }).toString();
 
     return (
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2 py-2 px-6 hover:bg-gray-50">
+      <div className="flex flex-col  lg:flex-row lg:items-center justify-between gap-2 py-2 px-6 hover:bg-gray-50">
         <div>{file.filename}</div>
         {type === 'file' && (
           <>
@@ -66,8 +66,7 @@ const FileList: FC<{}> = () => {
   return (
     <div>
       <PageTitle title={`Browser: ${model}`} backTo={`/`} />
-      <div className="rounded border shadow-sm mt-4 divide-y divide-gray-100">
-        <FileItem key={0} file={{ filename: parent }} type="folder" />
+      <div className="file-browser-container">
         {files.map((file, i) => (
           <FileItem key={i} file={file} />
         ))}
