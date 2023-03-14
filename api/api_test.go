@@ -45,6 +45,10 @@ func invokeHttp(method string, path string, headers map[string]string, data map[
 		req.Header.Add(key, headers[key])
 	}
 
+	if len(data) > 0 {
+		req.Header.Add("Content-Type", "application/json")
+	}
+
 	r.ServeHTTP(w, req)
 
 	return w.Code, w.Body.String()
@@ -68,4 +72,11 @@ func TestAPIGetModels(t *testing.T) {
 
 	assert.Equal(t, 200, code)
 	assertMatchJSON(t, gin.H{"models": []string{"base_test", "demo", "expand_env", "normal_files", "test_model"}}, body)
+}
+
+func TestAPIPostPeform(t *testing.T) {
+	code, body := invokeHttp("POST", "/api/perform", headers, gin.H{"model": "test_model"})
+
+	assert.Equal(t, 200, code)
+	assertMatchJSON(t, gin.H{"message": "Backup: test_model performed in background."}, body)
 }

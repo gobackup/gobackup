@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ import (
 
 func AuthRequired(token string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if gin.Mode() == "dev" {
+		if gin.Mode() == "debug" {
 			return
 		}
 
@@ -70,15 +71,20 @@ func getConfig(c *gin.Context) {
 }
 
 func perform(c *gin.Context) {
-	m := model.GetModelByName(c.Params.ByName("model"))
+
+	type performParam struct {
+		Model string `form:"model" json:"model" binding:"required"`
+	}
+
+	var param performParam
+	c.Bind(&param)
+
+	m := model.GetModelByName(param.Model)
 	if m == nil {
-		c.AbortWithStatusJSON(404, gin.H{"error": "Model not found"})
+		c.AbortWithStatusJSON(404, gin.H{"message": fmt.Sprintf("Model: \"%s\" not found", param.Model)})
 		return
 	}
 
-	if err := m.Perform(); err != nil {
-		c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
-	} else {
-		c.JSON(200, gin.H{"message": "Success"})
-	}
+	go m.Perform()
+	c.JSON(200, gin.H{"message": fmt.Sprintf("Backup: %s performed in background.", param.Model)})
 }
