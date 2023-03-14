@@ -129,3 +129,9 @@ func TestExpandEnv(t *testing.T) {
 	assert.Equal(t, model.Storages["s3"].Viper.GetString("access_key_id"), "xxxxxxxxxxxxxxxxxxxx")
 	assert.Equal(t, model.Storages["s3"].Viper.GetString("secret_access_key"), "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 }
+
+func TestWebConfig(t *testing.T) {
+	assert.Equal(t, Web.Port, "2703")
+	assert.Equal(t, Web.Username, "gobackup")
+	assert.Equal(t, Web.Password, "123456")
+}
