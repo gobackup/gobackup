@@ -157,5 +157,9 @@ func (s *SFTP) delete(fileKey string) error {
 }
 
 func (s *SFTP) list(parent string) ([]FileItem, error) {
-	panic("implement me")
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (s *SFTP) download(fileKey string) (string, error) {
+	return "", fmt.Errorf("not implemented")
 }

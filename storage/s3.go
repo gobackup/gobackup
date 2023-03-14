@@ -237,5 +237,9 @@ func (s *S3) delete(fileKey string) (err error) {
 }
 
 func (s *S3) list(parent string) ([]FileItem, error) {
-	panic("implement me")
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (s *S3) download(fileKey string) (string, error) {
+	return "", fmt.Errorf("not implemented")
 }

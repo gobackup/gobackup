@@ -92,6 +92,7 @@ func setupRouter(version string) *gin.Engine {
 
 	group.GET("/config", getConfig)
 	group.GET("/list", list)
+	group.GET("/download", download)
 	group.POST("/perform", perform)
 	group.GET("/log", log)
 	return r
@@ -152,6 +153,30 @@ func list(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{"files": files})
+}
+
+// GET /api/download?model=xxx&path=
+func download(c *gin.Context) {
+	modelName := c.Query("model")
+	m := model.GetModelByName(modelName)
+	if m == nil {
+		c.AbortWithStatusJSON(404, gin.H{"message": fmt.Sprintf("Model: \"%s\" not found", modelName)})
+		return
+	}
+
+	file := c.Query("path")
+	if file == "" {
+		c.AbortWithStatusJSON(404, gin.H{"message": "File not found"})
+		return
+	}
+
+	downloadURL, err := storage.Download(m.Config, file)
+	if err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.Redirect(302, downloadURL)
 }
 
 // GET /api/log

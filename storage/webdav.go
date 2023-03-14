@@ -97,5 +97,9 @@ func (s *WebDAV) delete(fileKey string) error {
 }
 
 func (s *WebDAV) list(parent string) ([]FileItem, error) {
-	panic("implement me")
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (s *WebDAV) download(fileKey string) (string, error) {
+	return "", fmt.Errorf("not implemented")
 }

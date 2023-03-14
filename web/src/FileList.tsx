@@ -1,7 +1,10 @@
 import { Button } from 'antd';
+import { filesize } from 'filesize';
 import { FC, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { PageTitle } from './components';
+
+import Icon from './icon';
 
 const FileList: FC<{}> = () => {
   let { model = '' } = useParams();
@@ -29,17 +32,30 @@ const FileList: FC<{}> = () => {
     file: any;
     type?: 'file' | 'folder';
   }) => {
+    const downloadURL =
+      `/api/download?` +
+      new URLSearchParams({
+        model,
+        path: file.filename,
+      }).toString();
+
+    const fsize = filesize(file.size || 0, { base: 2 }).toString();
+
     return (
-      <div className="flex items-center justify-between space-x-2 py-2 px-6 hover:bg-gray-50">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2 py-2 px-6 hover:bg-gray-50">
         <div>{file.filename}</div>
         {type === 'file' && (
           <>
-            <div className="flex items-center text-sm space-x-2">
-              <div>{file.size}</div>
+            <div className="flex items-center justify-between text-sm space-x-4 text-gray-400">
+              <div>{fsize}</div>
               <div>{file.last_modified}</div>
-            </div>
-            <div>
-              <Button size="small">Download</Button>
+              <div>
+                <Button size="small" title="Download backup file.">
+                  <a href={downloadURL}>
+                    <Icon name="download-cloud" mode="fill" />
+                  </a>
+                </Button>
+              </div>
             </div>
           </>
         )}

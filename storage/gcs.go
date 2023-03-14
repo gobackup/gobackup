@@ -144,5 +144,9 @@ func (s *GCS) delete(fileKey string) (err error) {
 }
 
 func (s *GCS) list(parent string) ([]FileItem, error) {
-	panic("implement me")
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (s *GCS) download(fileKey string) (string, error) {
+	return "", fmt.Errorf("not implemented")
 }

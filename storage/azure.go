@@ -148,5 +148,9 @@ func (s *Azure) delete(fileKey string) (err error) {
 }
 
 func (s *Azure) list(parent string) ([]FileItem, error) {
-	panic("implement me")
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (s *Azure) download(fileKey string) (string, error) {
+	return "", fmt.Errorf("not implemented")
 }

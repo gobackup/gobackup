@@ -35,6 +35,7 @@ type Storage interface {
 	upload(fileKey string) error
 	delete(fileKey string) error
 	list(parent string) ([]FileItem, error)
+	download(fileKey string) (string, error)
 }
 
 func newBase(model config.ModelConfig, archivePath string, storageConfig config.SubConfig) (base Base, err error) {
@@ -190,4 +191,19 @@ func List(model config.ModelConfig, parent string) (items []FileItem, err error)
 	}
 
 	return nil, fmt.Errorf("Storage %s not found", model.DefaultStorage)
+}
+
+func Download(model config.ModelConfig, fileKey string) (string, error) {
+	if storageConfig, ok := model.Storages[model.DefaultStorage]; ok {
+		_, s := new(model, "", storageConfig)
+		err := s.open()
+		if err != nil {
+			return "", err
+		}
+		defer s.close()
+
+		return s.download(fileKey)
+	}
+
+	return "", fmt.Errorf("Storage %s not found", model.DefaultStorage)
 }

@@ -170,5 +170,9 @@ func (s *FTP) delete(fileKey string) error {
 }
 
 func (s *FTP) list(parent string) ([]FileItem, error) {
-	panic("implement me")
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (s *FTP) download(fileKey string) (string, error) {
+	return "", fmt.Errorf("not implemented")
 }

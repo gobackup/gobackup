@@ -141,3 +141,8 @@ func (s *OSS) list(parent string) (fileItems []FileItem, err error) {
 
 	return
 }
+
+func (s *OSS) download(fileKey string) (string, error) {
+	remotePath := filepath.Join(s.path, fileKey)
+	return s.client.SignURL(remotePath, oss.HTTPGet, int64(1*time.Hour))
+}
