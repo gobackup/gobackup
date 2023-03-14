@@ -33,13 +33,13 @@ type WebConfig struct {
 }
 
 type ScheduleConfig struct {
-	Enabled bool
+	Enabled bool `json:"enabled,omitempty"`
 	// Cron expression
-	Cron string
+	Cron string `json:"cron,omitempty"`
 	// Every
-	Every string
+	Every string `json:"every,omitempty"`
 	// At time
-	At string
+	At string `json:"at,omitempty"`
 }
 
 func (sc ScheduleConfig) String() string {

@@ -8,7 +8,6 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
-	"sort"
 	"time"
 
 	"github.com/gin-contrib/static"
@@ -98,11 +97,13 @@ func setupRouter(version string) *gin.Engine {
 
 // GET /api/config
 func getConfig(c *gin.Context) {
-	models := []string{}
+	models := map[string]any{}
 	for _, m := range model.GetModels() {
-		models = append(models, m.Config.Name)
+		models[m.Config.Name] = gin.H{
+			"schedule":      m.Config.Schedule,
+			"schedule_info": m.Config.Schedule.String(),
+		}
 	}
-	sort.Strings(models)
 
 	c.JSON(200, gin.H{
 		"models": models,

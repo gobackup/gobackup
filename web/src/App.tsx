@@ -1,5 +1,4 @@
-import { Button, notification } from 'antd';
-import 'antd/dist/reset.css';
+import { Button, notification, Popconfirm } from 'antd';
 import { useEffect, useState } from 'react';
 import { LazyLog, ScrollFollow } from 'react-lazylog';
 import Icon from './icon';
@@ -34,7 +33,7 @@ const LogView = () => {
 
 const ModelList = ({}) => {
   const [loading, setLoading] = useState(false);
-  const [models, setModels] = useState([]);
+  const [models, setModels] = useState({});
 
   useEffect(() => {
     reloadModels();
@@ -67,10 +66,38 @@ const ModelList = ({}) => {
     setLoading(true);
     fetch(`${API_URL}/config`)
       .then((res) => res.json())
-      .then((config) => {
-        setModels(config.models);
+      .then((data) => {
+        setModels(data.models);
         setLoading(false);
       });
+  };
+
+  const ModelItem = ({ modelKey }: { modelKey: string }) => {
+    const model = models[modelKey];
+    const scheduleEnable = model.schedule?.enabled;
+
+    return (
+      <li
+        key={modelKey}
+        className="flex items-center justify-between py-2 px-4 hover:bg-gray-50"
+      >
+        <div className="divider-y text-base">
+          <div className="text-base font-medium">{modelKey}</div>
+          {scheduleEnable && (
+            <div className="text-green text-sm">{model.schedule_info}</div>
+          )}
+        </div>
+        <Popconfirm
+          title="Perform Backup"
+          description="Are you sure to perform backup now?"
+          onConfirm={() => performBackup(modelKey)}
+        >
+          <Button size="small" title="Perform backup now!">
+            <Icon name="play" mode="fill" />
+          </Button>
+        </Popconfirm>
+      </li>
+    );
   };
 
   return (
@@ -78,32 +105,16 @@ const ModelList = ({}) => {
       <div className="text-lg text-gray-600 p-2 px-4 bg-gray-100 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="text-text">Models</div>
-          <Button
-            icon={<Icon name="refresh" />}
-            size="small"
-            onClick={reloadModels}
-          >
-            Refresh
+          <Button size="small" onClick={reloadModels} title="Refresh">
+            <Icon name="refresh" />
           </Button>
         </div>
       </div>
       {loading && <>Loading...</>}
       {!loading && (
         <ul className="divide-y">
-          {models.map((model: string) => (
-            <li
-              key={model}
-              className="flex items-center justify-between py-2 px-4 hover:bg-gray-50"
-            >
-              <div className="text-base">{model}</div>
-              <Button
-                icon={<Icon name="play" mode="fill" />}
-                size="small"
-                onClick={() => performBackup(model)}
-              >
-                Backup
-              </Button>
-            </li>
+          {Object.keys(models).map((key: string) => (
+            <ModelItem modelKey={key} />
           ))}
         </ul>
       )}
@@ -114,7 +125,7 @@ const ModelList = ({}) => {
 const App = () => {
   return (
     <div className="py-6">
-      <div className="container mt-10 rounded bg-white shadow-sm p-6 border border-gray-200">
+      <div className="container rounded bg-white shadow-sm p-6 border border-gray-200">
         <div className="flex flex-col xl:flex-row gap-4">
           <ModelList />
           <LogView />

@@ -1,3 +1,4 @@
+import { StyleProvider } from '@ant-design/cssinjs';
 import { ConfigProvider } from 'antd';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -16,12 +17,13 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
           colorSuccess: '#4BAB4E',
           colorError: '#EB5424',
           colorInfo: '#2454BB',
-          colorBgBase: '#E8E9EB',
           borderRadius: 4,
         },
       }}
     >
-      <App />
+      <StyleProvider hashPriority="high">
+        <App />
+      </StyleProvider>
     </ConfigProvider>
   </React.StrictMode>
 );
