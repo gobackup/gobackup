@@ -128,52 +128,28 @@ Example config: [gobackup_test.yml](https://github.com/huacnlee/gobackup/blob/ma
 
 ```yml
 models:
-  gitlab:
-    compress_with:
-      type: tgz
-    storages:
-      scp1:
-        type: scp
-        path: ~/backup
-        host: your-host.com
-        private_key: ~/.ssh/id_rsa
-        username: ubuntu
-        password: password
-        timeout: 300
+  gitlab_app:
     databases:
       gitlab:
-        type: mysql
-        host: localhost
-        port: 3306
+        type: postgresql
         database: gitlab_production
-        username: root
+        username: gitlab
         password:
-        additional_options: --single-transaction --quick
       gitlab_redis:
         type: redis
         mode: sync
         rdb_path: /var/db/redis/dump.rdb
         invoke_save: true
-        password:
-    archive:
-      includes:
-        - /home/git/.ssh/
-        - /etc/mysql/my.conf
-        - /etc/nginx/nginx.conf
-        - /etc/nginx/conf.d
-        - /etc/redis/redis.conf
-        - /etc/logrotate.d/
-      excludes:
-        - /home/ubuntu/.ssh/known_hosts
-        - /etc/logrotate.d/syslog
-  gitlab_repos:
     storages:
-      local:
-        type: local
-        path: /data/backups/gitlab-repos/
-    archive:
-      includes:
-        - /home/git/repositories
+      scp1:
+        type: s3
+        bucket: my_app_backup
+        region: us-east-1
+        path: backups
+        access_key_id: $S3_ACCESS_KEY_Id
+        secret_access_key: $S3_SECRET_ACCESS_KEY
+    compress_with:
+      type: tgz
 ```
 
 ## Usage
