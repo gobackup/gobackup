@@ -8,7 +8,7 @@ body {
 }
 
 .container {
-  @apply mx-auto max-w-5xl;
+  @apply mx-auto;
 }
 
 .footer {
@@ -32,5 +32,18 @@ body {
 
   .ricon + span {
     margin-left: 4px;
+  }
+}
+
+.log-wrapper {
+  @apply relative w-full;
+
+  height: calc(100vh - 300px);
+
+  .react-lazylog-searchbar {
+    @apply rounded-t;
+  }
+  .ReactVirtualized__List {
+    @apply rounded-b;
   }
 }

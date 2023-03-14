@@ -10,10 +10,11 @@ const API_URL = '/api';
  * LazyLog
  *
  * https://mozilla-frontend-infra.github.io/react-lazylog/
+ * https://github.com/mozilla-frontend-infra/react-lazylog
  */
 const LogView = () => {
   return (
-    <div className="relative container my-6 h-[450px] rounded">
+    <div className="log-wrapper">
       <ScrollFollow
         startFollowing
         render={({ follow, onScroll }) => (
@@ -73,7 +74,7 @@ const ModelList = ({}) => {
   };
 
   return (
-    <div className="rounded border border-gray-200">
+    <div className="rounded w-full xl:w-[500px] border border-gray-200">
       <div className="text-lg text-gray-600 p-2 px-4 bg-gray-100 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="text-text">Models</div>
@@ -118,9 +119,12 @@ const App = () => {
         className="h-24 mx-auto"
       />
       <div className="container mt-10 rounded bg-white shadow-sm p-6 border border-gray-200">
-        <ModelList />
+        <div className="flex flex-col xl:flex-row gap-4">
+          <ModelList />
+          <LogView />
+        </div>
       </div>
-      <LogView />
+
       <div className="footer">
         <div className="copyright">GoBackup Powered.</div>
         <div className="links">

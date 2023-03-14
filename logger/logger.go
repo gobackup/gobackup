@@ -43,7 +43,7 @@ func init() {
 
 func SetLogger(logPath string) {
 	logfile, _ := os.OpenFile(logPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	_myLog = log.New(logfile, "", _logFlag)
+	_myLog = log.New(&writer{logfile, "2006/01/02 15:04:05"}, "", 0)
 	sharedLogger = newLogger()
 }
 

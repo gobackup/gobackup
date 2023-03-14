@@ -47,6 +47,15 @@ func StartHTTP(version string, apiToken string) (err error) {
 	mutex.Handle("/status", r)
 	mutex.Handle("/api/", r)
 
+	if gin.Mode() != gin.ReleaseMode {
+		go func() {
+			for {
+				time.Sleep(5 * time.Second)
+				logger.Info("Ping", time.Now())
+			}
+		}()
+	}
+
 	return http.ListenAndServe(":"+port, mutex)
 }
 
@@ -100,16 +109,18 @@ func perform(c *gin.Context) {
 
 func log(c *gin.Context) {
 	chanStream := tailFile()
+	defer close(chanStream)
 
 	c.Stream(func(w io.Writer) bool {
 		if msg, ok := <-chanStream; ok {
 			time.Sleep(5 * time.Millisecond)
+			println("- stream --------------- log line")
 			c.Writer.WriteString(msg + "\n")
 			c.Writer.Flush()
 
 			return true
 		}
-		return true
+		return false
 	})
 }
 
@@ -131,7 +142,6 @@ func tailFile() chan string {
 				out_chan <- string(line)
 			}
 		}
-
 	}()
 
 	return out_chan
