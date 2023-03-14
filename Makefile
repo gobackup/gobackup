@@ -10,3 +10,5 @@ start: web
 	GIN_MODE=debug go start main.go -- run --config ./gobackup_test.yml
 build: web
 	go build -o dist/gobackup
+dev:
+	cd web && yarn dev

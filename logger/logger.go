@@ -41,6 +41,12 @@ func init() {
 	sharedLogger = newLogger()
 }
 
+func SetLogger(logPath string) {
+	logfile, _ := os.OpenFile(logPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	_myLog = log.New(logfile, "", _logFlag)
+	sharedLogger = newLogger()
+}
+
 func newLogger() Logger {
 	return Logger{_logFlag, *_myLog}
 }

@@ -1,9 +1,35 @@
 import { Button, notification } from 'antd';
 import 'antd/dist/reset.css';
 import { useEffect, useState } from 'react';
+import { LazyLog, ScrollFollow } from 'react-lazylog';
 import Icon from './icon';
 
 const API_URL = '/api';
+
+/**
+ * LazyLog
+ *
+ * https://mozilla-frontend-infra.github.io/react-lazylog/
+ */
+const LogView = () => {
+  return (
+    <div className="relative container my-6 h-[450px] rounded">
+      <ScrollFollow
+        startFollowing
+        render={({ follow, onScroll }) => (
+          <LazyLog
+            extraLines={1}
+            enableSearch={true}
+            url={`${API_URL}/log`}
+            stream
+            follow={follow}
+            onScroll={onScroll}
+          />
+        )}
+      />
+    </div>
+  );
+};
 
 const ModelList = ({}) => {
   const [loading, setLoading] = useState(false);
@@ -91,9 +117,10 @@ const App = () => {
         src="https://user-images.githubusercontent.com/5518/205909959-12b92929-4ac5-4bb5-9111-6f9a3ed76cf6.png"
         className="h-24 mx-auto"
       />
-      <div className="container max-w-3xl mx-auto mt-10 rounded bg-white shadow-sm p-6 border border-gray-200">
+      <div className="container mt-10 rounded bg-white shadow-sm p-6 border border-gray-200">
         <ModelList />
       </div>
+      <LogView />
       <div className="footer">
         <div className="copyright">GoBackup Powered.</div>
         <div className="links">

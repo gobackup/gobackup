@@ -20,6 +20,9 @@ var (
 	Models []ModelConfig
 	// gobackup base dir
 	GoBackupDir string = getGoBackupDir()
+
+	PidFilePath string = filepath.Join(GoBackupDir, "gobackup.pid")
+	LogFilePath string = filepath.Join(GoBackupDir, "gobackup.log")
 )
 
 type ScheduleConfig struct {

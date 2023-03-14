@@ -7,6 +7,10 @@ body {
   @apply bg-gray-50 text-gray-900;
 }
 
+.container {
+  @apply mx-auto max-w-5xl;
+}
+
 .footer {
   @apply text-center self-center mt-4 text-base flex justify-between max-w-3xl mx-auto px-2 text-gray-600;
 

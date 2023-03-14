@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"syscall"
 
 	"github.com/google/uuid"
@@ -102,12 +101,13 @@ func main() {
 				}
 
 				dm := &daemon.Context{
-					LogFileName: filepath.Join(config.GoBackupDir, "gobackup.log"),
-					PidFileName: filepath.Join(config.GoBackupDir, "gobackup.pid"),
+					LogFileName: config.LogFilePath,
+					PidFileName: config.PidFilePath,
 					PidFilePerm: 0644,
 					WorkDir:     "./",
 					Args:        args,
 				}
+
 				d, err := dm.Reborn()
 				if err != nil {
 					log.Fatal("Unable to run: ", err)
@@ -143,6 +143,7 @@ func main() {
 
 func initApplication() {
 	config.Init(configFile)
+	logger.SetLogger(config.LogFilePath)
 }
 
 func perform(modelNames []string) {
