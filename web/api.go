@@ -11,11 +11,11 @@ import (
 	"sort"
 	"time"
 
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/gobackup/gobackup/config"
 	"github.com/gobackup/gobackup/logger"
 	"github.com/gobackup/gobackup/model"
-	"github.com/spf13/viper"
 	"github.com/stoicperlman/fls"
 )
 
@@ -23,29 +23,48 @@ import (
 var staticFS embed.FS
 var logFile *os.File
 
-// StartHTTP run API server
-func StartHTTP(version string, apiToken string) (err error) {
-	logger := logger.Tag("API")
+type embedFileSystem struct {
+	http.FileSystem
+	indexes bool
+}
 
-	viper.SetDefault("api.port", 2703)
+func (e embedFileSystem) Exists(prefix string, path string) bool {
+	f, err := e.Open(path)
+	if err != nil {
+		return false
+	}
+
+	// check if indexing is allowed
+	s, _ := f.Stat()
+	if s.IsDir() && !e.indexes {
+		return false
+	}
+
+	return true
+}
+
+// StartHTTP run API server
+func StartHTTP(version string) (err error) {
+	logger := logger.Tag("API")
 
 	logFile, err = os.Open(config.LogFilePath)
 	if err != nil {
 		return err
 	}
 
-	port := viper.GetString("api.port")
-	logger.Infof("Starting API server on port http://127.0.0.1:%s", port)
-	logger.Infof("API Token: %s", apiToken)
+	fmt.Printf("\nStarting API server on port http://127.0.0.1:%s\n", config.Web.Port)
 
-	r := setupRouter(version, apiToken)
+	r := setupRouter(version)
 
-	mutex := http.NewServeMux()
+	// Enable baseAuth
+	if len(config.Web.Username) > 0 && len(config.Web.Password) > 0 {
+		r.Use(gin.BasicAuth(gin.Accounts{
+			config.Web.Username: config.Web.Password,
+		}))
+	}
 
 	fe, _ := fs.Sub(staticFS, "dist")
-	mutex.Handle("/", http.FileServer(http.FS(fe)))
-	mutex.Handle("/status", r)
-	mutex.Handle("/api/", r)
+	r.Use(static.Serve("/", embedFileSystem{http.FS(fe), true}))
 
 	if gin.Mode() != gin.ReleaseMode {
 		go func() {
@@ -56,10 +75,10 @@ func StartHTTP(version string, apiToken string) (err error) {
 		}()
 	}
 
-	return http.ListenAndServe(":"+port, mutex)
+	return r.Run(":" + config.Web.Port)
 }
 
-func setupRouter(version string, apiToken string) *gin.Engine {
+func setupRouter(version string) *gin.Engine {
 	r := gin.Default()
 
 	r.GET("/status", func(c *gin.Context) {
@@ -109,12 +128,10 @@ func perform(c *gin.Context) {
 
 func log(c *gin.Context) {
 	chanStream := tailFile()
-	defer close(chanStream)
 
 	c.Stream(func(w io.Writer) bool {
 		if msg, ok := <-chanStream; ok {
 			time.Sleep(5 * time.Millisecond)
-			println("- stream --------------- log line")
 			c.Writer.WriteString(msg + "\n")
 			c.Writer.Flush()
 

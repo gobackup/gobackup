@@ -12,10 +12,6 @@ import (
 	"github.com/longbridgeapp/assert"
 )
 
-var (
-	testAPIToken = "foo-bar-dar"
-)
-
 func init() {
 	config.Init("../gobackup_test.yml")
 }
@@ -29,7 +25,7 @@ func assertMatchJSON(t *testing.T, expected map[string]any, actual string) {
 }
 
 func invokeHttp(method string, path string, headers map[string]string, data map[string]any) (statusCode int, body string) {
-	r := setupRouter("master", testAPIToken)
+	r := setupRouter("master")
 	w := httptest.NewRecorder()
 
 	bodyBytes, err := json.Marshal(data)

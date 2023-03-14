@@ -2,6 +2,9 @@
 # -----------------------
 # Put this file in follow place:
 # ~/.gobackup/gobackup.yml or /etc/gobackup/gobackup.yml
+web:
+  username: gobackup
+  password: 123456
 models:
   base_test:
     schedule:

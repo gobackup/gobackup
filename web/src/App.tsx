@@ -114,10 +114,6 @@ const ModelList = ({}) => {
 const App = () => {
   return (
     <div className="py-6">
-      <img
-        src="https://user-images.githubusercontent.com/5518/205909959-12b92929-4ac5-4bb5-9111-6f9a3ed76cf6.png"
-        className="h-24 mx-auto"
-      />
       <div className="container mt-10 rounded bg-white shadow-sm p-6 border border-gray-200">
         <div className="flex flex-col xl:flex-row gap-4">
           <ModelList />
@@ -125,8 +121,19 @@ const App = () => {
         </div>
       </div>
 
-      <div className="footer">
-        <div className="copyright">GoBackup Powered.</div>
+      <div className="footer container">
+        <div className="copyright flex items-center space-x-1">
+          <img
+            src="https://user-images.githubusercontent.com/5518/205909959-12b92929-4ac5-4bb5-9111-6f9a3ed76cf6.png"
+            className="h-6 mx-auto"
+          />
+          <div>
+            <a href="https://github.com/gobackup/gobackup" target="_blank">
+              GoBackup
+            </a>{' '}
+            powered.
+          </div>
+        </div>
         <div className="links">
           <a href="https://gobackup.github.io" target="_blank">
             <Icon name="home-smile" mode="fill" />

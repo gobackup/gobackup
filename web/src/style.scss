@@ -12,7 +12,7 @@ body {
 }
 
 .footer {
-  @apply text-center self-center mt-4 text-base flex justify-between max-w-3xl mx-auto px-2 text-gray-600;
+  @apply text-center self-center mt-4 text-base flex justify-between mx-auto px-2 text-gray-600;
 
   .links {
     @apply space-x-1;
@@ -41,7 +41,7 @@ body {
   height: calc(100vh - 300px);
 
   .react-lazylog-searchbar {
-    @apply rounded-t;
+    @apply rounded-t border-b  border-b-gray-900 shadow-md;
   }
   .ReactVirtualized__List {
     @apply rounded-b;

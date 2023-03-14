@@ -23,7 +23,14 @@ var (
 
 	PidFilePath string = filepath.Join(GoBackupDir, "gobackup.pid")
 	LogFilePath string = filepath.Join(GoBackupDir, "gobackup.log")
+	Web         WebConfig
 )
+
+type WebConfig struct {
+	Port     string
+	Username string
+	Password string
+}
 
 type ScheduleConfig struct {
 	Enabled bool
@@ -154,6 +161,14 @@ func Init(configFile string) {
 	if len(Models) == 0 {
 		logger.Fatalf("No model found in %s", viperConfigFile)
 	}
+
+	// Load web config
+	Web = WebConfig{}
+	viper.SetDefault("web.port", 2703)
+	Web.Port = viper.GetString("web.port")
+	Web.Username = viper.GetString("web.username")
+	Web.Password = viper.GetString("web.password")
+
 }
 
 func loadModel(key string) (model ModelConfig) {
