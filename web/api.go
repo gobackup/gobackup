@@ -66,7 +66,7 @@ func StartHTTP(version string) (err error) {
 	fe, _ := fs.Sub(staticFS, "dist")
 	r.Use(static.Serve("/", embedFileSystem{http.FS(fe), true}))
 
-	if gin.Mode() != gin.ReleaseMode {
+	if os.Getenv("GO_ENV") == "dev" {
 		go func() {
 			for {
 				time.Sleep(5 * time.Second)
@@ -96,6 +96,7 @@ func setupRouter(version string) *gin.Engine {
 	return r
 }
 
+// GET /api/config
 func getConfig(c *gin.Context) {
 	models := []string{}
 	for _, m := range model.GetModels() {
@@ -108,6 +109,7 @@ func getConfig(c *gin.Context) {
 	})
 }
 
+// POST /api/perform
 func perform(c *gin.Context) {
 	type performParam struct {
 		Model string `form:"model" json:"model" binding:"required"`
@@ -126,6 +128,7 @@ func perform(c *gin.Context) {
 	c.JSON(200, gin.H{"message": fmt.Sprintf("Backup: %s performed in background.", param.Model)})
 }
 
+// GET /api/log
 func log(c *gin.Context) {
 	chanStream := tailFile()
 
