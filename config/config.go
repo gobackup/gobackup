@@ -168,7 +168,6 @@ func Init(configFile string) {
 	Web.Port = viper.GetString("web.port")
 	Web.Username = viper.GetString("web.username")
 	Web.Password = viper.GetString("web.password")
-
 }
 
 func loadModel(key string) (model ModelConfig) {

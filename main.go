@@ -114,6 +114,7 @@ func main() {
 				defer dm.Release()
 
 				initApplication()
+				logger.SetLogger(config.LogFilePath)
 				scheduler.Start()
 
 				return nil
@@ -125,6 +126,7 @@ func main() {
 			Flags: buildFlags([]cli.Flag{}),
 			Action: func(ctx *cli.Context) error {
 				initApplication()
+				logger.SetLogger(config.LogFilePath)
 				scheduler.Start()
 
 				web.StartHTTP(version)
@@ -139,7 +141,6 @@ func main() {
 
 func initApplication() {
 	config.Init(configFile)
-	logger.SetLogger(config.LogFilePath)
 }
 
 func perform(modelNames []string) {
