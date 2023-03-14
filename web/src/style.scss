@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-size: 14px;
+  @apply bg-gray-50;
+}
+
+.btn {
+  @apply text-xs border rounded-sm border-gray-300 py-1 px-2 hover:bg-gray-200 active:bg-gray-300 shadow-sm;
+}

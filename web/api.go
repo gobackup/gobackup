@@ -1,7 +1,10 @@
-package api
+package web
 
 import (
+	"embed"
 	"fmt"
+	"io/fs"
+	"net/http"
 	"sort"
 
 	"github.com/gin-gonic/gin"
@@ -10,26 +13,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-func AuthRequired(token string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		if gin.Mode() == "debug" {
-			return
-		}
-
-		auth := c.Request.Header.Get("Authorization")
-
-		if auth != token {
-			c.AbortWithStatusJSON(403, gin.H{"error": "Access denied"})
-			return
-		}
-	}
-}
+//go:embed dist
+var staticFS embed.FS
 
 // StartHTTP run API server
 func StartHTTP(version string, apiToken string) error {
 	logger := logger.Tag("API")
 
-	viper.SetDefault("api.port", 7023)
+	viper.SetDefault("api.port", 2703)
 
 	port := viper.GetString("api.port")
 	logger.Infof("Starting API server on port http://127.0.0.1:%s", port)
@@ -37,7 +28,14 @@ func StartHTTP(version string, apiToken string) error {
 
 	r := setupRouter(version, apiToken)
 
-	return r.Run(":" + port)
+	mutex := http.NewServeMux()
+
+	fe, _ := fs.Sub(staticFS, "dist")
+	mutex.Handle("/", http.FileServer(http.FS(fe)))
+	mutex.Handle("/status", r)
+	mutex.Handle("/api/", r)
+
+	return http.ListenAndServe(":"+port, mutex)
 }
 
 func setupRouter(version string, apiToken string) *gin.Engine {
@@ -52,8 +50,8 @@ func setupRouter(version string, apiToken string) *gin.Engine {
 
 	group := r.Group("/api")
 
-	group.GET("/config", AuthRequired(apiToken), getConfig)
-	group.POST("/perform", AuthRequired(apiToken), perform)
+	group.GET("/config", getConfig)
+	group.POST("/perform", perform)
 
 	return r
 }

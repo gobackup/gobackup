@@ -13,11 +13,11 @@ import (
 	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
 
-	"github.com/gobackup/gobackup/api"
 	"github.com/gobackup/gobackup/config"
 	"github.com/gobackup/gobackup/logger"
 	"github.com/gobackup/gobackup/model"
 	"github.com/gobackup/gobackup/scheduler"
+	"github.com/gobackup/gobackup/web"
 )
 
 const (
@@ -131,7 +131,7 @@ func main() {
 				initApplication()
 				scheduler.Start()
 
-				api.StartHTTP(version, apiToken)
+				web.StartHTTP(version, apiToken)
 
 				return nil
 			},

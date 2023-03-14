@@ -1,4 +1,4 @@
-package api
+package web
 
 import (
 	"bytes"
@@ -14,9 +14,6 @@ import (
 
 var (
 	testAPIToken = "foo-bar-dar"
-	headers      = map[string]string{
-		"Authorization": testAPIToken,
-	}
 )
 
 func init() {
@@ -54,12 +51,6 @@ func invokeHttp(method string, path string, headers map[string]string, data map[
 	return w.Code, w.Body.String()
 }
 
-func TestWithoutAPIToken(t *testing.T) {
-	code, body := invokeHttp("GET", "/api/config", nil, nil)
-	assert.Equal(t, 403, code)
-	assertMatchJSON(t, gin.H{"error": "Access denied"}, body)
-}
-
 func TestAPIStatus(t *testing.T) {
 	code, body := invokeHttp("GET", "/status", nil, nil)
 
@@ -68,14 +59,14 @@ func TestAPIStatus(t *testing.T) {
 }
 
 func TestAPIGetModels(t *testing.T) {
-	code, body := invokeHttp("GET", "/api/config", headers, nil)
+	code, body := invokeHttp("GET", "/api/config", nil, nil)
 
 	assert.Equal(t, 200, code)
 	assertMatchJSON(t, gin.H{"models": []string{"base_test", "demo", "expand_env", "normal_files", "test_model"}}, body)
 }
 
 func TestAPIPostPeform(t *testing.T) {
-	code, body := invokeHttp("POST", "/api/perform", headers, gin.H{"model": "test_model"})
+	code, body := invokeHttp("POST", "/api/perform", nil, gin.H{"model": "test_model"})
 
 	assert.Equal(t, 200, code)
 	assertMatchJSON(t, gin.H{"message": "Backup: test_model performed in background."}, body)
