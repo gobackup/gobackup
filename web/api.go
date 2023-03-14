@@ -15,6 +15,7 @@ import (
 	"github.com/gobackup/gobackup/config"
 	"github.com/gobackup/gobackup/logger"
 	"github.com/gobackup/gobackup/model"
+	"github.com/gobackup/gobackup/storage"
 	"github.com/stoicperlman/fls"
 )
 
@@ -90,6 +91,7 @@ func setupRouter(version string) *gin.Engine {
 	group := r.Group("/api")
 
 	group.GET("/config", getConfig)
+	group.GET("/list", list)
 	group.POST("/perform", perform)
 	group.GET("/log", log)
 	return r
@@ -127,6 +129,29 @@ func perform(c *gin.Context) {
 
 	go m.Perform()
 	c.JSON(200, gin.H{"message": fmt.Sprintf("Backup: %s performed in background.", param.Model)})
+}
+
+// GET /api/list?model=xxx&parent=
+func list(c *gin.Context) {
+	modelName := c.Query("model")
+	m := model.GetModelByName(modelName)
+	if m == nil {
+		c.AbortWithStatusJSON(404, gin.H{"message": fmt.Sprintf("Model: \"%s\" not found", modelName)})
+		return
+	}
+
+	parent := c.Query("parent")
+	if parent == "" {
+		parent = "/"
+	}
+
+	files, err := storage.List(m.Config, parent)
+	if err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(200, gin.H{"files": files})
 }
 
 // GET /api/log

@@ -265,3 +265,7 @@ func newSSHClientConfig(c sshConfig) ssh.ClientConfig {
 		HostKeyCallback: keyCallBack,
 	}
 }
+
+func (s *SCP) list(parent string) ([]FileItem, error) {
+	panic("implement me")
+}

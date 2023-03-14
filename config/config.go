@@ -60,18 +60,19 @@ func (sc ScheduleConfig) String() string {
 
 // ModelConfig for special case
 type ModelConfig struct {
-	Name         string
-	TempPath     string
-	DumpPath     string
-	Schedule     ScheduleConfig
-	CompressWith SubConfig
-	EncryptWith  SubConfig
-	Archive      *viper.Viper
-	Splitter     *viper.Viper
-	Databases    map[string]SubConfig
-	Storages     map[string]SubConfig
-	Notifiers    map[string]SubConfig
-	Viper        *viper.Viper
+	Name           string
+	TempPath       string
+	DumpPath       string
+	Schedule       ScheduleConfig
+	CompressWith   SubConfig
+	EncryptWith    SubConfig
+	Archive        *viper.Viper
+	Splitter       *viper.Viper
+	Databases      map[string]SubConfig
+	Storages       map[string]SubConfig
+	DefaultStorage string
+	Notifiers      map[string]SubConfig
+	Viper          *viper.Viper
 }
 
 func getGoBackupDir() string {
@@ -253,8 +254,14 @@ func loadStoragesConfig(model *ModelConfig) {
 			Type:  storageViper.GetString("type"),
 			Viper: storageViper,
 		}
+
+		// Set default storage
+		if len(model.DefaultStorage) == 0 {
+			model.DefaultStorage = key
+		}
 	}
 	model.Storages = storageConfigs
+
 }
 
 func loadNotifiersConfig(model *ModelConfig) {

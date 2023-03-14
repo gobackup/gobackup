@@ -1,6 +1,7 @@
 import { Button, notification, Popconfirm } from 'antd';
 import { useEffect, useState } from 'react';
 import { LazyLog, ScrollFollow } from 'react-lazylog';
+import { Link } from 'react-router-dom';
 import Icon from './icon';
 
 const API_URL = '/api';
@@ -87,15 +88,23 @@ const ModelList = ({}) => {
             <div className="text-green text-sm">{model.schedule_info}</div>
           )}
         </div>
-        <Popconfirm
-          title="Perform Backup"
-          description="Are you sure to perform backup now?"
-          onConfirm={() => performBackup(modelKey)}
-        >
-          <Button size="small" title="Perform backup now!">
-            <Icon name="play" mode="fill" />
+        <div className="flex items-center space-x-1">
+          <Button size="small">
+            <Link to={`/browser/${modelKey}`}>
+              <Icon name="folders" mode="fill" />
+            </Link>
           </Button>
-        </Popconfirm>
+
+          <Popconfirm
+            title="Perform Backup"
+            description="Are you sure to perform backup now?"
+            onConfirm={() => performBackup(modelKey)}
+          >
+            <Button size="small" title="Perform backup now!">
+              <Icon name="play" mode="fill" />
+            </Button>
+          </Popconfirm>
+        </div>
       </li>
     );
   };
@@ -124,36 +133,9 @@ const ModelList = ({}) => {
 
 const App = () => {
   return (
-    <div className="py-6">
-      <div className="container rounded bg-white shadow-sm p-6 border border-gray-200">
-        <div className="flex flex-col xl:flex-row gap-4">
-          <ModelList />
-          <LogView />
-        </div>
-      </div>
-
-      <div className="footer container">
-        <div className="copyright flex items-center space-x-1">
-          <img
-            src="https://user-images.githubusercontent.com/5518/205909959-12b92929-4ac5-4bb5-9111-6f9a3ed76cf6.png"
-            className="h-6 mx-auto"
-          />
-          <div>
-            <a href="https://github.com/gobackup/gobackup" target="_blank">
-              GoBackup
-            </a>{' '}
-            powered.
-          </div>
-        </div>
-        <div className="links">
-          <a href="https://gobackup.github.io" target="_blank">
-            <Icon name="home-smile" mode="fill" />
-          </a>
-          <a href="https://github.com/gobackup/gobackup" target="_blank">
-            <Icon name="github" mode="fill" />
-          </a>
-        </div>
-      </div>
+    <div className="flex flex-col xl:flex-row gap-4">
+      <ModelList />
+      <LogView />
     </div>
   );
 };

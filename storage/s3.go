@@ -235,3 +235,7 @@ func (s *S3) delete(fileKey string) (err error) {
 	_, err = s.client.S3.DeleteObject(input)
 	return
 }
+
+func (s *S3) list(parent string) ([]FileItem, error) {
+	panic("implement me")
+}

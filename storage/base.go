@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/gobackup/gobackup/config"
 	"github.com/gobackup/gobackup/logger"
@@ -21,12 +22,19 @@ type Base struct {
 	cycler      *Cycler
 }
 
+type FileItem struct {
+	Filename     string    `json:"filename,omitempty"`
+	Size         int64     `json:"size,omitempty"`
+	LastModified time.Time `json:"last_modified,omitempty"`
+}
+
 // Storage interface
 type Storage interface {
 	open() error
 	close()
 	upload(fileKey string) error
 	delete(fileKey string) error
+	list(parent string) ([]FileItem, error)
 }
 
 func newBase(model config.ModelConfig, archivePath string, storageConfig config.SubConfig) (base Base, err error) {
@@ -70,14 +78,10 @@ func newBase(model config.ModelConfig, archivePath string, storageConfig config.
 	return
 }
 
-// run storage
-func runModel(model config.ModelConfig, archivePath string, storageConfig config.SubConfig) (err error) {
-	logger := logger.Tag("Storage")
-
-	newFileKey := filepath.Base(archivePath)
+func new(model config.ModelConfig, archivePath string, storageConfig config.SubConfig) (Base, Storage) {
 	base, err := newBase(model, archivePath, storageConfig)
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	var s Storage
@@ -115,8 +119,18 @@ func runModel(model config.ModelConfig, archivePath string, storageConfig config
 	case "azure":
 		s = &Azure{Base: base}
 	default:
-		return fmt.Errorf("[%s] storage type has not implement", storageConfig.Type)
+		panic(fmt.Errorf("[%s] storage type has not implement", storageConfig.Type))
 	}
+
+	return base, s
+}
+
+// run storage
+func runModel(model config.ModelConfig, archivePath string, storageConfig config.SubConfig) (err error) {
+	logger := logger.Tag("Storage")
+
+	newFileKey := filepath.Base(archivePath)
+	base, s := new(model, archivePath, storageConfig)
 
 	logger.Info("=> Storage | " + storageConfig.Type)
 	err = s.open()
@@ -131,7 +145,6 @@ func runModel(model config.ModelConfig, archivePath string, storageConfig config
 	}
 
 	base.cycler.run(newFileKey, base.fileKeys, base.keep, s.delete)
-
 	return nil
 }
 
@@ -157,4 +170,24 @@ func Run(model config.ModelConfig, archivePath string) (err error) {
 	}
 
 	return nil
+}
+
+// List return file list of storage
+func List(model config.ModelConfig, parent string) (items []FileItem, err error) {
+	if storageConfig, ok := model.Storages[model.DefaultStorage]; ok {
+		_, s := new(model, "", storageConfig)
+		err = s.open()
+		if err != nil {
+			return nil, err
+		}
+		defer s.close()
+
+		if parent == "" {
+			parent = "/"
+		}
+
+		return s.list(parent)
+	}
+
+	return nil, fmt.Errorf("Storage %s not found", model.DefaultStorage)
 }

@@ -95,3 +95,7 @@ func (s *WebDAV) delete(fileKey string) error {
 	logger.Info("-> remove", remotePath)
 	return s.client.Remove(remotePath)
 }
+
+func (s *WebDAV) list(parent string) ([]FileItem, error) {
+	panic("implement me")
+}

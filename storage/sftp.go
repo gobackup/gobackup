@@ -155,3 +155,7 @@ func (s *SFTP) delete(fileKey string) error {
 
 	return nil
 }
+
+func (s *SFTP) list(parent string) ([]FileItem, error) {
+	panic("implement me")
+}

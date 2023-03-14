@@ -146,3 +146,7 @@ func (s *Azure) delete(fileKey string) (err error) {
 
 	return nil
 }
+
+func (s *Azure) list(parent string) ([]FileItem, error) {
+	panic("implement me")
+}

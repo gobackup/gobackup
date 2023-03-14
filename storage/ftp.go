@@ -168,3 +168,7 @@ func (s *FTP) delete(fileKey string) error {
 
 	return nil
 }
+
+func (s *FTP) list(parent string) ([]FileItem, error) {
+	panic("implement me")
+}

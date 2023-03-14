@@ -142,3 +142,7 @@ func (s *GCS) delete(fileKey string) (err error) {
 
 	return nil
 }
+
+func (s *GCS) list(parent string) ([]FileItem, error) {
+	panic("implement me")
+}

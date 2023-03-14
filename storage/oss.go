@@ -122,3 +122,22 @@ func (s *OSS) delete(fileKey string) error {
 	remotePath := filepath.Join(s.path, fileKey)
 	return s.client.DeleteObject(remotePath)
 }
+
+func (s *OSS) list(parent string) (fileItems []FileItem, err error) {
+	remotePath := filepath.Join(s.path, parent)
+	items, err := s.client.ListObjectsV2(oss.Prefix(remotePath))
+	if err != nil {
+		return
+	}
+
+	fileItems = []FileItem{}
+	for _, item := range items.Objects {
+		fileItems = append(fileItems, FileItem{
+			Filename:     filepath.Join(remotePath, item.Key),
+			LastModified: item.LastModified,
+			Size:         item.Size,
+		})
+	}
+
+	return
+}

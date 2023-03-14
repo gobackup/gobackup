@@ -38,3 +38,7 @@ func (s *Local) upload(fileKey string) (err error) {
 func (s *Local) delete(fileKey string) (err error) {
 	return os.Remove(filepath.Join(s.destPath, fileKey))
 }
+
+func (s *Local) list(parent string) ([]FileItem, error) {
+	panic("implement me")
+}
