@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
 
 	"github.com/gobackup/gobackup/config"
@@ -187,7 +188,20 @@ func List(model config.ModelConfig, parent string) (items []FileItem, err error)
 			parent = "/"
 		}
 
-		return s.list(parent)
+		items, err := s.list(parent)
+		if err != nil {
+			return nil, err
+		}
+
+		// Sort items by LastModified, Filename in descending
+		sort.Slice(items, func(i, j int) bool {
+			if items[i].LastModified == items[j].LastModified {
+				return items[i].Filename > items[j].Filename
+			}
+			return items[i].LastModified.After(items[j].LastModified)
+		})
+
+		return items, nil
 	}
 
 	return nil, fmt.Errorf("Storage %s not found", model.DefaultStorage)
