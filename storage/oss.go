@@ -40,8 +40,6 @@ var (
 )
 
 func (s *OSS) open() (err error) {
-	logger := logger.Tag("OSS")
-
 	s.viper.SetDefault("endpoint", "oss-cn-beijing.aliyuncs.com")
 	s.viper.SetDefault("max_retries", 3)
 	s.viper.SetDefault("path", "/")
@@ -65,9 +63,6 @@ func (s *OSS) open() (err error) {
 		s.threads = 100
 	}
 
-	logger.Info("endpoint:", s.endpoint)
-	logger.Info("bucket:", s.bucket)
-
 	ossClient, err := oss.New(s.endpoint, s.accessKeyID, s.accessKeySecret)
 	if err != nil {
 		return err
@@ -88,6 +83,9 @@ func (s *OSS) close() {
 
 func (s *OSS) upload(fileKey string) (err error) {
 	logger := logger.Tag("OSS")
+
+	logger.Info("endpoint:", s.endpoint)
+	logger.Info("bucket:", s.bucket)
 
 	var fileKeys []string
 	if len(s.fileKeys) != 0 {
@@ -121,4 +119,38 @@ func (s *OSS) upload(fileKey string) (err error) {
 func (s *OSS) delete(fileKey string) error {
 	remotePath := filepath.Join(s.path, fileKey)
 	return s.client.DeleteObject(remotePath)
+}
+
+func (s *OSS) list(parent string) (fileItems []FileItem, err error) {
+	remotePath := filepath.Join(s.path, parent)
+
+	fileItems = []FileItem{}
+
+	continueToken := ""
+	for {
+		lsRes, err := s.client.ListObjectsV2(oss.Prefix(remotePath), oss.ContinuationToken(continueToken))
+		if err != nil {
+			return nil, err
+		}
+
+		for _, item := range lsRes.Objects {
+			fileItems = append(fileItems, FileItem{
+				Filename:     item.Key,
+				LastModified: item.LastModified,
+				Size:         item.Size,
+			})
+		}
+
+		if lsRes.IsTruncated {
+			continueToken = lsRes.NextContinuationToken
+		} else {
+			break
+		}
+	}
+
+	return
+}
+
+func (s *OSS) download(fileKey string) (string, error) {
+	return s.client.SignURL(fileKey, oss.HTTPGet, int64(1*time.Hour))
 }

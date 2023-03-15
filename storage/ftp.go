@@ -161,10 +161,36 @@ func (s *FTP) delete(fileKey string) error {
 	if !strings.HasSuffix(fileKey, "/") {
 		// file
 		return s.client.Delete(remotePath)
-	} else {
-		// directory
-		return s.client.RemoveDir(remotePath)
 	}
 
-	return nil
+	// directory
+	return s.client.RemoveDir(remotePath)
+}
+
+// list files
+func (s *FTP) list(parent string) ([]FileItem, error) {
+	remotePath := path.Join(s.path, parent)
+
+	entries, err := s.client.List(remotePath)
+	if err != nil {
+		return nil, err
+	}
+
+	var items []FileItem
+	for _, entry := range entries {
+		if entry.Type == ftp.EntryTypeFile {
+			items = append(items, FileItem{
+				Filename:     entry.Name,
+				Size:         int64(entry.Size),
+				LastModified: entry.Time,
+			})
+		}
+	}
+
+	return items, nil
+}
+
+// Get FTP download URL
+func (s *FTP) download(fileKey string) (string, error) {
+	return "", fmt.Errorf("FTP download is not supported")
 }

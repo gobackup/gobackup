@@ -235,3 +235,55 @@ func (s *S3) delete(fileKey string) (err error) {
 	_, err = s.client.S3.DeleteObject(input)
 	return
 }
+
+// List the objects in the bucket with the prefix = parent
+func (s *S3) list(parent string) ([]FileItem, error) {
+	remotePath := filepath.Join(s.path, parent)
+	continueToken := ""
+	var items []FileItem
+
+	for {
+		input := &s3.ListObjectsV2Input{
+			Bucket:            aws.String(s.bucket),
+			Prefix:            aws.String(remotePath),
+			ContinuationToken: aws.String(continueToken),
+		}
+
+		result, err := s.client.S3.ListObjectsV2(input)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list objects, %v", err)
+		}
+
+		for _, object := range result.Contents {
+			items = append(items, FileItem{
+				Filename:     *object.Key,
+				Size:         *object.Size,
+				LastModified: *object.LastModified,
+			})
+		}
+
+		if *result.IsTruncated {
+			continueToken = *result.NextContinuationToken
+		} else {
+			break
+		}
+	}
+
+	return items, nil
+}
+
+// Get the object download URL by fileKey (include remote_path)
+func (s *S3) download(fileKey string) (string, error) {
+	input := &s3.GetObjectInput{
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(fileKey),
+	}
+
+	req, _ := s.client.S3.GetObjectRequest(input)
+	url, err := req.Presign(1 * time.Hour)
+	if err != nil {
+		return "", fmt.Errorf("failed to sign request, %v", err)
+	}
+
+	return url, nil
+}

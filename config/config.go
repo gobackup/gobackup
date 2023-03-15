@@ -20,16 +20,26 @@ var (
 	Models []ModelConfig
 	// gobackup base dir
 	GoBackupDir string = getGoBackupDir()
+
+	PidFilePath string = filepath.Join(GoBackupDir, "gobackup.pid")
+	LogFilePath string = filepath.Join(GoBackupDir, "gobackup.log")
+	Web         WebConfig
 )
 
+type WebConfig struct {
+	Port     string
+	Username string
+	Password string
+}
+
 type ScheduleConfig struct {
-	Enabled bool
+	Enabled bool `json:"enabled,omitempty"`
 	// Cron expression
-	Cron string
+	Cron string `json:"cron,omitempty"`
 	// Every
-	Every string
+	Every string `json:"every,omitempty"`
 	// At time
-	At string
+	At string `json:"at,omitempty"`
 }
 
 func (sc ScheduleConfig) String() string {
@@ -50,18 +60,20 @@ func (sc ScheduleConfig) String() string {
 
 // ModelConfig for special case
 type ModelConfig struct {
-	Name         string
-	TempPath     string
-	DumpPath     string
-	Schedule     ScheduleConfig
-	CompressWith SubConfig
-	EncryptWith  SubConfig
-	Archive      *viper.Viper
-	Splitter     *viper.Viper
-	Databases    map[string]SubConfig
-	Storages     map[string]SubConfig
-	Notifiers    map[string]SubConfig
-	Viper        *viper.Viper
+	Name           string
+	Description    string
+	TempPath       string
+	DumpPath       string
+	Schedule       ScheduleConfig
+	CompressWith   SubConfig
+	EncryptWith    SubConfig
+	Archive        *viper.Viper
+	Splitter       *viper.Viper
+	Databases      map[string]SubConfig
+	Storages       map[string]SubConfig
+	DefaultStorage string
+	Notifiers      map[string]SubConfig
+	Viper          *viper.Viper
 }
 
 func getGoBackupDir() string {
@@ -151,14 +163,23 @@ func Init(configFile string) {
 	if len(Models) == 0 {
 		logger.Fatalf("No model found in %s", viperConfigFile)
 	}
+
+	// Load web config
+	Web = WebConfig{}
+	viper.SetDefault("web.port", 2703)
+	Web.Port = viper.GetString("web.port")
+	Web.Username = viper.GetString("web.username")
+	Web.Password = viper.GetString("web.password")
 }
 
 func loadModel(key string) (model ModelConfig) {
 	model.Name = key
+
 	model.TempPath = filepath.Join(viper.GetString("workdir"), fmt.Sprintf("%d", time.Now().UnixNano()))
 	model.DumpPath = filepath.Join(model.TempPath, key)
 	model.Viper = viper.Sub("models." + key)
 
+	model.Description = model.Viper.GetString("description")
 	model.Schedule = ScheduleConfig{Enabled: false}
 
 	model.CompressWith = SubConfig{
@@ -236,8 +257,14 @@ func loadStoragesConfig(model *ModelConfig) {
 			Type:  storageViper.GetString("type"),
 			Viper: storageViper,
 		}
+
+		// Set default storage
+		if len(model.DefaultStorage) == 0 {
+			model.DefaultStorage = key
+		}
 	}
 	model.Storages = storageConfigs
+
 }
 
 func loadNotifiersConfig(model *ModelConfig) {

@@ -14,6 +14,16 @@ get_latest_release() {
 
 repo="gobackup/gobackup"
 version="$(get_latest_release "${repo}")"  # v1.2.0
+
+# if args has version override it and not eq "latest"
+if test $# -eq 1; then
+  if test "$1" != "latest"; then
+    version="$1"
+
+    echo "Install ${version}"
+  fi
+fi
+
 platform="$(uname | tr "[A-Z]" "[a-z]")"  # Linux => linux
 arch="$(uname -m | sed 's/x86_64/amd64/')"  # x86_64 => amd64
 package="gobackup-${platform}-${arch}.tar.gz"

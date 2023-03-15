@@ -155,3 +155,28 @@ func (s *SFTP) delete(fileKey string) error {
 
 	return nil
 }
+
+func (s *SFTP) list(parent string) ([]FileItem, error) {
+	remotePath := path.Join(s.path, parent)
+	var items []FileItem
+
+	fileInfos, err := s.client.ReadDir(remotePath)
+	if err != nil {
+		return nil, err
+	}
+	for _, fileInfo := range fileInfos {
+		if !fileInfo.IsDir() {
+			items = append(items, FileItem{
+				Filename:     fileInfo.Name(),
+				Size:         fileInfo.Size(),
+				LastModified: fileInfo.ModTime(),
+			})
+		}
+	}
+
+	return items, nil
+}
+
+func (s *SFTP) download(fileKey string) (string, error) {
+	return "", fmt.Errorf("SFTP not support download")
+}

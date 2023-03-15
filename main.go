@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"syscall"
 
 	"github.com/sevlyar/go-daemon"
@@ -16,6 +15,7 @@ import (
 	"github.com/gobackup/gobackup/logger"
 	"github.com/gobackup/gobackup/model"
 	"github.com/gobackup/gobackup/scheduler"
+	"github.com/gobackup/gobackup/web"
 )
 
 const (
@@ -97,12 +97,13 @@ func main() {
 				}
 
 				dm := &daemon.Context{
-					LogFileName: filepath.Join(config.GoBackupDir, "gobackup.log"),
-					PidFileName: filepath.Join(config.GoBackupDir, "gobackup.pid"),
+					LogFileName: config.LogFilePath,
+					PidFileName: config.PidFilePath,
 					PidFilePerm: 0644,
 					WorkDir:     "./",
 					Args:        args,
 				}
+
 				d, err := dm.Reborn()
 				if err != nil {
 					log.Fatal("Unable to run: ", err)
@@ -113,6 +114,7 @@ func main() {
 				defer dm.Release()
 
 				initApplication()
+				logger.SetLogger(config.LogFilePath)
 				scheduler.Start()
 
 				return nil
@@ -124,14 +126,10 @@ func main() {
 			Flags: buildFlags([]cli.Flag{}),
 			Action: func(ctx *cli.Context) error {
 				initApplication()
+				logger.SetLogger(config.LogFilePath)
 				scheduler.Start()
 
-				err := daemon.ServeSignals()
-				if err != nil {
-					log.Printf("Error: %s", err.Error())
-				}
-
-				log.Println("daemon terminated")
+				web.StartHTTP(version)
 
 				return nil
 			},

@@ -1,0 +1,65 @@
+@import 'antd/dist/reset.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-size: 14px;
+  @apply bg-gray-50 text-gray-900;
+}
+
+.container {
+  @apply mx-auto;
+}
+
+.footer {
+  @apply text-center self-center mt-4 text-base flex justify-between mx-auto px-2 text-gray-600;
+
+  .links {
+    @apply space-x-1;
+
+    .ricon {
+      @apply text-xl text-gray-800 hover:text-gray-900;
+    }
+  }
+}
+
+.ricon {
+  font-size: 1em;
+}
+
+.ant-btn {
+  @apply items-center;
+
+  .ricon {
+    all: unset;
+  }
+
+  .ricon + span {
+    margin-left: 4px;
+  }
+}
+
+:root {
+  --max-content-height: calc(100vh - 230px);
+}
+
+.log-wrapper {
+  @apply relative w-full;
+
+  height: var(--max-content-height);
+
+  .react-lazylog-searchbar {
+    @apply rounded-t border-b  border-b-gray-900 shadow-md;
+  }
+  .ReactVirtualized__List {
+    @apply rounded-b;
+  }
+}
+
+.file-browser-container {
+  height: var(--max-content-height);
+  min-height: 250px;
+  @apply rounded overflow-y-scroll border border-gray-200 shadow-sm mt-4 divide-y divide-gray-100 p-2;
+}
