@@ -139,7 +139,7 @@ const ModelList = ({}) => {
 
 const App = () => {
   return (
-    <div className="flex flex-col relative xl:flex-row gap-4">
+    <div className="flex flex-col relative lg:flex-row gap-4">
       <ModelList />
       <LogView />
     </div>

@@ -47,7 +47,7 @@ body {
 
 .log-wrapper {
   @apply relative w-full h-[500px];
-  @screen xl {
+  @screen lg {
     height: auto;
   }
 
@@ -60,7 +60,7 @@ body {
 }
 
 .model-list-wrapper {
-  @apply rounded w-full xl:w-[600px] border border-gray-200;
+  @apply rounded w-full lg:w-[600px] border border-gray-200;
 
   .model-list-header {
     @apply text-lg text-gray-600 p-2 px-4 bg-gray-100 border-b border-gray-200;
@@ -68,7 +68,7 @@ body {
 
   .model-list-scrollview {
     @apply overflow-y-scroll h-[300px];
-    @screen xl {
+    @screen lg {
       height: calc(var(--max-content-height) - 50px);
       min-height: 250px;
     }
@@ -80,7 +80,7 @@ body {
 }
 
 .file-browser-container {
-  height: var(--max-content-height);
+  height: calc(var(--max-content-height) - 80px);
   min-height: 250px;
   @apply rounded overflow-y-scroll border border-gray-200 shadow-sm mt-4 divide-y divide-gray-100 p-2;
 }
