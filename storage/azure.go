@@ -6,11 +6,11 @@ import (
 	"math"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
+	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/sas"
 	"github.com/dustin/go-humanize"
 	"github.com/hako/durafmt"
 
@@ -24,6 +24,7 @@ import (
 // account: gobackup-test
 // # Container name
 // container: gobackup
+// path: backups
 // # Authorization https://learn.microsoft.com/en-us/azure/developer/go/azure-sdk-authentication
 // tenant_id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 // client_id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
@@ -33,6 +34,7 @@ type Azure struct {
 	Base
 	account   string
 	container string
+	path      string
 	timeout   time.Duration
 	client    *azblob.Client
 }
@@ -40,6 +42,7 @@ type Azure struct {
 func (s *Azure) open() (err error) {
 	s.viper.SetDefault("timeout", "300")
 	s.viper.SetDefault("container", "gobackup")
+	s.viper.SetDefault("path", "/")
 
 	timeout := s.viper.GetInt("timeout")
 	s.timeout = time.Duration(timeout) * time.Second
@@ -48,6 +51,7 @@ func (s *Azure) open() (err error) {
 	if len(s.account) == 0 {
 		s.account = s.viper.GetString("bucket")
 	}
+	s.path = s.viper.GetString("path")
 
 	tenantId := s.viper.GetString("tenant_id")
 	clientId := s.viper.GetString("client_id")
@@ -113,7 +117,7 @@ func (s *Azure) upload(fileKey string) (err error) {
 			return fmt.Errorf("Azure failed to get size of file %q, %v", filePath, err)
 		}
 
-		remotePath := key
+		remotePath := filepath.Join(s.path, key)
 
 		logger.Infof("-> Uploading (%s)...", humanize.Bytes(uint64(info.Size())))
 
@@ -134,23 +138,51 @@ func (s *Azure) upload(fileKey string) (err error) {
 }
 
 func (s *Azure) delete(fileKey string) (err error) {
+	remotePath := filepath.Join(s.path, fileKey)
 	var ctx = context.Background()
 
-	// No need to remove empty directory
-	if !strings.HasSuffix(fileKey, "/") {
-		remotePath := fileKey
-		if _, err = s.client.DeleteBlob(ctx, s.container, remotePath, nil); err != nil {
-			return fmt.Errorf("Azure failed to delete file %q, %v", remotePath, err)
-		}
+	if _, err = s.client.DeleteBlob(ctx, s.container, remotePath, nil); err != nil {
+		return fmt.Errorf("Azure failed to delete file %q, %v", remotePath, err)
 	}
 
 	return nil
 }
 
+// List the objects in the bucket with the prefix = parent
+// https://pkg.go.dev/github.com/Azure/azure-sdk-for-go/sdk/storage/azblob
 func (s *Azure) list(parent string) ([]FileItem, error) {
-	return nil, fmt.Errorf("not implemented")
+	remotePath := filepath.Join(s.archivePath, parent)
+	var ctx = context.Background()
+
+	var fileItems []FileItem
+
+	// Get a result segment starting with the blob indicated by the current Marker.
+	pager := s.client.NewListBlobsFlatPager(s.container, &azblob.ListBlobsFlatOptions{
+		Prefix: &remotePath,
+	})
+
+	for pager.More() {
+		resp, err := pager.NextPage(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, blob := range resp.Segment.BlobItems {
+			fileItems = append(fileItems, FileItem{
+				Filename:     *blob.Name,
+				LastModified: *blob.Properties.LastModified,
+				Size:         *blob.Properties.ContentLength,
+			})
+		}
+	}
+
+	return fileItems, nil
 }
 
+// Get a client download URL
 func (s *Azure) download(fileKey string) (string, error) {
-	return "", fmt.Errorf("not implemented")
+	containerClient := s.client.ServiceClient().NewContainerClient(s.container)
+	blobClient := containerClient.NewBlobClient(fileKey)
+
+	return blobClient.GetSASURL(sas.BlobPermissions{Read: true}, time.Now(), time.Now().Add(time.Hour*1))
 }
