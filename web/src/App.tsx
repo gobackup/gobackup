@@ -91,11 +91,11 @@ const ModelList = ({}) => {
           )}
         </div>
         <div className="flex items-center space-x-1">
-          <Button size="small">
-            <Link to={`/browser/${modelKey}`}>
-              <Icon name="folders" mode="fill" />
-            </Link>
-          </Button>
+          <Link to={`/browser/${modelKey}`}>
+            <Button size="small">
+              <Icon name="folders" />
+            </Button>
+          </Link>
 
           <Popconfirm
             title="Perform Backup"

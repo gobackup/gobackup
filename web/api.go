@@ -51,6 +51,7 @@ func StartHTTP(version string) (err error) {
 	if err != nil {
 		return err
 	}
+	defer logFile.Close()
 
 	fmt.Printf("\nStarting API server on port http://127.0.0.1:%s\n", config.Web.Port)
 
@@ -184,17 +185,24 @@ func download(c *gin.Context) {
 
 // GET /api/log
 func log(c *gin.Context) {
+	// https://github.com/gin-gonic/examples/blob/master/realtime-chat/main.go#L27
 	chanStream := tailFile()
+	clientGone := c.Request.Context().Done()
 
 	c.Stream(func(w io.Writer) bool {
-		if msg, ok := <-chanStream; ok {
-			time.Sleep(5 * time.Millisecond)
+		select {
+		case <-clientGone:
+			println("Client gone, close stream.")
+			return false
+		case msg := <-chanStream:
+			if os.Getenv("GO_ENV") == "dev" {
+				println(msg)
+			}
+
 			c.Writer.WriteString(msg + "\n")
 			c.Writer.Flush()
-
 			return true
 		}
-		return false
 	})
 }
 
@@ -203,7 +211,7 @@ func tailFile() chan string {
 	out_chan := make(chan string)
 
 	file := fls.LineFile(logFile)
-	file.SeekLine(-200, io.SeekEnd)
+	file.SeekLine(-50, io.SeekEnd)
 	bf := bufio.NewReader(file)
 
 	go func() {
@@ -211,7 +219,7 @@ func tailFile() chan string {
 			line, _, _ := bf.ReadLine()
 
 			if len(line) == 0 {
-				time.Sleep(100 * time.Millisecond)
+				time.Sleep(50 * time.Millisecond)
 			} else {
 				out_chan <- string(line)
 			}
