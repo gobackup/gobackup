@@ -13,6 +13,7 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/dustin/go-humanize"
 	"github.com/hako/durafmt"
+	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 
 	"github.com/gobackup/gobackup/logger"
@@ -143,10 +144,36 @@ func (s *GCS) delete(fileKey string) (err error) {
 	return nil
 }
 
+// List all files in the bucket
 func (s *GCS) list(parent string) ([]FileItem, error) {
-	return nil, fmt.Errorf("not implemented")
+	var files []FileItem
+	remotePath := filepath.Join(s.path, parent)
+
+	it := s.client.Bucket(s.bucket).Objects(context.Background(), &storage.Query{Prefix: remotePath})
+	for {
+		attrs, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		file := FileItem{
+			Filename:     attrs.Name,
+			Size:         attrs.Size,
+			LastModified: attrs.Created,
+		}
+
+		files = append(files, file)
+	}
+
+	return files, nil
 }
 
+// Generate a sign URL for download
 func (s *GCS) download(fileKey string) (string, error) {
-	return "", fmt.Errorf("not implemented")
+	return s.client.Bucket(s.bucket).SignedURL(fileKey, &storage.SignedURLOptions{
+		Expires: time.Now().Add(time.Hour * 1),
+	})
 }
