@@ -40,8 +40,6 @@ var (
 )
 
 func (s *OSS) open() (err error) {
-	logger := logger.Tag("OSS")
-
 	s.viper.SetDefault("endpoint", "oss-cn-beijing.aliyuncs.com")
 	s.viper.SetDefault("max_retries", 3)
 	s.viper.SetDefault("path", "/")
@@ -65,9 +63,6 @@ func (s *OSS) open() (err error) {
 		s.threads = 100
 	}
 
-	logger.Info("endpoint:", s.endpoint)
-	logger.Info("bucket:", s.bucket)
-
 	ossClient, err := oss.New(s.endpoint, s.accessKeyID, s.accessKeySecret)
 	if err != nil {
 		return err
@@ -88,6 +83,9 @@ func (s *OSS) close() {
 
 func (s *OSS) upload(fileKey string) (err error) {
 	logger := logger.Tag("OSS")
+
+	logger.Info("endpoint:", s.endpoint)
+	logger.Info("bucket:", s.bucket)
 
 	var fileKeys []string
 	if len(s.fileKeys) != 0 {

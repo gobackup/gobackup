@@ -1,4 +1,4 @@
-import { Button, notification, Popconfirm } from 'antd';
+import { Button, notification, Popconfirm, Skeleton } from 'antd';
 import { useEffect, useState } from 'react';
 import { LazyLog, ScrollFollow } from 'react-lazylog';
 import { Link } from 'react-router-dom';
@@ -78,10 +78,7 @@ const ModelList = ({}) => {
     const scheduleEnable = model.schedule?.enabled;
 
     return (
-      <li
-        key={modelKey}
-        className="flex items-center justify-between py-2 px-4 hover:bg-gray-50"
-      >
+      <li className="flex items-center justify-between py-2 px-4 hover:bg-gray-50">
         <div className="divider-y text-base">
           <div className="text-base font-medium uppercase">{modelKey}</div>
           {scheduleEnable && (
@@ -124,11 +121,15 @@ const ModelList = ({}) => {
           </Button>
         </div>
       </div>
-      {loading && <>Loading...</>}
+      {loading && (
+        <div className="p-4">
+          <Skeleton active />
+        </div>
+      )}
       {!loading && (
         <ul className="divide-y">
-          {Object.keys(models).map((key: string) => (
-            <ModelItem modelKey={key} />
+          {Object.keys(models).map((key: string, idx: number) => (
+            <ModelItem modelKey={key} key={idx} />
           ))}
         </ul>
       )}

@@ -54,6 +54,17 @@ func StartHTTP(version string) (err error) {
 
 	fmt.Printf("\nStarting API server on port http://127.0.0.1:%s\n", config.Web.Port)
 
+	if os.Getenv("GO_ENV") == "dev" {
+		go func() {
+			for {
+				time.Sleep(5 * time.Second)
+				logger.Info("Ping", time.Now())
+			}
+		}()
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	r := setupRouter(version)
 
 	// Enable baseAuth
@@ -65,15 +76,6 @@ func StartHTTP(version string) (err error) {
 
 	fe, _ := fs.Sub(staticFS, "dist")
 	r.Use(static.Serve("/", embedFileSystem{http.FS(fe), true}))
-
-	if os.Getenv("GO_ENV") == "dev" {
-		go func() {
-			for {
-				time.Sleep(5 * time.Second)
-				logger.Info("Ping", time.Now())
-			}
-		}()
-	}
 
 	return r.Run(":" + config.Web.Port)
 }
