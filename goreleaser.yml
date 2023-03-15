@@ -16,3 +16,5 @@ builds:
 archives:
   - name_template: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
     format: tar.gz
+release:
+  prerelease: auto
