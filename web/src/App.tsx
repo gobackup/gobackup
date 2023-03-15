@@ -78,8 +78,8 @@ const ModelList = ({}) => {
     const scheduleEnable = model.schedule?.enabled;
 
     return (
-      <li className="flex items-center justify-between py-2 px-4 hover:bg-gray-50">
-        <div className="divider-y text-base">
+      <div className="model-list-item">
+        <div className="text-base">
           <div className="text-base font-medium uppercase">{modelKey}</div>
           {scheduleEnable && (
             <div className="text-green text-sm">{model.schedule_info}</div>
@@ -107,36 +107,39 @@ const ModelList = ({}) => {
             </Button>
           </Popconfirm>
         </div>
-      </li>
+      </div>
     );
   };
 
   return (
-    <div className="rounded w-full xl:w-[600px] border border-gray-200">
-      <div className="text-lg text-gray-600 p-2 px-4 bg-gray-100 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <div className="text-text">Models</div>
+    <div className="model-list-wrapper">
+      <div className="model-list-header">
+        <div className="flex items-center space-x-2">
+          <Icon name="stack" />
+          <div className="text-text text-base">Models</div>
         </div>
       </div>
-      {loading && (
-        <div className="p-4">
-          <Skeleton active />
-        </div>
-      )}
-      {!loading && (
-        <ul className="divide-y">
-          {Object.keys(models).map((key: string, idx: number) => (
-            <ModelItem modelKey={key} key={idx} />
-          ))}
-        </ul>
-      )}
+      <div className="model-list-scrollview">
+        {loading && (
+          <div className="p-4">
+            <Skeleton active />
+          </div>
+        )}
+        {!loading && (
+          <>
+            {Object.keys(models).map((key: string, idx: number) => (
+              <ModelItem modelKey={key} key={idx} />
+            ))}
+          </>
+        )}
+      </div>
     </div>
   );
 };
 
 const App = () => {
   return (
-    <div className="flex flex-col xl:flex-row gap-4">
+    <div className="flex flex-col relative xl:flex-row gap-4">
       <ModelList />
       <LogView />
     </div>

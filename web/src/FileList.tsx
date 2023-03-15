@@ -13,6 +13,11 @@ const FileList: FC<{}> = () => {
   const [files, setFiles] = useState<any[]>([]);
   const [parent, setParent] = useState('/');
 
+  const Time = ({ value }: { value: string }) => {
+    if (!value) return <></>;
+    return <span title={value}>{new Date(value).toLocaleString()}</span>;
+  };
+
   const reloadList = () => {
     setLoading(true);
     let query = new URLSearchParams({
@@ -61,7 +66,9 @@ const FileList: FC<{}> = () => {
           <>
             <div className="flex items-center justify-between text-sm space-x-4 text-gray-400">
               <div>{fsize}</div>
-              <div>{file.last_modified}</div>
+              <div>
+                <Time value={file.last_modified} />
+              </div>
               <div>
                 <Button size="small" title="Download backup file.">
                   <a href={downloadURL}>

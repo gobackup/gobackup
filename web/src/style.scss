@@ -42,19 +42,40 @@ body {
 }
 
 :root {
-  --max-content-height: calc(100vh - 230px);
+  --max-content-height: calc(100vh - 150px);
 }
 
 .log-wrapper {
-  @apply relative w-full;
-
-  height: var(--max-content-height);
+  @apply relative w-full h-[500px];
+  @screen xl {
+    height: auto;
+  }
 
   .react-lazylog-searchbar {
     @apply rounded-t border-b  border-b-gray-900 shadow-md;
   }
   .ReactVirtualized__List {
     @apply rounded-b;
+  }
+}
+
+.model-list-wrapper {
+  @apply rounded w-full xl:w-[600px] border border-gray-200;
+
+  .model-list-header {
+    @apply text-lg text-gray-600 p-2 px-4 bg-gray-100 border-b border-gray-200;
+  }
+
+  .model-list-scrollview {
+    @apply overflow-y-scroll h-[300px];
+    @screen xl {
+      height: calc(var(--max-content-height) - 50px);
+      min-height: 250px;
+    }
+  }
+
+  .model-list-item {
+    @apply min-h-[60px] flex items-center justify-between py-2 px-4 hover:bg-gray-50 border-b border-b-gray-200;
   }
 }
 
