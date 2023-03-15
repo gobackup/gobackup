@@ -190,7 +190,7 @@ func List(model config.ModelConfig, parent string) (items []FileItem, err error)
 
 		items, err := s.list(parent)
 		if err != nil {
-			return nil, err
+			return []FileItem{}, err
 		}
 
 		// Sort items by LastModified, Filename in descending
@@ -204,7 +204,7 @@ func List(model config.ModelConfig, parent string) (items []FileItem, err error)
 		return items, nil
 	}
 
-	return nil, fmt.Errorf("Storage %s not found", model.DefaultStorage)
+	return []FileItem{}, fmt.Errorf("Storage %s not found", model.DefaultStorage)
 }
 
 func Download(model config.ModelConfig, fileKey string) (string, error) {

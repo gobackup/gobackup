@@ -1,4 +1,4 @@
-import { Button, Skeleton } from 'antd';
+import { Button, Empty, Skeleton } from 'antd';
 import { filesize } from 'filesize';
 import { FC, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -23,7 +23,7 @@ const FileList: FC<{}> = () => {
     fetch(`/api/list?` + query.toString())
       .then((res) => res.json())
       .then((data) => {
-        setFiles(data.files);
+        setFiles(data.files || []);
         setLoading(false);
       });
   };
@@ -98,6 +98,7 @@ const FileList: FC<{}> = () => {
         {loading && <Skeleton active />}
         {!loading && (
           <>
+            {files.length === 0 && <Empty className="pt-10" />}
             {files.map((file, i) => (
               <FileItem key={i} file={file} />
             ))}
