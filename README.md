@@ -35,6 +35,7 @@ https://gobackup.github.io
 - Archive paths or files into a tar.
 - Split large backup file into multiple parts.
 - Run as daemon to backup in schedully.
+- Web UI to manage backups.
 
 ### Databases
 
@@ -207,13 +208,25 @@ models:
         password: password
 ```
 
-### Start daemon
+### Start Daemon & Web UI
+
+GoBackup bulit a HTTP Server for Web UI, you can start it by `gobackup start`.
+
+It also will handle the backup schedule.
 
 ```bash
-gobackup start
+$ gobackup start
+
+2023/03/15 23:00:30 [Config] Load config from default path.
+Starting API server on port http://127.0.0.1:2703
 ```
 
 > NOTE: If you wants start without daemon, use `gobackup run` instead.
+
+Now visit http://127.0.0.1:2703 you can see the Web UI:
+
+![gobackup-webui-main](https://user-images.githubusercontent.com/5518/225351245-90ff1eab-673a-44c7-bf37-d1964af24e12.png)
+![gobackup-webui-files](https://user-images.githubusercontent.com/5518/225351184-32d9ada9-2faf-45a3-a7f3-10d41feffb8c.png)
 
 ### Signal handling
 
