@@ -13,6 +13,12 @@ import (
 
 // WebDAV storage
 //
+// # Install WebDAV Server on macOS
+// https://github.com/hacdias/webdav/releases/tag/v4.2.0
+//
+//	 echo "users:\n  - username: admin\n    password: admin" > config.yml
+//		./webdav --port 8080 -c config.yml
+//
 // type: webdav
 // root: http://localhost:8080
 // username:
@@ -96,10 +102,29 @@ func (s *WebDAV) delete(fileKey string) error {
 	return s.client.Remove(remotePath)
 }
 
+// List all files from storage
 func (s *WebDAV) list(parent string) ([]FileItem, error) {
-	return nil, fmt.Errorf("not implemented")
+	remotePath := filepath.Join(s.path, parent)
+
+	entries, err := s.client.ReadDir(remotePath)
+	if err != nil {
+		return nil, err
+	}
+
+	var items []FileItem
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			items = append(items, FileItem{
+				Filename:     entry.Name(),
+				Size:         entry.Size(),
+				LastModified: entry.ModTime(),
+			})
+		}
+	}
+
+	return items, nil
 }
 
 func (s *WebDAV) download(fileKey string) (string, error) {
-	return "", fmt.Errorf("not implemented")
+	return "", fmt.Errorf("WebDAV not support download")
 }

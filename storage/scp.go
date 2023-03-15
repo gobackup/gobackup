@@ -84,7 +84,7 @@ func (s *SCP) open() (err error) {
 
 	sshClient, err := ssh.Dial("tcp", s.host+":"+s.port, &clientConfig)
 	if err != nil {
-		return fmt.Errorf("Failed to ssh %s@%s -p %s: %v", s.username, s.host, s.port, err)
+		return fmt.Errorf("failed to ssh %s@%s -p %s: %v", s.username, s.host, s.port, err)
 	}
 
 	s.client = sshClient
@@ -100,12 +100,12 @@ func (s *SCP) open() (err error) {
 func (s *SCP) run(cmd string) error {
 	session, err := s.client.NewSession()
 	if err != nil {
-		return fmt.Errorf("Failed to create session: %v", err)
+		return fmt.Errorf("failed to create session: %v", err)
 	}
 	defer session.Close()
 
 	if err := session.Run(cmd); err != nil {
-		return fmt.Errorf("Failed to run %s: %v", cmd, err)
+		return fmt.Errorf("failed to run %s: %v", cmd, err)
 	}
 
 	return nil
@@ -267,9 +267,9 @@ func newSSHClientConfig(c sshConfig) ssh.ClientConfig {
 }
 
 func (s *SCP) list(parent string) ([]FileItem, error) {
-	return nil, fmt.Errorf("not implemented")
+	return nil, fmt.Errorf("SCP not support list")
 }
 
 func (s *SCP) download(fileKey string) (string, error) {
-	return "", fmt.Errorf("not implemented")
+	return "", fmt.Errorf("SCP not support download")
 }
