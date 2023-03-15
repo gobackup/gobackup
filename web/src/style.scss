@@ -30,7 +30,11 @@ body {
 }
 
 .ant-btn {
-  @apply inline-flex items-center;
+  @apply items-center;
+
+  .ricon {
+    all: unset;
+  }
 
   .ricon + span {
     margin-left: 4px;
@@ -56,5 +60,6 @@ body {
 
 .file-browser-container {
   height: var(--max-content-height);
-  @apply rounded overflow-y-scroll border shadow-sm mt-4 divide-y divide-gray-100;
+  min-height: 250px;
+  @apply rounded overflow-y-scroll border border-gray-200 shadow-sm mt-4 divide-y divide-gray-100 p-2;
 }

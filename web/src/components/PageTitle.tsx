@@ -3,20 +3,24 @@ import { Link } from 'react-router-dom';
 import Icon from '../icon';
 
 const PageTitle: FC<{
-  title: string;
+  title: string | JSX.Element;
   backTo?: string;
-}> = ({ title, backTo = '/' }) => {
+  extra?: JSX.Element;
+}> = ({ title, backTo = '/', extra }) => {
   return (
-    <div className="flex items-center space-x-3 mb-6 border-b-2 border-b-gray-200 py-3">
-      <div>
+    <div className="flex items-center space-x-3 mb-6 border-b-2 border-b-gray-200 py-3 justify-between">
+      <div className="flex items-center gap-3">
         <Link
           to={backTo}
           className="text-2xl hover:text-red rounded hover:border-gray-100"
         >
           <Icon name="arrow-left" />
         </Link>
+
+        <div className="text-xl">{title}</div>
       </div>
-      <div className="text-xl">{title}</div>
+
+      {extra && <div>{extra}</div>}
     </div>
   );
 };
