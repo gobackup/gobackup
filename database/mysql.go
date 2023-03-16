@@ -52,11 +52,6 @@ func (db *MySQL) init() (err error) {
 		db.args = viper.GetString("args")
 	}
 
-	if len(viper.GetString("additional_options")) > 0 {
-		logger.Warn("[Deprecated] `additional_options` is deprecated, please use `args` instead")
-		db.args = viper.GetString("additional_options")
-	}
-
 	// mysqldump command
 	if len(db.database) == 0 {
 		return fmt.Errorf("mysql database config is required")
