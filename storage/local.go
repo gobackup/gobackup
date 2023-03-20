@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 
 	"github.com/gobackup/gobackup/helper"
@@ -29,16 +30,23 @@ func (s *Local) close() {}
 func (s *Local) upload(fileKey string) (err error) {
 	logger := logger.Tag("Local")
 
-	_, err = helper.Exec("cp", "-a", s.archivePath, s.path)
+	targetPath := path.Join(s.path, fileKey)
+	targetDir := path.Dir(targetPath)
+	helper.MkdirP(targetDir)
+
+	_, err = helper.Exec("cp", "-a", s.archivePath, targetPath)
 	if err != nil {
 		return err
 	}
-	logger.Info("Store succeeded", filepath.Join(s.path, filepath.Base(s.archivePath)))
+	logger.Info("Store succeeded", targetPath)
 	return nil
 }
 
 func (s *Local) delete(fileKey string) (err error) {
-	return os.Remove(filepath.Join(s.path, fileKey))
+	targetPath := filepath.Join(s.path, fileKey)
+	logger.Info("Deleting", targetPath)
+
+	return os.Remove(targetPath)
 }
 
 // List all files

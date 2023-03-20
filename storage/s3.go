@@ -165,20 +165,19 @@ func (s *S3) upload(fileKey string) (err error) {
 	}
 
 	for _, key := range fileKeys {
-		filePath := filepath.Join(filepath.Dir(s.archivePath), key)
-		f, err := os.Open(filePath)
-		if err != nil {
-			return fmt.Errorf("failed to open file %q, %v", filePath, err)
-		}
+		sourcePath := filepath.Join(filepath.Dir(s.archivePath), key)
+		remotePath := filepath.Join(s.path, key)
 
+		f, err := os.Open(sourcePath)
+		if err != nil {
+			return fmt.Errorf("failed to open file %q, %v", sourcePath, err)
+		}
 		defer f.Close()
 
 		info, err := f.Stat()
 		if err != nil {
-			return fmt.Errorf("failed to get size of file %q, %v", filePath, err)
+			return fmt.Errorf("failed to get size of file %q, %v", sourcePath, err)
 		}
-
-		remotePath := filepath.Join(s.path, key)
 
 		input := &s3manager.UploadInput{
 			Bucket: aws.String(s.bucket),

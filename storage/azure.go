@@ -104,20 +104,20 @@ func (s *Azure) upload(fileKey string) (err error) {
 	}
 
 	for _, key := range fileKeys {
-		filePath := filepath.Join(filepath.Dir(s.archivePath), key)
+		sourcePath := filepath.Join(filepath.Dir(s.archivePath), key)
+		remotePath := filepath.Join(s.path, key)
+
 		// Open file
-		f, err := os.Open(filePath)
+		f, err := os.Open(sourcePath)
 		if err != nil {
-			return fmt.Errorf("Azure failed to open file %q, %v", filePath, err)
+			return fmt.Errorf("Azure failed to open file %q, %v", sourcePath, err)
 		}
 		defer f.Close()
 
 		info, err := f.Stat()
 		if err != nil {
-			return fmt.Errorf("Azure failed to get size of file %q, %v", filePath, err)
+			return fmt.Errorf("Azure failed to get size of file %q, %v", sourcePath, err)
 		}
-
-		remotePath := filepath.Join(s.path, key)
 
 		logger.Infof("-> Uploading (%s)...", humanize.Bytes(uint64(info.Size())))
 

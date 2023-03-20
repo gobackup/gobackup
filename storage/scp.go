@@ -123,7 +123,10 @@ func (s *SCP) upload(fileKey string) error {
 		// directory
 		// 2022.12.04.07.09.47/2022.12.04.07.09.47.tar.xz-000
 		fileKeys = s.fileKeys
-		remoteDir := filepath.Join(s.path, filepath.Base(s.archivePath))
+
+		remotePath := filepath.Join(s.path, fileKey)
+		remoteDir := filepath.Dir(remotePath)
+
 		// mkdir
 		if err := s.run(fmt.Sprintf("mkdir -p %s", remoteDir)); err != nil {
 			return err
@@ -135,9 +138,10 @@ func (s *SCP) upload(fileKey string) error {
 	}
 
 	for _, key := range fileKeys {
-		filePath := filepath.Join(filepath.Dir(s.archivePath), key)
+		sourcePath := filepath.Join(filepath.Dir(s.archivePath), key)
 		remotePath := filepath.Join(s.path, key)
-		if err := s.up(filePath, remotePath); err != nil {
+
+		if err := s.up(sourcePath, remotePath); err != nil {
 			return err
 		}
 	}
@@ -166,7 +170,7 @@ func (s *SCP) up(localPath, remotePath string) error {
 
 	logger.Info("-> scp to", remotePath)
 	if err := client.CopyFromFile(context.Background(), *file, remotePath, "0644"); err != nil {
-		return fmt.Errorf("Store %s failed: %v", remotePath, err)
+		return fmt.Errorf("store %s failed: %v", remotePath, err)
 	}
 	logger.Infof("Store %s succeeded", remotePath)
 	return nil

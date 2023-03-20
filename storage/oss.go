@@ -99,12 +99,12 @@ func (s *OSS) upload(fileKey string) (err error) {
 	}
 
 	for _, key := range fileKeys {
-		filePath := filepath.Join(filepath.Dir(s.archivePath), key)
+		sourcePath := filepath.Join(filepath.Dir(s.archivePath), key)
 		remotePath := filepath.Join(s.path, key)
 
 		start := time.Now()
 		logger.Info(fmt.Sprintf("-> Uploading %s...", remotePath))
-		if err := s.client.UploadFile(remotePath, filePath, ossPartSize, oss.Routines(s.threads)); err != nil {
+		if err := s.client.UploadFile(remotePath, sourcePath, ossPartSize, oss.Routines(s.threads)); err != nil {
 			return err
 		}
 

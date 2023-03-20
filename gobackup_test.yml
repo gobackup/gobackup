@@ -100,11 +100,17 @@ models:
         timeout: 30
         username: user1
         password: pass1
+    archive:
+      includes:
+        - /etc/hosts
   expand_env:
     databases:
       postgresql:
         type: postgresql
         database: demo
+    archive:
+      includes:
+        - /etc/hosts
     storages:
       s3:
         type: s3
@@ -121,8 +127,6 @@ models:
     encrypt_with:
       type: openssl
       password: 123456
-      salt: false
-      chiper: rc4
     notifiers:
     storages:
       local:
