@@ -8,7 +8,7 @@ const PageTitle: FC<{
   extra?: JSX.Element;
 }> = ({ title, backTo = '/', extra }) => {
   return (
-    <div className="flex items-center space-x-3 mb-6 border-b-2 border-b-gray-200 py-3 justify-between">
+    <div className="flex items-center space-x-3 pb-3 justify-between">
       <div className="flex items-center gap-3">
         <Link
           to={backTo}

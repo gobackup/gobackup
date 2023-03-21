@@ -6,21 +6,17 @@
 
 body {
   font-size: 14px;
-  @apply bg-gray-50 text-gray-900;
-}
-
-.container {
-  @apply mx-auto;
+  @apply bg-white text-gray-900;
 }
 
 .footer {
-  @apply text-center self-center mt-4 text-base flex justify-between mx-auto px-2 text-gray-600;
+  @apply text-center self-center text-sm flex justify-between px-4 text-gray-600;
 
   .links {
     @apply space-x-1;
 
     .ricon {
-      @apply text-xl text-gray-800 hover:text-gray-900;
+      @apply text-xl text-gray-500 hover:text-gray-600;
     }
   }
 }
@@ -42,7 +38,7 @@ body {
 }
 
 :root {
-  --max-content-height: calc(100vh - 150px);
+  --max-content-height: calc(100vh - 75px);
 }
 
 .log-wrapper {
@@ -60,7 +56,7 @@ body {
 }
 
 .model-list-wrapper {
-  @apply rounded w-full lg:w-[600px] border border-gray-200;
+  @apply rounded w-full md:w-[450px] lg:w-[600px] border border-gray-200;
 
   .model-list-header {
     @apply text-lg text-gray-600 p-2 px-4 bg-gray-100 border-b border-gray-200;
@@ -80,7 +76,7 @@ body {
 }
 
 .file-browser-container {
-  height: calc(var(--max-content-height) - 80px);
+  height: calc(var(--max-content-height) - 50px);
   min-height: 250px;
-  @apply rounded overflow-y-scroll border border-gray-200 shadow-sm mt-4 divide-y divide-gray-100 p-2;
+  @apply rounded overflow-y-scroll border border-gray-200 shadow-sm divide-y divide-gray-100 p-2;
 }
