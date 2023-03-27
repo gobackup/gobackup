@@ -47,13 +47,17 @@ func (e embedFileSystem) Exists(prefix string, path string) bool {
 func StartHTTP(version string) (err error) {
 	logger := logger.Tag("API")
 
+	if len(config.Web.Password) == 0 {
+		logger.Warn("You are running with insecure API server. Please don't forget setup `web.password` in config file for more safety.")
+	}
+
 	logFile, err = os.Open(config.LogFilePath)
 	if err != nil {
 		return err
 	}
 	defer logFile.Close()
 
-	fmt.Printf("\nStarting API server on port http://127.0.0.1:%s\n", config.Web.Port)
+	logger.Infof("Starting API server on port http://127.0.0.1:%s", config.Web.Port)
 
 	if os.Getenv("GO_ENV") == "dev" {
 		go func() {
