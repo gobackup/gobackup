@@ -675,11 +675,6 @@ fetch-readablestream@^0.2.0:
   resolved "https://registry.npmjs.org/fetch-readablestream/-/fetch-readablestream-0.2.0.tgz"
   integrity sha512-qu4mXWf4wus4idBIN/kVH+XSer8IZ9CwHP+Pd7DL7TuKNC1hP7ykon4kkBjwJF3EMX2WsFp4hH7gU7CyL7ucXw==
 
-filesize.js@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/filesize.js/-/filesize.js-2.0.0.tgz#b212f8dfe35de64bca9b7141ca3ddb2e7413f139"
-  integrity sha512-dOngzfsRfjwTQkG3UPY3GI+OqbBj4mO1UW1FoDYN2SF/p7hACKXHKGjgA62ug4KtORXcXdlEKOXrgfzt+qB2Nw==
-
 filesize@^10.0.6:
   version "10.0.6"
   resolved "https://registry.yarnpkg.com/filesize/-/filesize-10.0.6.tgz#5f4cd2721664cd925db3a7a5a87bbfd6ab5ebb1a"
