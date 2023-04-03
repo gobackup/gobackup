@@ -65,6 +65,19 @@ func main() {
 	daemon.AddCommand(daemon.StringFlag(signal, "stop"), syscall.SIGTERM, termHandler)
 	daemon.AddCommand(daemon.StringFlag(signal, "reload"), syscall.SIGHUP, reloadHandler)
 
+	args := []string{"gobackup", "run"}
+	if len(configFile) != 0 {
+		args = append(args, "--config", configFile)
+	}
+
+	dm := &daemon.Context{
+		PidFileName: config.PidFilePath,
+		PidFilePerm: 0644,
+		Args:        args,
+	}
+	// defer dm.Release()
+	logger.Info("PID:", config.PidFilePath)
+
 	app.Commands = []*cli.Command{
 		{
 			Name: "perform",
@@ -91,18 +104,6 @@ func main() {
 			Action: func(ctx *cli.Context) error {
 				fmt.Println("GoBackup starting...")
 
-				args := []string{"gobackup", "run"}
-				if len(configFile) != 0 {
-					args = append(args, "--config", configFile)
-				}
-
-				dm := &daemon.Context{
-					PidFileName: config.PidFilePath,
-					PidFilePerm: 0644,
-					WorkDir:     "./",
-					Args:        args,
-				}
-
 				d, err := dm.Reborn()
 				if err != nil {
 					log.Fatal("Unable to run: ", err)
@@ -110,11 +111,30 @@ func main() {
 				if d != nil {
 					return nil
 				}
-				defer dm.Release()
 
 				initApplication()
 				logger.SetLogger(config.LogFilePath)
 				scheduler.Start()
+
+				return nil
+			},
+		},
+		{
+			Name:  "stop",
+			Usage: "Stop daemon",
+			Flags: buildFlags([]cli.Flag{}),
+			Action: func(ctx *cli.Context) error {
+				fmt.Println("GoBackup stopping...")
+
+				d, err := dm.Search()
+				if err != nil {
+					log.Fatal("Stop failed: ", err)
+				}
+
+				err = d.Kill()
+				if err != nil {
+					log.Fatal("Unable to stop GoBackup: ", err)
+				}
 
 				return nil
 			},

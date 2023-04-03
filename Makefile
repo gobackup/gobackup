@@ -8,6 +8,8 @@ run:
 	GO_ENV=dev go run main.go -- run --config ./gobackup_test.yml
 start: 
 	GO_ENV=dev go run main.go -- start --config ./gobackup_test.yml
+stop: 
+	GO_ENV=dev go run main.go -- stop
 build: build_web
 	go build -o dist/gobackup
 dev:
