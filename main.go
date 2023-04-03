@@ -97,7 +97,6 @@ func main() {
 				}
 
 				dm := &daemon.Context{
-					LogFileName: config.LogFilePath,
 					PidFileName: config.PidFilePath,
 					PidFilePerm: 0644,
 					WorkDir:     "./",
