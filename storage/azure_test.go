@@ -20,7 +20,7 @@ func Test_Azure_open(t *testing.T) {
 
 	viper.Set("bucket", "hello")
 
-	s.open()
+	assert.NoError(t, s.open())
 	assert.Equal(t, "https://hello.blob.core.windows.net", s.getBucketURL())
 	assert.Equal(t, "gobackup", s.container)
 	assert.Equal(t, "hello", s.account)
@@ -30,7 +30,7 @@ func Test_Azure_open(t *testing.T) {
 
 	viper.Set("container", "my-container")
 	viper.Set("account", "hello1")
-	s.open()
+	assert.NoError(t, s.open())
 	assert.Equal(t, "hello1", s.account)
 	assert.Equal(t, "https://hello1.blob.core.windows.net", s.getBucketURL())
 	assert.Equal(t, "my-container", s.container)

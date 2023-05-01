@@ -2,7 +2,7 @@ package storage
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -92,13 +92,13 @@ func (c *Cycler) load(cyclerFileName string) {
 
 	// write example JSON if not exist
 	if !helper.IsExistsPath(cyclerFileName) {
-		if err := ioutil.WriteFile(cyclerFileName, []byte("[]"), 0o660); err != nil {
+		if err := os.WriteFile(cyclerFileName, []byte("[]"), 0o660); err != nil {
 			logger.Errorf("Failed to write file %s: %v", cyclerFileName, err)
 			return
 		}
 	}
 
-	f, err := ioutil.ReadFile(cyclerFileName)
+	f, err := os.ReadFile(cyclerFileName)
 	if err != nil {
 		logger.Error("Load cycler.json failed:", err)
 		return
@@ -124,7 +124,7 @@ func (c *Cycler) save(cyclerFileName string) {
 		return
 	}
 
-	err = ioutil.WriteFile(cyclerFileName, data, 0o660)
+	err = os.WriteFile(cyclerFileName, data, 0o660)
 	if err != nil {
 		logger.Error("Save cycler.json failed: ", err)
 		return

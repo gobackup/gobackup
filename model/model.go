@@ -29,9 +29,13 @@ func (m Model) Perform() (err error) {
 	defer func() {
 		if err != nil {
 			logger.Error(err)
-			notifier.Failure(m.Config, err.Error())
+			if err := notifier.Failure(m.Config, err.Error()); err != nil {
+				logger.Error(err)
+			}
 		} else {
-			notifier.Success(m.Config)
+			if err := notifier.Success(m.Config); err != nil {
+				logger.Error(err)
+			}
 		}
 	}()
 

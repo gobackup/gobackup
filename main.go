@@ -110,13 +110,11 @@ func main() {
 				if d != nil {
 					return nil
 				}
-				defer dm.Release()
+				defer dm.Release() // nolint:errcheck
 
 				initApplication()
 				logger.SetLogger(config.LogFilePath)
-				scheduler.Start()
-
-				return nil
+				return scheduler.Start()
 			},
 		},
 		{
@@ -126,16 +124,18 @@ func main() {
 			Action: func(ctx *cli.Context) error {
 				initApplication()
 				logger.SetLogger(config.LogFilePath)
-				scheduler.Start()
+				if err := scheduler.Start(); err != nil {
+					return fmt.Errorf("scheduler start: %w", err)
+				}
 
-				web.StartHTTP(version)
-
-				return nil
+				return web.StartHTTP(version)
 			},
 		},
 	}
 
-	app.Run(os.Args)
+	if err := app.Run(os.Args); err != nil {
+		log.Fatal(err.Error())
+	}
 }
 
 func initApplication() {
@@ -158,6 +158,8 @@ func perform(modelNames []string) {
 	}
 
 	for _, m := range models {
-		m.Perform()
+		if err := m.Perform(); err != nil {
+			logger.Errorf("[ERROR] perform model %v failed: %s\n", m.Config.Name, err.Error())
+		}
 	}
 }

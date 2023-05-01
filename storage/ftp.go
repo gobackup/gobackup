@@ -93,7 +93,9 @@ func (s *FTP) open() error {
 }
 
 func (s *FTP) close() {
-	s.client.Quit()
+	if err := s.client.Quit(); err != nil {
+		logger.Errorf("ftp close: %s", err.Error())
+	}
 }
 
 func (s *FTP) mkdir(rpath string) error {

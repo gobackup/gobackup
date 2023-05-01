@@ -38,8 +38,8 @@ func newBase(model config.ModelConfig) (base Base) {
 	return
 }
 
-// Run compressor
-func Run(model config.ModelConfig) (archivePath string, err error) {
+// Run compressor, returns archive path
+func Run(model config.ModelConfig) (string, error) {
 	logger := logger.Tag("Compressor")
 
 	base := newBase(model)
@@ -72,8 +72,7 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 		ext = ".tar"
 		model.CompressWith.Type = "tar"
 	default:
-		err = fmt.Errorf("Unsupported compress type: %s", model.CompressWith.Type)
-		return
+		return "", fmt.Errorf("Unsupported compress type: %s", model.CompressWith.Type)
 	}
 
 	// save Extension
@@ -86,12 +85,16 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 	logger.Info("=> Compress | " + model.CompressWith.Type)
 
 	// set workdir
-	os.Chdir(path.Join(model.DumpPath, "../"))
-	archivePath, err = c.perform()
-	if err != nil {
-		return
+	if err := os.Chdir(path.Join(model.DumpPath, "../")); err != nil {
+		return "", fmt.Errorf("chdir: %w", err)
 	}
+
+	archivePath, err := c.perform()
+	if err != nil {
+		return "", err
+	}
+
 	logger.Info("->", archivePath)
 
-	return
+	return archivePath, nil
 }
