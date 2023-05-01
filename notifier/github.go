@@ -16,9 +16,7 @@ type githubIssue struct {
 	issueId string
 }
 
-var (
-	githubIssueRe = regexp.MustCompile(`^http[s]?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/(issues|pull)\/([^\/]+)`)
-)
+var githubIssueRe = regexp.MustCompile(`^http[s]?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/(issues|pull)\/([^\/]+)`)
 
 func parseGitHubIssue(url string) (*githubIssue, error) {
 	if !githubIssueRe.MatchString(url) {

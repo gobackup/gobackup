@@ -52,7 +52,7 @@ func (s *Local) delete(fileKey string) (err error) {
 // List all files
 func (s *Local) list(parent string) ([]FileItem, error) {
 	remotePath := filepath.Join(s.path, parent)
-	var items = []FileItem{}
+	items := []FileItem{}
 
 	files, err := ioutil.ReadDir(remotePath)
 	if err != nil {

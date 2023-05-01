@@ -42,7 +42,6 @@ type Redis struct {
 }
 
 func (db *Redis) init() (err error) {
-
 	viper := db.viper
 	viper.SetDefault("rdb_path", "/var/db/redis/dump.rdb")
 	viper.SetDefault("host", "127.0.0.1")

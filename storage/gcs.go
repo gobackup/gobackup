@@ -71,7 +71,7 @@ func (s *GCS) close() {
 func (s *GCS) upload(fileKey string) (err error) {
 	logger := logger.Tag("GCS")
 
-	var ctx = context.Background()
+	ctx := context.Background()
 	var cancel context.CancelFunc
 
 	if s.timeout.Seconds() > 0 {

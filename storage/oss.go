@@ -34,10 +34,8 @@ type OSS struct {
 	threads         int
 }
 
-var (
-	// 1 Mb one part
-	ossPartSize int64 = 1024 * 1024
-)
+// 1 Mb one part
+var ossPartSize int64 = 1024 * 1024
 
 func (s *OSS) open() (err error) {
 	s.viper.SetDefault("endpoint", "oss-cn-beijing.aliyuncs.com")

@@ -11,9 +11,7 @@ import (
 	"github.com/gobackup/gobackup/model"
 )
 
-var (
-	mycron *gocron.Scheduler
-)
+var mycron *gocron.Scheduler
 
 // Start scheduler
 func Start() error {

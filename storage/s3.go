@@ -205,7 +205,6 @@ func (s *S3) upload(fileKey string) (err error) {
 			uploader.LeavePartsOnError = false
 			uploader.PartSize = partSize
 		})
-
 		if err != nil {
 			return fmt.Errorf("failed to upload file, %v", err)
 		}

@@ -13,7 +13,7 @@ type serviceInfo struct {
 }
 
 func Test_providerName(t *testing.T) {
-	var cases = map[string]serviceInfo{
+	cases := map[string]serviceInfo{
 		"s3":     {"AWS S3", "", "us-east-1"},
 		"b2":     {"Backblaze B2", "us-east-001.backblazeb2.com", "us-east-001"},
 		"us3":    {"UCloud US3", "s3-cn-bj.ufileos.com", "s3-cn-bj"},
@@ -40,5 +40,4 @@ func Test_providerName(t *testing.T) {
 		assert.Equal(t, "3", s.viper.GetString("max_retries"))
 		assert.Equal(t, "300", s.viper.GetString("timeout"))
 	}
-
 }

@@ -254,7 +254,6 @@ func loadStoragesConfig(model *ModelConfig) {
 		}
 	}
 	model.Storages = storageConfigs
-
 }
 
 func loadNotifiersConfig(model *ModelConfig) {

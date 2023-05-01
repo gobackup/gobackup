@@ -41,7 +41,6 @@ func TestMongoDB_init(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, db.build(), "mongodump --db=my_db --username=user1 --password=pass1 --authenticationDatabase=sssbbb --host=1.2.3.4 --port=1234 --oplog --excludeCollection=aa --excludeCollection=bb --foo --bar --dar --out=/data/backups/mongodb/mongodb1")
-
 }
 
 func TestMongoDB_credentialOptions(t *testing.T) {

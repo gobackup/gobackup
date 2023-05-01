@@ -18,5 +18,4 @@ func TestTar_options(t *testing.T) {
 		assert.Equal(t, opts[0], "-a")
 		assert.Equal(t, opts[1], "-cf")
 	}
-
 }

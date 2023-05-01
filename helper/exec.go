@@ -12,9 +12,7 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
-var (
-	spaceRegexp = regexp.MustCompile("[\\s]+")
-)
+var spaceRegexp = regexp.MustCompile(`[\s]+`)
 
 // Exec cli commands
 func Exec(command string, args ...string) (output string, err error) {

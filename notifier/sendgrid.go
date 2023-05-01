@@ -14,11 +14,13 @@ type sendgridPayload struct {
 	Body             []sendgridContent                    `json:"content"`
 }
 
-type sendgridPersonalization = []sendgridEmailInfo
-type sendgridEmailInfo struct {
-	Email string `json:"email"`
-	Name  string `json:"name"`
-}
+type (
+	sendgridPersonalization = []sendgridEmailInfo
+	sendgridEmailInfo       struct {
+		Email string `json:"email"`
+		Name  string `json:"name"`
+	}
+)
 type sendgridContent struct {
 	Type  string `json:"type"`
 	Value string `json:"value"`

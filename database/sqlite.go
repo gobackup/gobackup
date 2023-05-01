@@ -1,6 +1,8 @@
 package database
 
 import (
+	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -31,22 +33,13 @@ func (db *SQLite) init() error {
 	return nil
 }
 
-func (db *SQLite) build() string {
-	args := []string{
-		"sqlite3",
-		db.path,
-		".dump",
-		">",
-		db._dumpFilePath,
-	}
-	return strings.Join(args, " ")
-}
-
 func (db *SQLite) perform() error {
 	logger := logger.Tag("SQLite")
 
 	logger.Info("-> Dumping SQLite...")
-	if _, err := helper.Exec(db.build()); err != nil {
+	if out, err := helper.Exec(fmt.Sprintf("sqlite3 %s .dump", db.path)); err != nil {
+		return err
+	} else if err := os.WriteFile(db._dumpFilePath, []byte(out), 0o644); err != nil {
 		return err
 	}
 

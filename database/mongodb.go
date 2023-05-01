@@ -33,9 +33,7 @@ type MongoDB struct {
 	args          string
 }
 
-var (
-	mongodumpCli = "mongodump"
-)
+var mongodumpCli = "mongodump"
 
 func (db *MongoDB) init() (err error) {
 	viper := db.viper

@@ -12,11 +12,12 @@ import (
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
+	"github.com/stoicperlman/fls"
+
 	"github.com/gobackup/gobackup/config"
 	"github.com/gobackup/gobackup/logger"
 	"github.com/gobackup/gobackup/model"
 	"github.com/gobackup/gobackup/storage"
-	"github.com/stoicperlman/fls"
 )
 
 //go:embed dist

@@ -1,11 +1,12 @@
 package database
 
 import (
+	"testing"
+
 	"github.com/gobackup/gobackup/config"
 	"github.com/spf13/viper"
 
 	// "github.com/spf13/viper"
-	"testing"
 
 	"github.com/longbridgeapp/assert"
 )

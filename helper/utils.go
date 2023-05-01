@@ -4,10 +4,8 @@ import (
 	"strings"
 )
 
-var (
-	// IsGnuTar show tar type
-	IsGnuTar = false
-)
+// IsGnuTar show tar type
+var IsGnuTar = false
 
 func init() {
 	checkIsGnuTar()

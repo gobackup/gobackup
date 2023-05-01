@@ -21,9 +21,7 @@ type Package struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-var (
-	cyclerPath = filepath.Join(config.GoBackupDir, "cycler")
-)
+var cyclerPath = filepath.Join(config.GoBackupDir, "cycler")
 
 type Cycler struct {
 	name     string
@@ -94,7 +92,7 @@ func (c *Cycler) load(cyclerFileName string) {
 
 	// write example JSON if not exist
 	if !helper.IsExistsPath(cyclerFileName) {
-		if err := ioutil.WriteFile(cyclerFileName, []byte("[]"), 0660); err != nil {
+		if err := ioutil.WriteFile(cyclerFileName, []byte("[]"), 0o660); err != nil {
 			logger.Errorf("Failed to write file %s: %v", cyclerFileName, err)
 			return
 		}
@@ -126,7 +124,7 @@ func (c *Cycler) save(cyclerFileName string) {
 		return
 	}
 
-	err = ioutil.WriteFile(cyclerFileName, data, 0660)
+	err = ioutil.WriteFile(cyclerFileName, data, 0o660)
 	if err != nil {
 		logger.Error("Save cycler.json failed: ", err)
 		return

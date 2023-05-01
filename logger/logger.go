@@ -34,15 +34,15 @@ func (w writer) Write(b []byte) (n int, err error) {
 
 func init() {
 	if isTest {
-		os.MkdirAll("../log", 0777)
-		logfile, _ := os.OpenFile("../log/test.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		os.MkdirAll("../log", 0o777)
+		logfile, _ := os.OpenFile("../log/test.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
 		_myLog = log.New(logfile, "", _logFlag)
 	}
 	sharedLogger = newLogger()
 }
 
 func SetLogger(logPath string) {
-	logfile, _ := os.OpenFile(logPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	logfile, _ := os.OpenFile(logPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
 	multi := io.MultiWriter(logfile, os.Stdout)
 	_myLog = log.New(&writer{multi, "2006/01/02 15:04:05"}, "", 0)
 	sharedLogger = newLogger()

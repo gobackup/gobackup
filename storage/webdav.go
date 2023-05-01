@@ -50,7 +50,7 @@ func (s *WebDAV) open() error {
 
 	s.client = client
 
-	return s.client.MkdirAll(s.path, 0644)
+	return s.client.MkdirAll(s.path, 0o644)
 }
 
 func (s *WebDAV) close() {}
@@ -69,7 +69,7 @@ func (s *WebDAV) upload(fileKey string) error {
 		remoteDir := filepath.Dir(remotePath)
 
 		// mkdir
-		if err := s.client.MkdirAll(remoteDir, 0644); err != nil {
+		if err := s.client.MkdirAll(remoteDir, 0o644); err != nil {
 			return err
 		}
 	} else {
@@ -88,7 +88,7 @@ func (s *WebDAV) upload(fileKey string) error {
 		}
 		defer f.Close()
 
-		if err := s.client.WriteStream(remotePath, f, 0644); err != nil {
+		if err := s.client.WriteStream(remotePath, f, 0o644); err != nil {
 			return err
 		}
 
