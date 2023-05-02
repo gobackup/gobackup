@@ -27,7 +27,7 @@ var (
 )
 
 type WebConfig struct {
-    Host     string
+	Host     string
 	Port     string
 	Username string
 	Password string
