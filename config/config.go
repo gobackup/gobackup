@@ -27,6 +27,7 @@ var (
 )
 
 type WebConfig struct {
+    Host     string
 	Port     string
 	Username string
 	Password string
@@ -166,7 +167,9 @@ func Init(configFile string) {
 
 	// Load web config
 	Web = WebConfig{}
+	viper.SetDefault("web.host", "127.0.0.1")
 	viper.SetDefault("web.port", 2703)
+	Web.Host = viper.GetString("web.host")
 	Web.Port = viper.GetString("web.port")
 	Web.Username = viper.GetString("web.username")
 	Web.Password = viper.GetString("web.password")

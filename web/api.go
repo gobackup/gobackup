@@ -57,7 +57,7 @@ func StartHTTP(version string) (err error) {
 	}
 	defer logFile.Close()
 
-	logger.Infof("Starting API server on port http://127.0.0.1:%s", config.Web.Port)
+	logger.Infof("Starting API server on port http://%s:%s", config.Web.Host, config.Web.Port)
 
 	if os.Getenv("GO_ENV") == "dev" {
 		go func() {
@@ -82,7 +82,7 @@ func StartHTTP(version string) (err error) {
 	fe, _ := fs.Sub(staticFS, "dist")
 	r.Use(static.Serve("/", embedFileSystem{http.FS(fe), true}))
 
-	return r.Run(":" + config.Web.Port)
+	return r.Run(config.Web.Host + ":" + config.Web.Port)
 }
 
 func setupRouter(version string) *gin.Engine {
