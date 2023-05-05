@@ -32,5 +32,5 @@ func TestSQLite_init(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, db._dumpFilePath, "/data/backups/sqlite/sqlite1/my.sql")
-	assert.Equal(t, db.build(), "sqlite3 /var/db/my.sqlite .dump > /data/backups/sqlite/sqlite1/my.sql")
+	assert.Equal(t, db.buildArgs(), []string{"/var/db/my.sqlite", ".dump > /data/backups/sqlite/sqlite1/my.sql"})
 }

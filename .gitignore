@@ -22,3 +22,4 @@ log/
 *.log
 .env
 .DS_Store
+tests/backups/

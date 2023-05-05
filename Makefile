@@ -1,5 +1,7 @@
 test:
 	GO_ENV=test go test ./...
+test\:all:
+	@sh tests/test.sh
 build_web:
 	cd web; yarn && yarn build
 perform:

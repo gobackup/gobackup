@@ -1,0 +1,13 @@
+models:
+  test:
+    compress_with:
+      type: tgz
+    storages:
+      local:
+        type: local
+        keep: 10
+        path: tests/backups/
+    databases:
+      sqlite3:
+        type: sqlite
+        database: tests/fixtures/test.sqlite3
