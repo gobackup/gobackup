@@ -28,14 +28,16 @@ import (
 // access_key_id: your-access-key-id
 // secret_access_key: your-secret-access-key
 // max_retries: 5
+// storage_class: STANDARD_IA
 // timeout: 300
 type S3 struct {
 	Base
-	Service string
-
-	bucket string
-	path   string
-	client *s3manager.Uploader
+	Service      string
+	bucket       string
+	path         string
+	client       *s3manager.Uploader
+	storageClass string
+	awsCfg       *aws.Config
 }
 
 func (s S3) providerName() string {
@@ -110,6 +112,7 @@ func (s *S3) init() {
 	s.viper.SetDefault("endpoint", s.defaultEndpoint())
 	s.viper.SetDefault("max_retries", 3)
 	s.viper.SetDefault("timeout", "300")
+	s.viper.SetDefault("storage_class", "STANDARD_IA")
 }
 
 func (s *S3) open() (err error) {
@@ -134,14 +137,16 @@ func (s *S3) open() (err error) {
 
 	s.bucket = s.viper.GetString("bucket")
 	s.path = s.viper.GetString("path")
+	s.storageClass = s.viper.GetString("storage_class")
 
 	timeout := s.viper.GetInt("timeout")
 	uploadTimeoutDuration := time.Duration(timeout) * time.Second
 
 	httpClient := &http.Client{Timeout: uploadTimeoutDuration}
 	cfg.HTTPClient = httpClient
+	s.awsCfg = cfg
 
-	sess := session.Must(session.NewSession(cfg))
+	sess := session.Must(session.NewSession(s.awsCfg))
 	s.client = s3manager.NewUploader(sess)
 
 	return
@@ -180,9 +185,10 @@ func (s *S3) upload(fileKey string) (err error) {
 		}
 
 		input := &s3manager.UploadInput{
-			Bucket: aws.String(s.bucket),
-			Key:    aws.String(remotePath),
-			Body:   f,
+			Bucket:       aws.String(s.bucket),
+			Key:          aws.String(remotePath),
+			Body:         f,
+			StorageClass: aws.String(s.storageClass),
 		}
 
 		logger.Infof("-> Uploading (%s)...", humanize.Bytes(uint64(info.Size())))

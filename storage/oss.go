@@ -21,6 +21,7 @@ import (
 // max_retries: 5
 // timeout: 300
 // threads: 1 (1 .. 100)
+// storage_class: Archive
 type OSS struct {
 	Base
 	endpoint        string
@@ -32,6 +33,7 @@ type OSS struct {
 	timeout         int
 	client          *oss.Bucket
 	threads         int
+	storageClass    oss.StorageClassType
 }
 
 var (
@@ -45,6 +47,7 @@ func (s *OSS) open() (err error) {
 	s.viper.SetDefault("path", "/")
 	s.viper.SetDefault("timeout", 300)
 	s.viper.SetDefault("threads", 1)
+	s.viper.SetDefault("storage_class", "Archive")
 
 	s.endpoint = s.viper.GetString("endpoint")
 	s.bucket = s.viper.GetString("bucket")
@@ -54,6 +57,7 @@ func (s *OSS) open() (err error) {
 	s.maxRetries = s.viper.GetInt("max_retries")
 	s.timeout = s.viper.GetInt("timeout")
 	s.threads = s.viper.GetInt("threads")
+	s.storageClass = oss.StorageClassType(s.viper.GetString("storage_class"))
 
 	// limit thread in 1..100
 	if s.threads < 1 {
@@ -104,7 +108,7 @@ func (s *OSS) upload(fileKey string) (err error) {
 
 		start := time.Now()
 		logger.Info(fmt.Sprintf("-> Uploading %s...", remotePath))
-		if err := s.client.UploadFile(remotePath, sourcePath, ossPartSize, oss.Routines(s.threads)); err != nil {
+		if err := s.client.UploadFile(remotePath, sourcePath, ossPartSize, oss.Routines(s.threads), oss.StorageClass(s.storageClass)); err != nil {
 			return err
 		}
 
