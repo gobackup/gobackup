@@ -10,4 +10,4 @@ models:
     databases:
       sqlite3:
         type: sqlite
-        database: tests/fixtures/test.sqlite3
+        path: tests/fixtures/test.sqlite3
