@@ -61,8 +61,10 @@ func (sc ScheduleConfig) String() string {
 
 // ModelConfig for special case
 type ModelConfig struct {
-	Name           string
-	Description    string
+	Name        string
+	Description string
+	// WorkDir of the gobackup started
+	WorkDir        string
 	TempPath       string
 	DumpPath       string
 	Schedule       ScheduleConfig
@@ -144,6 +146,7 @@ func Init(configFile string) {
 		return
 	}
 
+	// TODO: Here the `useTempWorkDir` and `workdir`, is not in config document. We need removed it.
 	viper.Set("useTempWorkDir", false)
 	if workdir := viper.GetString("workdir"); len(workdir) == 0 {
 		// use temp dir as workdir
@@ -178,6 +181,9 @@ func Init(configFile string) {
 func loadModel(key string) (model ModelConfig) {
 	model.Name = key
 
+	workdir, _ := os.Getwd()
+
+	model.WorkDir = workdir
 	model.TempPath = filepath.Join(viper.GetString("workdir"), fmt.Sprintf("%d", time.Now().UnixNano()))
 	model.DumpPath = filepath.Join(model.TempPath, key)
 	model.Viper = viper.Sub("models." + key)

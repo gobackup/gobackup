@@ -30,6 +30,11 @@ func (s *Local) close() {}
 func (s *Local) upload(fileKey string) (err error) {
 	logger := logger.Tag("Local")
 
+	// Related path
+	if !path.IsAbs(s.path) {
+		s.path = path.Join(s.model.WorkDir, s.path)
+	}
+
 	targetPath := path.Join(s.path, fileKey)
 	targetDir := path.Dir(targetPath)
 	helper.MkdirP(targetDir)
