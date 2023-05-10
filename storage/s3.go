@@ -195,7 +195,8 @@ func (s *S3) upload(fileKey string) (err error) {
 
 		start := time.Now()
 
-		result, err := s.client.Upload(input, func(uploader *s3manager.Uploader) {
+		ctx := aws.BackgroundContext()
+		result, err := s.client.UploadWithContext(ctx, input, func(uploader *s3manager.Uploader) {
 			// set the part size as low as possible to avoid timeouts and aborts
 			// also set concurrency to 1 for the same reason
 			var partSize int64 = 5242880 // 5MiB
