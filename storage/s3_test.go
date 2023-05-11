@@ -9,7 +9,7 @@ import (
 )
 
 type serviceInfo struct {
-	name, endpoint, region string
+	name, endpoint, region, storageClass string
 }
 
 func Test_S3_open(t *testing.T) {
@@ -49,14 +49,14 @@ func Test_S3_open(t *testing.T) {
 
 func Test_providerName(t *testing.T) {
 	var cases = map[string]serviceInfo{
-		"s3":     {"AWS S3", "", "us-east-1"},
-		"b2":     {"Backblaze B2", "us-east-001.backblazeb2.com", "us-east-001"},
-		"us3":    {"UCloud US3", "s3-cn-bj.ufileos.com", "s3-cn-bj"},
-		"cos":    {"QCloud COS", "cos.ap-nanjing.myqcloud.com", "ap-nanjing"},
-		"kodo":   {"Qiniu Kodo", "s3-cn-east-1.qiniucs.com", "cn-east-1"},
-		"r2":     {"Cloudflare R2", ".r2.cloudflarestorage.com", "us-east-1"},
-		"spaces": {"DigitalOcean Spaces", "nyc1.digitaloceanspaces.com", "nyc1"},
-		"bos":    {"Baidu BOS", "s3.bj.bcebos.com", "bj"},
+		"s3":     {"AWS S3", "", "us-east-1", "STANDARD_IA"},
+		"b2":     {"Backblaze B2", "us-east-001.backblazeb2.com", "us-east-001", "STANDARD"},
+		"us3":    {"UCloud US3", "s3-cn-bj.ufileos.com", "s3-cn-bj", "ARCHIVE"},
+		"cos":    {"QCloud COS", "cos.ap-nanjing.myqcloud.com", "ap-nanjing", "STANDARD_IA"},
+		"kodo":   {"Qiniu Kodo", "s3-cn-east-1.qiniucs.com", "cn-east-1", "LINE"},
+		"r2":     {"Cloudflare R2", ".r2.cloudflarestorage.com", "us-east-1", ""},
+		"spaces": {"DigitalOcean Spaces", "nyc1.digitaloceanspaces.com", "nyc1", "STANDARD"},
+		"bos":    {"Baidu BOS", "s3.bj.bcebos.com", "bj", "STANDARD_IA"},
 	}
 
 	base, _ := newBase(config.ModelConfig{}, "test", config.SubConfig{})
@@ -69,6 +69,7 @@ func Test_providerName(t *testing.T) {
 		assert.Equal(t, info.name, s.providerName(), "providerName for "+service)
 		assert.Equal(t, info.endpoint, *s.defaultEndpoint(), "defaultEndpoint for "+service)
 		assert.Equal(t, info.region, s.defaultRegion(), "defaultRegion for "+service)
+		assert.Equal(t, info.storageClass, s.defaultStorageClass(), "defaultStorageClass for "+service)
 
 		assert.Equal(t, info.region, s.viper.GetString("region"))
 		assert.Equal(t, info.endpoint, s.viper.GetString("endpoint"))

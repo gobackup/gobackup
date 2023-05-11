@@ -28,7 +28,7 @@ import (
 // access_key_id: your-access-key-id
 // secret_access_key: your-secret-access-key
 // max_retries: 5
-// storage_class: STANDARD_IA
+// storage_class:
 // timeout: 300
 type S3 struct {
 	Base
@@ -107,12 +107,43 @@ func (s S3) defaultEndpoint() *string {
 	return aws.String("")
 }
 
+func (s *S3) defaultStorageClass() string {
+	switch s.Service {
+	case "s3":
+		return "STANDARD_IA"
+	case "b2":
+		return "STANDARD"
+	case "us3":
+		return "ARCHIVE"
+	case "cos":
+		return "STANDARD_IA"
+	case "kodo":
+		return "LINE"
+	case "r2":
+		// https://developers.cloudflare.com/r2/api/s3/api/
+		return ""
+	case "spaces":
+		// Allowed for compatibility purposes. Spaces only accepts the default value, STANDARD,
+		// and will reject other, unsupported storage class values.
+		// https://docs.digitalocean.com/reference/api/spaces-api/#upload-an-object-put
+		return "STANDARD"
+	case "bos":
+		return "STANDARD_IA"
+	}
+
+	return ""
+}
+
 func (s *S3) init() {
+	if len(s.Service) == 0 {
+		s.Service = "s3"
+	}
+
 	s.viper.SetDefault("region", s.defaultRegion())
 	s.viper.SetDefault("endpoint", s.defaultEndpoint())
 	s.viper.SetDefault("max_retries", 3)
 	s.viper.SetDefault("timeout", "300")
-	s.viper.SetDefault("storage_class", "STANDARD_IA")
+	s.viper.SetDefault("storage_class", s.defaultStorageClass())
 }
 
 func (s *S3) open() (err error) {
