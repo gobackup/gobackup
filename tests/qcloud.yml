@@ -1,0 +1,13 @@
+models:
+  qcloud:
+    archive:
+      includes:
+        - /etc/hosts
+    storages:
+      s3:
+        type: cos
+        bucket: gobackup-1251974611
+        region: ap-nanjing
+        path: backups
+        access_key_id: $COS_ACCESS_KEY_ID
+        secret_access_key: $COS_SECRET_ACCESS_KEY
