@@ -18,6 +18,7 @@ models:
       password: 123456
       salt: false
       openssl: true
+    default_storage: local
     storages:
       local:
         type: local

@@ -86,6 +86,9 @@ func TestModel(t *testing.T) {
 func Test_otherModels(t *testing.T) {
 	model := GetModelConfigByName("normal_files")
 
+	// default_storage
+	assert.Equal(t, model.DefaultStorage, "scp")
+
 	// schedule
 	schedule := model.Schedule
 	assert.Equal(t, true, schedule.Enabled)

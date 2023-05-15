@@ -248,6 +248,8 @@ func loadDatabasesConfig(model *ModelConfig) {
 func loadStoragesConfig(model *ModelConfig) {
 	storageConfigs := map[string]SubConfig{}
 
+	model.DefaultStorage = model.Viper.GetString("default_storage")
+
 	subViper := model.Viper.Sub("storages")
 	for key := range model.Viper.GetStringMap("storages") {
 		storageViper := subViper.Sub(key)
