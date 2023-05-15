@@ -1,0 +1,13 @@
+models:
+  test:
+    archive:
+      includes:
+        - /etc/hosts
+    storages:
+      minio:
+        type: minio
+        bucket: gobackup-test
+        endpoint: http://127.0.0.1:9000
+        path: backups
+        access_key_id: test-user
+        secret_access_key: test-user-secret

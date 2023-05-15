@@ -23,3 +23,4 @@ log/
 .env
 .DS_Store
 tests/backups/
+tests/data/

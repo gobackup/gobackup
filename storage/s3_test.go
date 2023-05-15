@@ -57,6 +57,7 @@ func Test_providerName(t *testing.T) {
 		"r2":     {"Cloudflare R2", ".r2.cloudflarestorage.com", "us-east-1", ""},
 		"spaces": {"DigitalOcean Spaces", "nyc1.digitaloceanspaces.com", "nyc1", "STANDARD"},
 		"bos":    {"Baidu BOS", "s3.bj.bcebos.com", "bj", "STANDARD_IA"},
+		"minio":  {"MinIO", "", "us-east-1", ""},
 	}
 
 	base, _ := newBase(config.ModelConfig{}, "test", config.SubConfig{})

@@ -104,6 +104,8 @@ func new(model config.ModelConfig, archivePath string, storageConfig config.SubC
 		s = &GCS{Base: base}
 	case "s3":
 		s = &S3{Base: base, Service: "s3"}
+	case "minio":
+		s = &S3{Base: base, Service: "minio"}
 	case "b2":
 		s = &S3{Base: base, Service: "b2"}
 	case "us3":

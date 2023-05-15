@@ -1,10 +1,10 @@
 models:
-  qcloud:
+  test:
     archive:
       includes:
         - /etc/hosts
     storages:
-      s3:
+      qcloud:
         type: cos
         bucket: gobackup-1251974611
         region: ap-nanjing

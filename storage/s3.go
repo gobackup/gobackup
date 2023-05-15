@@ -58,6 +58,8 @@ func (s S3) providerName() string {
 		return "DigitalOcean Spaces"
 	case "bos":
 		return "Baidu BOS"
+	case "minio":
+		return "MinIO"
 	}
 
 	return "AWS S3"
@@ -81,6 +83,8 @@ func (s S3) defaultRegion() string {
 		return "nyc1"
 	case "bos":
 		return "bj"
+	case "minio":
+		return "us-east-1"
 	}
 
 	return "us-east-1"
@@ -129,6 +133,8 @@ func (s *S3) defaultStorageClass() string {
 		return "STANDARD"
 	case "bos":
 		return "STANDARD_IA"
+	case "minio":
+		return ""
 	}
 
 	return ""
@@ -204,6 +210,9 @@ func (s *S3) upload(fileKey string) (err error) {
 		sourcePath := filepath.Join(filepath.Dir(s.archivePath), key)
 		remotePath := filepath.Join(s.path, key)
 
+		// fake source path
+		// sourcePath = "/Users/jason/Downloads/docker.tar"
+
 		f, err := os.Open(sourcePath)
 		if err != nil {
 			return fmt.Errorf("failed to open file %q, %v", sourcePath, err)
@@ -215,6 +224,8 @@ func (s *S3) upload(fileKey string) (err error) {
 			return fmt.Errorf("failed to get size of file %q, %v", sourcePath, err)
 		}
 
+		logger.Infof("-> Uploading (%s)...", humanize.Bytes(uint64(info.Size())))
+
 		input := &s3manager.UploadInput{
 			Bucket:       aws.String(s.bucket),
 			Key:          aws.String(remotePath),
@@ -222,12 +233,9 @@ func (s *S3) upload(fileKey string) (err error) {
 			StorageClass: aws.String(s.storageClass),
 		}
 
-		logger.Infof("-> Uploading (%s)...", humanize.Bytes(uint64(info.Size())))
-
 		start := time.Now()
 
-		ctx := aws.BackgroundContext()
-		result, err := s.client.UploadWithContext(ctx, input, func(uploader *s3manager.Uploader) {
+		result, err := s.client.Upload(input, func(uploader *s3manager.Uploader) {
 			// set the part size as low as possible to avoid timeouts and aborts
 			// also set concurrency to 1 for the same reason
 			var partSize int64 = 64 * 1024 * 1024 // 64MiB
