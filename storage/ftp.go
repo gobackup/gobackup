@@ -147,11 +147,11 @@ func (s *FTP) upload(fileKey string) error {
 		}
 		defer f.Close()
 
-		if err := s.client.Stor(remotePath, f); err != nil {
-			return err
+		progress := helper.NewProgressBar(logger, f)
+		if err := s.client.Stor(remotePath, progress.Reader); err != nil {
+			return progress.Errorf("upload failed %v", err)
 		}
-
-		logger.Infof("Store %s succeeded", remotePath)
+		progress.Done(remotePath)
 	}
 
 	logger.Info("Store succeeded")

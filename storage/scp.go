@@ -168,11 +168,12 @@ func (s *SCP) up(localPath, remotePath string) error {
 	}
 	defer file.Close()
 
-	logger.Info("-> scp to", remotePath)
-	if err := client.CopyFromFile(context.Background(), *file, remotePath, "0644"); err != nil {
-		return fmt.Errorf("store %s failed: %v", remotePath, err)
+	progress := helper.NewProgressBar(logger, file)
+	if err := client.CopyFile(context.Background(), progress.Reader, remotePath, "0644"); err != nil {
+		return progress.Errorf("store %s failed: %v", remotePath, err)
 	}
-	logger.Infof("Store %s succeeded", remotePath)
+	progress.Done(remotePath)
+
 	return nil
 }
 

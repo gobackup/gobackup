@@ -1,0 +1,13 @@
+models:
+  test:
+    archive:
+      includes:
+        - /etc/hosts
+    storages:
+      oss:
+        type: oss
+        bucket: gobackup-test
+        path: backups
+        endpoint: oss-cn-beijing.aliyuncs.com
+        access_key_id: $OSS_ACCESS_KEY_ID
+        access_key_secret: $OSS_SECRET_ACCESS_KEY

@@ -3,7 +3,6 @@ package storage
 import (
 	"context"
 	"fmt"
-	"math"
 	"os"
 	"path/filepath"
 	"time"
@@ -11,9 +10,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/sas"
-	"github.com/dustin/go-humanize"
-	"github.com/hako/durafmt"
 
+	"github.com/gobackup/gobackup/helper"
 	"github.com/gobackup/gobackup/logger"
 )
 
@@ -114,24 +112,12 @@ func (s *Azure) upload(fileKey string) (err error) {
 		}
 		defer f.Close()
 
-		info, err := f.Stat()
-		if err != nil {
-			return fmt.Errorf("Azure failed to get size of file %q, %v", sourcePath, err)
+		progress := helper.NewProgressBar(logger, f)
+		if _, err = s.client.UploadStream(ctx, s.container, remotePath, progress.Reader, nil); err != nil {
+			return progress.Errorf("Azure upload error: %v", err)
 		}
+		progress.Done(remotePath)
 
-		logger.Infof("-> Uploading (%s)...", humanize.Bytes(uint64(info.Size())))
-
-		start := time.Now()
-		if _, err = s.client.UploadFile(ctx, s.container, remotePath, f, nil); err != nil {
-			return fmt.Errorf("Azure upload error: %v", err)
-		}
-
-		t := time.Now()
-		elapsed := t.Sub(start)
-
-		rate := math.Ceil(float64(info.Size()) / (elapsed.Seconds() * 1024 * 1024))
-
-		logger.Info(fmt.Sprintf("Duration %v, rate %.1f MiB/s", durafmt.Parse(elapsed).LimitFirstN(2).String(), rate))
 	}
 
 	return nil

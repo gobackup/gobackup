@@ -17,7 +17,8 @@ type Logger struct {
 
 var (
 	_logFlag     = log.Ldate | log.Ltime
-	_myLog       = log.New(&writer{os.Stdout, "2006/01/02 15:04:05"}, "", 0)
+	TimeFormat   = "2006/01/02 15:04:05"
+	_myLog       = log.New(&writer{os.Stdout, TimeFormat}, "", 0)
 	sharedLogger Logger
 	isTest       = os.Getenv("GO_ENV") == "test"
 	isDebug      = os.Getenv("DEBUG") == "true"
@@ -44,7 +45,7 @@ func init() {
 func SetLogger(logPath string) {
 	logfile, _ := os.OpenFile(logPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	multi := io.MultiWriter(logfile, os.Stdout)
-	_myLog = log.New(&writer{multi, "2006/01/02 15:04:05"}, "", 0)
+	_myLog = log.New(&writer{multi, TimeFormat}, "", 0)
 	sharedLogger = newLogger()
 }
 
@@ -54,6 +55,14 @@ func newLogger() Logger {
 
 func Tag(tag string) Logger {
 	return sharedLogger.Tag(color.CyanString(fmt.Sprintf("[%s] ", tag)))
+}
+
+func (logger Logger) Prefix() string {
+	return logger.myLog.Prefix()
+}
+
+func (logger Logger) Writer() io.Writer {
+	return logger.myLog.Writer()
 }
 
 func (logger Logger) Tag(tag string) Logger {

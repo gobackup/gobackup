@@ -99,7 +99,7 @@ func new(model config.ModelConfig, archivePath string, storageConfig config.SubC
 	case "sftp":
 		s = &SFTP{Base: base}
 	case "oss":
-		s = &OSS{Base: base}
+		s = &S3{Base: base, Service: "oss"}
 	case "gcs":
 		s = &GCS{Base: base}
 	case "s3":

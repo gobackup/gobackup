@@ -13,9 +13,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/dustin/go-humanize"
-	"github.com/hako/durafmt"
 
+	"github.com/gobackup/gobackup/helper"
 	"github.com/gobackup/gobackup/logger"
 )
 
@@ -58,6 +57,8 @@ func (s S3) providerName() string {
 		return "DigitalOcean Spaces"
 	case "bos":
 		return "Baidu BOS"
+	case "oss":
+		return "Aliyun OSS"
 	case "minio":
 		return "MinIO"
 	}
@@ -83,6 +84,8 @@ func (s S3) defaultRegion() string {
 		return "nyc1"
 	case "bos":
 		return "bj"
+	case "oss":
+		return "cn-hangzhou"
 	case "minio":
 		return "us-east-1"
 	}
@@ -106,6 +109,8 @@ func (s S3) defaultEndpoint() *string {
 		return aws.String(fmt.Sprintf("%s.digitaloceanspaces.com", s.viper.GetString("region")))
 	case "bos":
 		return aws.String(fmt.Sprintf("s3.%s.bcebos.com", s.viper.GetString("region")))
+	case "oss":
+		return aws.String(fmt.Sprintf("oss-%s.aliyuncs.com", s.viper.GetString("region")))
 	}
 
 	return aws.String("")
@@ -132,6 +137,10 @@ func (s *S3) defaultStorageClass() string {
 		// https://docs.digitalocean.com/reference/api/spaces-api/#upload-an-object-put
 		return "STANDARD"
 	case "bos":
+		return "STANDARD_IA"
+	case "oss":
+		// https://help.aliyun.com/document_detail/389025.html
+		// By test, Aliyun OSS only support "Standard" via S3 SDK, even we set "STANDARD_IA" or "ARCHIVE"
 		return "STANDARD_IA"
 	case "minio":
 		return ""
@@ -163,9 +172,15 @@ func (s *S3) open() (err error) {
 		cfg.S3ForcePathStyle = aws.Bool(true)
 	}
 
+	accessKeyId := s.viper.GetString("access_key_id")
+	secretAccessKey := s.viper.GetString("secret_access_key")
+	if len(secretAccessKey) == 0 {
+		secretAccessKey = s.viper.GetString("access_key_secret")
+	}
+
 	cfg.Credentials = credentials.NewStaticCredentials(
-		s.viper.GetString("access_key_id"),
-		s.viper.GetString("secret_access_key"),
+		accessKeyId,
+		secretAccessKey,
 		s.viper.GetString("token"),
 	)
 
@@ -210,41 +225,31 @@ func (s *S3) upload(fileKey string) (err error) {
 		sourcePath := filepath.Join(filepath.Dir(s.archivePath), key)
 		remotePath := filepath.Join(s.path, key)
 
-		// fake source path
-		// sourcePath = "/Users/jason/Downloads/docker.tar"
-
 		f, err := os.Open(sourcePath)
 		if err != nil {
 			return fmt.Errorf("failed to open file %q, %v", sourcePath, err)
 		}
 		defer f.Close()
 
-		info, err := f.Stat()
-		if err != nil {
-			return fmt.Errorf("failed to get size of file %q, %v", sourcePath, err)
-		}
-
-		logger.Infof("-> Uploading (%s)...", humanize.Bytes(uint64(info.Size())))
+		progress := helper.NewProgressBar(logger, f)
 
 		input := &s3manager.UploadInput{
 			Bucket:       aws.String(s.bucket),
 			Key:          aws.String(remotePath),
-			Body:         f,
+			Body:         progress.Reader,
 			StorageClass: aws.String(s.storageClass),
 		}
-
-		start := time.Now()
 
 		result, err := s.client.Upload(input, func(uploader *s3manager.Uploader) {
 			// set the part size as low as possible to avoid timeouts and aborts
 			// also set concurrency to 1 for the same reason
 			var partSize int64 = 64 * 1024 * 1024 // 64MiB
-			maxParts := math.Ceil(float64(info.Size() / partSize))
+			maxParts := math.Ceil(float64(progress.FileLength / partSize))
 
 			// 10000 parts is the limit for AWS S3. If the resulting number of parts would exceed that limit, increase the
 			// part size as much as needed but as little possible
 			if maxParts > 10000 {
-				partSize = int64(math.Ceil(float64(info.Size()) / 10000))
+				partSize = int64(math.Ceil(float64(progress.FileLength) / 10000))
 			}
 
 			uploader.Concurrency = 1
@@ -253,19 +258,14 @@ func (s *S3) upload(fileKey string) (err error) {
 		})
 
 		if err != nil {
-			return fmt.Errorf("failed to upload file, %v", err)
+			return progress.Errorf("%v", err)
 		}
 
-		t := time.Now()
-		elapsed := t.Sub(start)
+		progress.Done(result.Location)
 
-		logger.Info("=>", result.Location)
 		if s.Service == "s3" {
 			logger.Info("=>", fmt.Sprintf("s3://%s/%s", s.bucket, remotePath))
 		}
-		rate := math.Ceil(float64(info.Size()) / (elapsed.Seconds() * 1024 * 1024))
-
-		logger.Info(fmt.Sprintf("Duration %v, rate %.1f MiB/s", durafmt.Parse(elapsed).LimitFirstN(2).String(), rate))
 	}
 
 	return nil

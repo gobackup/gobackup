@@ -4,18 +4,16 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"math"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/dustin/go-humanize"
-	"github.com/hako/durafmt"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 
+	"github.com/gobackup/gobackup/helper"
 	"github.com/gobackup/gobackup/logger"
 )
 
@@ -102,31 +100,17 @@ func (s *GCS) upload(fileKey string) (err error) {
 		}
 		defer f.Close()
 
-		info, err := f.Stat()
-		if err != nil {
-			return fmt.Errorf("GCS failed to get size of file %q, %v", sourcePath, err)
-		}
-
+		progress := helper.NewProgressBar(logger, f)
 		object := s.client.Bucket(s.bucket).Object(remotePath).If(storage.Conditions{DoesNotExist: true})
 		writer := object.NewWriter(ctx)
 
-		logger.Infof("-> Uploading (%s)...", humanize.Bytes(uint64(info.Size())))
-
-		start := time.Now()
-
-		if _, err = io.Copy(writer, f); err != nil {
-			return fmt.Errorf("GCS upload error: %v", err)
+		if _, err = io.Copy(writer, progress.Reader); err != nil {
+			return progress.Errorf("GCS upload error: %v", err)
 		}
 		if err := writer.Close(); err != nil {
-			return fmt.Errorf("GCS upload Writer.Close: %v", err)
+			return progress.Errorf("GCS upload Writer.Close: %v", err)
 		}
-
-		t := time.Now()
-		elapsed := t.Sub(start)
-
-		rate := math.Ceil(float64(info.Size()) / (elapsed.Seconds() * 1024 * 1024))
-
-		logger.Info(fmt.Sprintf("Duration %v, rate %.1f MiB/s", durafmt.Parse(elapsed).LimitFirstN(2).String(), rate))
+		progress.Done(remotePath)
 	}
 
 	return nil
