@@ -12,6 +12,7 @@ import (
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
+	"golang.org/x/oauth2/google"
 
 	"github.com/gobackup/gobackup/helper"
 	"github.com/gobackup/gobackup/logger"
@@ -41,6 +42,7 @@ func (s *GCS) open() (err error) {
 	s.timeout = time.Duration(timeout) * time.Second
 	s.path = s.viper.GetString("path")
 	s.bucket = s.viper.GetString("bucket")
+	ctx := context.Background()
 
 	credentials := s.viper.GetString("credentials")
 	credentialsFile := s.viper.GetString("credentials_file")
@@ -51,10 +53,14 @@ func (s *GCS) open() (err error) {
 	} else if len(credentialsFile) != 0 {
 		opt = option.WithCredentialsFile(credentialsFile)
 	} else {
-		return fmt.Errorf("GCS: credentials or credentialsFile is required")
+		creds, err := google.FindDefaultCredentials(ctx, storage.ScopeReadOnly)
+		if err != nil {
+			return fmt.Errorf("Cannot find default application credentials: %v", err)
+		}
+		opt = option.WithCredentials(creds)
 	}
 
-	s.client, err = storage.NewClient(context.Background(), opt)
+	s.client, err = storage.NewClient(ctx, opt)
 	if err != nil {
 		return err
 	}
