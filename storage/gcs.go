@@ -53,7 +53,12 @@ func (s *GCS) open() (err error) {
 	} else if len(credentialsFile) != 0 {
 		opt = option.WithCredentialsFile(credentialsFile)
 	} else {
-		creds, err := google.FindDefaultCredentials(ctx, storage.ScopeReadOnly)
+		// Defaults to search for credentials in several locations: https://pkg.go.dev/golang.org/x/oauth2/google#FindDefaultCredentials
+		// of which of interest to us are:
+		// 1. A JSON file whose path is specified by the GOOGLE_APPLICATION_CREDENTIALS environment variable, similar to how credentials_file works
+		// 4. Fetches credentials from the metadata server which allows us to assign a GCP Service Account to an instance where gobackup runs,
+		//    thus avoiding the need to add use a static secret
+		creds, err := google.FindDefaultCredentials(ctx, storage.ScopeReadWrite)
 		if err != nil {
 			return fmt.Errorf("Cannot find default application credentials: %v", err)
 		}
