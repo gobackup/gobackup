@@ -12,6 +12,7 @@ import (
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
+	"golang.org/x/oauth2/google"
 
 	"github.com/gobackup/gobackup/helper"
 	"github.com/gobackup/gobackup/logger"
@@ -41,6 +42,7 @@ func (s *GCS) open() (err error) {
 	s.timeout = time.Duration(timeout) * time.Second
 	s.path = s.viper.GetString("path")
 	s.bucket = s.viper.GetString("bucket")
+	ctx := context.Background()
 
 	credentials := s.viper.GetString("credentials")
 	credentialsFile := s.viper.GetString("credentials_file")
@@ -51,10 +53,19 @@ func (s *GCS) open() (err error) {
 	} else if len(credentialsFile) != 0 {
 		opt = option.WithCredentialsFile(credentialsFile)
 	} else {
-		return fmt.Errorf("GCS: credentials or credentialsFile is required")
+		// Defaults to search for credentials in several locations: https://pkg.go.dev/golang.org/x/oauth2/google#FindDefaultCredentials
+		// of which of interest to us are:
+		// 1. A JSON file whose path is specified by the GOOGLE_APPLICATION_CREDENTIALS environment variable, similar to how credentials_file works
+		// 4. Fetches credentials from the metadata server which allows us to assign a GCP Service Account to an instance where gobackup runs,
+		//    thus avoiding the need to add use a static secret
+		creds, err := google.FindDefaultCredentials(ctx, storage.ScopeReadWrite)
+		if err != nil {
+			return fmt.Errorf("Cannot find default application credentials: %v", err)
+		}
+		opt = option.WithCredentials(creds)
 	}
 
-	s.client, err = storage.NewClient(context.Background(), opt)
+	s.client, err = storage.NewClient(ctx, opt)
 	if err != nil {
 		return err
 	}
