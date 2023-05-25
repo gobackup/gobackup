@@ -9,7 +9,6 @@
    <a href="https://hub.docker.com/r/huacnlee/gobackup"><img src="https://img.shields.io/docker/v/huacnlee/gobackup?label=Docker&color=blue" alt="Docker Image Version (latest server)"></a>
    <a href="https://formulae.brew.sh/formula/gobackup"><img alt="homebrew version" src="https://img.shields.io/homebrew/v/gobackup?color=success&label=Brew"></a>
 </p>
-</p>
 
 GoBackup is a fullstack backup tool design for application servers, to backup your databases, files to cloud storages (Local disk, FTP, SCP, S3, GCS, Aliyun OSS ...).
 
@@ -44,6 +43,7 @@ https://gobackup.github.io
 - Redis - `mode: sync/copy`
 - MongoDB
 - SQLite
+- MSSQL
 
 ### Storages
 
