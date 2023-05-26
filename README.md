@@ -43,7 +43,7 @@ https://gobackup.github.io
 - Redis - `mode: sync/copy`
 - MongoDB
 - SQLite
-- MSSQL
+- Microsoft SQL Server
 
 ### Storages
 

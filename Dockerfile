@@ -21,16 +21,15 @@ RUN apk add \
   xz \
   # pixz is in edge atm
   zstd \
+  # microsoft sql dependencies \
+  libstdc++ \
+  gcompat \
+  icu \
   && \
   rm -rf /var/cache/apk/*
 
 WORKDIR /tmp
-RUN apk update && \
-    apk add --no-cache \
-    libstdc++ \
-    gcompat \
-    icu && \
-    wget https://aka.ms/sqlpackage-linux && \
+RUN wget https://aka.ms/sqlpackage-linux && \
     unzip sqlpackage-linux -d /opt/sqlpackage && \
     rm sqlpackage-linux && \
     chmod +x /opt/sqlpackage/sqlpackage && \

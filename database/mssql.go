@@ -71,22 +71,23 @@ func (db *MSSQL) credentialOptions() string {
 		opts = append(opts, "/SourceUser:"+db.username)
 	}
 	if len(db.password) > 0 {
-		opts = append(opts, `/SourcePassword:`+db.password)
+		opts = append(opts, "/SourcePassword:"+db.password)
 	}
 	return strings.Join(opts, " ")
 }
 
 func (db *MSSQL) connectivityOptions() string {
-	if len(db.host) > 0 {
-		if len(db.port) > 0 {
-			return "/SourceServerName:" + db.host + "," + db.port
-		}
-		return "/SourceServerName:" + db.host + "," + "1433"
+	var host = db.host
+	var port = db.port
+
+	if len(host) == 0 {
+		host = "127.0.0.1"
 	}
-	if len(db.port) > 0 {
-		return "/SourceServerName:127.0.0.1" + "," + db.port
+	if len(port) == 0 {
+		port = "1433"
 	}
-	return "/SourceServerName:127.0.0.1,1433"
+
+	return "/SourceServerName:" + db.host + "," + db.port
 }
 
 func (db *MSSQL) additionOption() string {
