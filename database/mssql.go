@@ -87,7 +87,7 @@ func (db *MSSQL) connectivityOptions() string {
 		port = "1433"
 	}
 
-	return "/SourceServerName:" + db.host + "," + db.port
+	return "/SourceServerName:" + host + "," + port
 }
 
 func (db *MSSQL) additionOption() string {
