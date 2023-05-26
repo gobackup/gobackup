@@ -32,8 +32,7 @@ WORKDIR /tmp
 RUN wget https://aka.ms/sqlpackage-linux && \
     unzip sqlpackage-linux -d /opt/sqlpackage && \
     rm sqlpackage-linux && \
-    chmod +x /opt/sqlpackage/sqlpackage && \
-    rm -rf /var/cache/apk/*
+    chmod +x /opt/sqlpackage/sqlpackage
 
 ENV PATH="${PATH}:/opt/sqlpackage"
 
