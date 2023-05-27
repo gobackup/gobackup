@@ -94,6 +94,7 @@ type SubConfig struct {
 	Viper *viper.Viper
 }
 
+// Init
 // loadConfig from:
 // - ./gobackup.yml
 // - ~/.gobackup/gobackup.yml
