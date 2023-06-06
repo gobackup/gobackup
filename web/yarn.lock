@@ -1552,10 +1552,10 @@ util-deprecate@^1.0.2:
   resolved "https://registry.npmjs.org/util-deprecate/-/util-deprecate-1.0.2.tgz"
   integrity sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==
 
-vite@^4.1.0:
-  version "4.1.4"
-  resolved "https://registry.npmjs.org/vite/-/vite-4.1.4.tgz"
-  integrity sha512-3knk/HsbSTKEin43zHu7jTwYWv81f8kgAL99G5NWBcA1LKvtvcVAC4JjBH1arBunO9kQka+1oGbrMKOjk4ZrBg==
+vite@^4.1.5:
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-4.1.5.tgz#9c93d579f62179ab99c4182fa37acf1b380a374b"
+  integrity sha512-zJ0RiVkf61kpd7O+VtU6r766xgnTaIknP/lR6sJTZq3HtVJ3HGnTo5DaJhTUtYoTyS/CQwZ6yEVdc/lrmQT7dQ==
   dependencies:
     esbuild "^0.16.14"
     postcss "^8.4.21"
