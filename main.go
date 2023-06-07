@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"syscall"
 
@@ -111,7 +110,7 @@ func main() {
 
 				d, err := dm.Reborn()
 				if err != nil {
-					log.Fatal("Unable to run: ", err)
+					logger.Fatal("Start failed, please check is there another instance running.")
 				}
 				if d != nil {
 					return nil
