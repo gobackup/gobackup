@@ -62,6 +62,8 @@ https://gobackup.github.io
 - [UCloud US3](https://docs.ucloud.cn/ufile/introduction/concept)
 - [Qiniu Kodo](https://www.qiniu.com/products/kodo)
 - [Baidu BOS](https://cloud.baidu.com/product/bos.html)
+- [MinIO](https://min.io)
+- [Huawei OBS](https://www.huaweicloud.com/intl/en-us/product/obs.html)
 - [WebDAV](http://www.webdav.org)
 
 ## Notifier
