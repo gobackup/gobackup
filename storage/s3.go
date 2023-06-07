@@ -61,6 +61,8 @@ func (s S3) providerName() string {
 		return "Aliyun OSS"
 	case "minio":
 		return "MinIO"
+	case "obs":
+		return "Huawei OBS"
 	}
 
 	return "AWS S3"
@@ -88,6 +90,8 @@ func (s S3) defaultRegion() string {
 		return "cn-hangzhou"
 	case "minio":
 		return "us-east-1"
+	case "obs":
+		return "cn-north-1"
 	}
 
 	return "us-east-1"
@@ -111,6 +115,8 @@ func (s S3) defaultEndpoint() *string {
 		return aws.String(fmt.Sprintf("s3.%s.bcebos.com", s.viper.GetString("region")))
 	case "oss":
 		return aws.String(fmt.Sprintf("oss-%s.aliyuncs.com", s.viper.GetString("region")))
+	case "obs":
+		return aws.String(fmt.Sprintf("obs.%s.myhuaweicloud.com", s.viper.GetString("region")))
 	}
 
 	return aws.String("")
@@ -144,6 +150,10 @@ func (s *S3) defaultStorageClass() string {
 		return "STANDARD_IA"
 	case "minio":
 		return ""
+	case "obs":
+		// https://support.huaweicloud.com/api-obs/obs_04_0044.html#obs_04_0044__table63485364
+		// STANDARD, STANDARD_IA, GLACIER, DEEP_ARCHIVE
+		return "STANDARD_IA"
 	}
 
 	return ""
@@ -164,6 +174,8 @@ func (s *S3) init() {
 func (s *S3) open() (err error) {
 	s.init()
 
+	logger := logger.Tag(s.providerName())
+
 	cfg := aws.NewConfig()
 	endpoint := s.viper.GetString("endpoint")
 
@@ -176,6 +188,10 @@ func (s *S3) open() (err error) {
 	secretAccessKey := s.viper.GetString("secret_access_key")
 	if len(secretAccessKey) == 0 {
 		secretAccessKey = s.viper.GetString("access_key_secret")
+	}
+
+	if len(accessKeyId) == 0 || len(secretAccessKey) == 0 {
+		logger.Warn("`access_key_id` or `secret_access_key` is empty.")
 	}
 
 	cfg.Credentials = credentials.NewStaticCredentials(

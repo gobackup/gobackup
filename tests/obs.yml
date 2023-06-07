@@ -1,0 +1,13 @@
+models:
+  test:
+    archive:
+      includes:
+        - /etc/hosts
+    storages:
+      minio:
+        type: obs
+        bucket: gobackup-test
+        path: backups
+        region: cn-east-3
+        access_key_id: $OBS_ACCESS_KEY_ID
+        secret_access_key: $OBS_SECRET_ACCESS_KEY

@@ -120,6 +120,8 @@ func new(model config.ModelConfig, archivePath string, storageConfig config.SubC
 		s = &S3{Base: base, Service: "spaces"}
 	case "bos":
 		s = &S3{Base: base, Service: "bos"}
+	case "obs":
+		s = &S3{Base: base, Service: "obs"}
 	case "azure":
 		s = &Azure{Base: base}
 	default:
