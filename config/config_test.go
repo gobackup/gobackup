@@ -147,7 +147,13 @@ func TestWebConfig(t *testing.T) {
 	assert.Equal(t, Web.Password, "123456")
 }
 
+func TestInitWithNotExistsConfigFile(t *testing.T) {
+	err := Init("config/path/not-exist.yml")
+	assert.NotNil(t, err)
+}
+
 func TestWatchConfigToReload(t *testing.T) {
+	Init(testConfigFile)
 	lastUpdatedAt := UpdatedAt.UnixNano()
 	time.Sleep(1 * time.Millisecond)
 

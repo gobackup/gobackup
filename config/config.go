@@ -106,7 +106,7 @@ type SubConfig struct {
 // - ./gobackup.yml
 // - ~/.gobackup/gobackup.yml
 // - /etc/gobackup/gobackup.yml
-func Init(configFile string) {
+func Init(configFile string) error {
 	logger := logger.Tag("Config")
 
 	viper.SetConfigType("yaml")
@@ -128,19 +128,26 @@ func Init(configFile string) {
 	}
 
 	viperConfigFile := viper.ConfigFileUsed()
-	if info, _ := os.Stat(viperConfigFile); info.Mode()&(1<<2) != 0 {
-		// max permission: 0770
+	info, err := os.Stat(viperConfigFile)
+	if err != nil {
+		logger.Errorf("Config file %s not found.", viperConfigFile)
+		return err
+	}
+
+	// max permission: 0770
+	if info.Mode()&(1<<2) != 0 {
 		logger.Warnf("Other users are able to access %s with mode %v", viperConfigFile, info.Mode())
 	}
 
 	viper.WatchConfig()
-
 	viper.OnConfigChange(func(in fsnotify.Event) {
 		logger.Info("Config file changed:", in.Name)
 		loadConfig(viperConfigFile)
 	})
 
 	loadConfig(viperConfigFile)
+
+	return nil
 }
 
 func loadConfig(configFile string) {
