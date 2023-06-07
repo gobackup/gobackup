@@ -5,8 +5,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 
@@ -24,6 +26,11 @@ var (
 	PidFilePath string = filepath.Join(GoBackupDir, "gobackup.pid")
 	LogFilePath string = filepath.Join(GoBackupDir, "gobackup.log")
 	Web         WebConfig
+
+	wLock = sync.Mutex{}
+
+	// The config file loaded at
+	UpdatedAt time.Time
 )
 
 type WebConfig struct {
@@ -120,20 +127,36 @@ func Init(configFile string) {
 		viper.AddConfigPath("/etc/gobackup/") // path to look for the config file in
 	}
 
-	err := viper.ReadInConfig()
-	if err != nil {
-		logger.Error("Load gobackup config failed: ", err)
-		return
-	}
-
 	viperConfigFile := viper.ConfigFileUsed()
 	if info, _ := os.Stat(viperConfigFile); info.Mode()&(1<<2) != 0 {
 		// max permission: 0770
 		logger.Warnf("Other users are able to access %s with mode %v", viperConfigFile, info.Mode())
 	}
 
+	viper.WatchConfig()
+
+	viper.OnConfigChange(func(in fsnotify.Event) {
+		logger.Info("Config file changed:", in.Name)
+		loadConfig(viperConfigFile)
+	})
+
+	loadConfig(viperConfigFile)
+}
+
+func loadConfig(configFile string) {
+	wLock.Lock()
+	defer wLock.Unlock()
+
+	logger := logger.Tag("Config")
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		logger.Error("Load gobackup config failed: ", err)
+		return
+	}
+
 	// load .env if exists in the same direcotry of used config file and expand variables in the config
-	dotEnv := filepath.Join(filepath.Dir(viperConfigFile), ".env")
+	dotEnv := filepath.Join(filepath.Dir(configFile), ".env")
 	if _, err := os.Stat(dotEnv); err == nil {
 		if err := godotenv.Load(dotEnv); err != nil {
 			logger.Errorf("Load %s failed: %v", dotEnv, err)
@@ -141,7 +164,7 @@ func Init(configFile string) {
 		}
 	}
 
-	cfg, _ := os.ReadFile(viperConfigFile)
+	cfg, _ := os.ReadFile(configFile)
 	if err := viper.ReadConfig(strings.NewReader(os.ExpandEnv(string(cfg)))); err != nil {
 		logger.Errorf("Load expanded config failed: %v", err)
 		return
@@ -166,7 +189,7 @@ func Init(configFile string) {
 	}
 
 	if len(Models) == 0 {
-		logger.Fatalf("No model found in %s", viperConfigFile)
+		logger.Fatalf("No model found in %s", configFile)
 	}
 
 	// Load web config
@@ -177,6 +200,9 @@ func Init(configFile string) {
 	Web.Port = viper.GetString("web.port")
 	Web.Username = viper.GetString("web.username")
 	Web.Password = viper.GetString("web.password")
+
+	UpdatedAt = time.Now()
+	logger.Infof("Config loaded, found %d models.", len(Models))
 }
 
 func loadModel(key string) (model ModelConfig) {

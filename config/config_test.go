@@ -3,14 +3,19 @@ package config
 import (
 	"os"
 	"testing"
+	"time"
 
 	"github.com/longbridgeapp/assert"
+)
+
+var (
+	testConfigFile = "../gobackup_test.yml"
 )
 
 func init() {
 	os.Setenv("S3_ACCESS_KEY_ID", "xxxxxxxxxxxxxxxxxxxx")
 	os.Setenv("S3_SECRET_ACCESS_KEY", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-	Init("../gobackup_test.yml")
+	Init(testConfigFile)
 }
 
 func TestModelsLength(t *testing.T) {
@@ -140,4 +145,34 @@ func TestWebConfig(t *testing.T) {
 	assert.Equal(t, Web.Port, "2703")
 	assert.Equal(t, Web.Username, "gobackup")
 	assert.Equal(t, Web.Password, "123456")
+}
+
+func TestWatchConfigToReload(t *testing.T) {
+	lastUpdatedAt := UpdatedAt.UnixNano()
+	time.Sleep(1 * time.Millisecond)
+
+	// Touch `testConfigFile` to trigger file changes event
+	err := updateFile(testConfigFile)
+	assert.Nil(t, err)
+
+	// Wait for reload
+	time.Sleep(10 * time.Millisecond)
+
+	// check config reload updated_at
+	assert.NotEqual(t, lastUpdatedAt, UpdatedAt.UnixNano())
+}
+
+func updateFile(path string) error {
+	// Open file and write it again without any changes
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(path, data, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
