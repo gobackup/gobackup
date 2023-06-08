@@ -110,7 +110,8 @@ func main() {
 
 				d, err := dm.Reborn()
 				if err != nil {
-					logger.Fatal("Start failed, please check is there another instance running.")
+					logger.Error(err)
+					logger.Fatalf("Start failed, please check is there another instance running.")
 				}
 				if d != nil {
 					return nil
