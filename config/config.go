@@ -127,30 +127,16 @@ func Init(configFile string) error {
 		viper.AddConfigPath("/etc/gobackup/") // path to look for the config file in
 	}
 
-	viperConfigFile := viper.ConfigFileUsed()
-	info, err := os.Stat(viperConfigFile)
-	if err != nil {
-		logger.Errorf("Config file %s not found.", viperConfigFile)
-		return err
-	}
-
-	// max permission: 0770
-	if info.Mode()&(1<<2) != 0 {
-		logger.Warnf("Other users are able to access %s with mode %v", viperConfigFile, info.Mode())
-	}
-
 	viper.WatchConfig()
 	viper.OnConfigChange(func(in fsnotify.Event) {
 		logger.Info("Config file changed:", in.Name)
-		loadConfig(viperConfigFile)
+		loadConfig()
 	})
 
-	loadConfig(viperConfigFile)
-
-	return nil
+	return loadConfig()
 }
 
-func loadConfig(configFile string) {
+func loadConfig() error {
 	wLock.Lock()
 	defer wLock.Unlock()
 
@@ -159,22 +145,32 @@ func loadConfig(configFile string) {
 	err := viper.ReadInConfig()
 	if err != nil {
 		logger.Error("Load gobackup config failed: ", err)
-		return
+		return err
 	}
 
-	// load .env if exists in the same direcotry of used config file and expand variables in the config
-	dotEnv := filepath.Join(filepath.Dir(configFile), ".env")
-	if _, err := os.Stat(dotEnv); err == nil {
-		if err := godotenv.Load(dotEnv); err != nil {
-			logger.Errorf("Load %s failed: %v", dotEnv, err)
-			return
+	viperConfigFile := viper.ConfigFileUsed()
+	if info, err := os.Stat(viperConfigFile); err == nil {
+		// max permission: 0770
+		if info.Mode()&(1<<2) != 0 {
+			logger.Warnf("Other users are able to access %s with mode %v", viperConfigFile, info.Mode())
 		}
 	}
 
-	cfg, _ := os.ReadFile(configFile)
+	logger.Info("Config file:", viperConfigFile)
+
+	// load .env if exists in the same direcotry of used config file and expand variables in the config
+	dotEnv := filepath.Join(filepath.Dir(viperConfigFile), ".env")
+	if _, err := os.Stat(dotEnv); err == nil {
+		if err := godotenv.Load(dotEnv); err != nil {
+			logger.Errorf("Load %s failed: %v", dotEnv, err)
+			return err
+		}
+	}
+
+	cfg, _ := os.ReadFile(viperConfigFile)
 	if err := viper.ReadConfig(strings.NewReader(os.ExpandEnv(string(cfg)))); err != nil {
 		logger.Errorf("Load expanded config failed: %v", err)
-		return
+		return err
 	}
 
 	// TODO: Here the `useTempWorkDir` and `workdir`, is not in config document. We need removed it.
@@ -196,7 +192,7 @@ func loadConfig(configFile string) {
 	}
 
 	if len(Models) == 0 {
-		logger.Fatalf("No model found in %s", configFile)
+		logger.Fatalf("No model found in %s", viperConfigFile)
 	}
 
 	// Load web config
@@ -210,6 +206,8 @@ func loadConfig(configFile string) {
 
 	UpdatedAt = time.Now()
 	logger.Infof("Config loaded, found %d models.", len(Models))
+
+	return nil
 }
 
 func loadModel(key string) (model ModelConfig) {
