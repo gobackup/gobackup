@@ -125,7 +125,7 @@ func new(model config.ModelConfig, archivePath string, storageConfig config.SubC
 	case "azure":
 		s = &Azure{Base: base}
 	default:
-		panic(fmt.Errorf("[%s] storage type has not implement", storageConfig.Type))
+		logger.Errorf("[%s] storage type has not implement.", storageConfig.Type)
 	}
 
 	return base, s
