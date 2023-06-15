@@ -29,6 +29,7 @@ import (
 // max_retries: 5
 // storage_class:
 // timeout: 300
+// force_path_style:
 type S3 struct {
 	Base
 	Service      string
@@ -63,6 +64,8 @@ func (s S3) providerName() string {
 		return "MinIO"
 	case "obs":
 		return "Huawei OBS"
+	case "tos":
+		return "Volcengine TOS"
 	}
 
 	return "AWS S3"
@@ -92,6 +95,9 @@ func (s S3) defaultRegion() string {
 		return "us-east-1"
 	case "obs":
 		return "cn-north-1"
+	case "tos":
+		// https://www.volcengine.com/docs/6349/107356
+		return "cn-beijing"
 	}
 
 	return "us-east-1"
@@ -117,6 +123,8 @@ func (s S3) defaultEndpoint() *string {
 		return aws.String(fmt.Sprintf("oss-%s.aliyuncs.com", s.viper.GetString("region")))
 	case "obs":
 		return aws.String(fmt.Sprintf("obs.%s.myhuaweicloud.com", s.viper.GetString("region")))
+	case "tos":
+		return aws.String(fmt.Sprintf("tos-s3-%s.volces.com", s.viper.GetString("region")))
 	}
 
 	return aws.String("")
@@ -154,9 +162,22 @@ func (s *S3) defaultStorageClass() string {
 		// https://support.huaweicloud.com/api-obs/obs_04_0044.html#obs_04_0044__table63485364
 		// STANDARD, STANDARD_IA, GLACIER, DEEP_ARCHIVE
 		return "STANDARD_IA"
+	case "tos":
+		// https://www.volcengine.com/docs/6349/147050
+		// STANDARD, STANDARD_IA, GLACIER_IR
+		return "STANDARD_IA"
 	}
 
 	return ""
+}
+
+func (s *S3) forcePathStyle() bool {
+	switch s.Service {
+	case "tos", "oss":
+		return false
+	default:
+		return true
+	}
 }
 
 func (s *S3) init() {
@@ -181,7 +202,11 @@ func (s *S3) open() (err error) {
 
 	if len(endpoint) > 0 {
 		cfg.Endpoint = aws.String(endpoint)
-		cfg.S3ForcePathStyle = aws.Bool(true)
+	}
+
+	cfg.S3ForcePathStyle = aws.Bool(s.forcePathStyle())
+	if s.viper.IsSet("force_path_style") {
+		cfg.S3ForcePathStyle = aws.Bool(s.viper.GetBool("force_path_style"))
 	}
 
 	accessKeyId := s.viper.GetString("access_key_id")

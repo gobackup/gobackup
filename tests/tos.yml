@@ -1,0 +1,13 @@
+models:
+  test:
+    archive:
+      includes:
+        - /etc/hosts
+    storages:
+      minio:
+        type: tos
+        bucket: gobackup-test
+        path: /
+        region: cn-shanghai
+        access_key_id: $TOS_ACCESS_KEY_ID
+        secret_access_key: $TOS_SECRET_ACCESS_KEY

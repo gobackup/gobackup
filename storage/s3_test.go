@@ -10,6 +10,7 @@ import (
 
 type serviceInfo struct {
 	name, endpoint, region, storageClass string
+	forcePathStyle                       bool
 }
 
 func Test_S3_open(t *testing.T) {
@@ -49,16 +50,18 @@ func Test_S3_open(t *testing.T) {
 
 func Test_providerName(t *testing.T) {
 	var cases = map[string]serviceInfo{
-		"s3":     {"AWS S3", "", "us-east-1", "STANDARD_IA"},
-		"b2":     {"Backblaze B2", "us-east-001.backblazeb2.com", "us-east-001", "STANDARD"},
-		"us3":    {"UCloud US3", "s3-cn-bj.ufileos.com", "s3-cn-bj", "ARCHIVE"},
-		"cos":    {"QCloud COS", "cos.ap-nanjing.myqcloud.com", "ap-nanjing", "STANDARD_IA"},
-		"kodo":   {"Qiniu Kodo", "s3-cn-east-1.qiniucs.com", "cn-east-1", "LINE"},
-		"r2":     {"Cloudflare R2", ".r2.cloudflarestorage.com", "us-east-1", ""},
-		"spaces": {"DigitalOcean Spaces", "nyc1.digitaloceanspaces.com", "nyc1", "STANDARD"},
-		"bos":    {"Baidu BOS", "s3.bj.bcebos.com", "bj", "STANDARD_IA"},
-		"oss":    {"Aliyun OSS", "oss-cn-hangzhou.aliyuncs.com", "cn-hangzhou", "STANDARD_IA"},
-		"minio":  {"MinIO", "", "us-east-1", ""},
+		"s3":     {"AWS S3", "", "us-east-1", "STANDARD_IA", true},
+		"b2":     {"Backblaze B2", "us-east-001.backblazeb2.com", "us-east-001", "STANDARD", true},
+		"us3":    {"UCloud US3", "s3-cn-bj.ufileos.com", "s3-cn-bj", "ARCHIVE", true},
+		"cos":    {"QCloud COS", "cos.ap-nanjing.myqcloud.com", "ap-nanjing", "STANDARD_IA", true},
+		"kodo":   {"Qiniu Kodo", "s3-cn-east-1.qiniucs.com", "cn-east-1", "LINE", true},
+		"r2":     {"Cloudflare R2", ".r2.cloudflarestorage.com", "us-east-1", "", true},
+		"spaces": {"DigitalOcean Spaces", "nyc1.digitaloceanspaces.com", "nyc1", "STANDARD", true},
+		"bos":    {"Baidu BOS", "s3.bj.bcebos.com", "bj", "STANDARD_IA", true},
+		"oss":    {"Aliyun OSS", "oss-cn-hangzhou.aliyuncs.com", "cn-hangzhou", "STANDARD_IA", false},
+		"obs":    {"Huawei OBS", "obs.cn-north-1.myhuaweicloud.com", "cn-north-1", "STANDARD_IA", true},
+		"tos":    {"Volcengine TOS", "tos-s3-cn-beijing.volces.com", "cn-beijing", "STANDARD_IA", false},
+		"minio":  {"MinIO", "", "us-east-1", "", true},
 	}
 
 	base, _ := newBase(config.ModelConfig{}, "test", config.SubConfig{})
@@ -73,6 +76,7 @@ func Test_providerName(t *testing.T) {
 		assert.Equal(t, info.endpoint, *s.defaultEndpoint(), "defaultEndpoint for "+service)
 		assert.Equal(t, info.region, s.defaultRegion(), "defaultRegion for "+service)
 		assert.Equal(t, info.storageClass, s.defaultStorageClass(), "defaultStorageClass for "+service)
+		assert.Equal(t, info.forcePathStyle, s.forcePathStyle(), "forcePathStyle for "+service)
 
 		assert.Equal(t, info.region, s.viper.GetString("region"))
 		assert.Equal(t, info.endpoint, s.viper.GetString("endpoint"))
