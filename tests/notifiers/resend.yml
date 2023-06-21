@@ -1,0 +1,19 @@
+models:
+  test:
+    compress_with:
+      type: tgz
+    storages:
+      local:
+        type: local
+        keep: 10
+        path: tests/backups/
+    archives:
+      test:
+        includes:
+          - /etc/hosts
+    notifiers:
+      resend:
+        type: resend
+        from: notifier@gobackup.github.io
+        to: huacnlee@gmail.com
+        token: $RESEND_API_KEY
