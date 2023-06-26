@@ -44,7 +44,7 @@ func Start() error {
 			}
 		}
 
-		scheduler.Do(func(modelConfig config.ModelConfig) {
+		if _, err := scheduler.Do(func(modelConfig config.ModelConfig) {
 			defer mu.Unlock()
 			logger := superlogger.Tag(fmt.Sprintf("Scheduler: %s", modelConfig.Name))
 
@@ -54,9 +54,13 @@ func Start() error {
 				Config: modelConfig,
 			}
 			mu.Lock()
-			m.Perform()
+			if err := m.Perform(); err != nil {
+				logger.Errorf("Failed to perform: %s", err.Error())
+			}
 			logger.Info("Done.")
-		}, modelConfig)
+		}, modelConfig); err != nil {
+			logger.Errorf("Failed to register job func: %s", err.Error())
+		}
 	}
 
 	mycron.StartAsync()

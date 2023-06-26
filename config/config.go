@@ -130,7 +130,9 @@ func Init(configFile string) error {
 	viper.WatchConfig()
 	viper.OnConfigChange(func(in fsnotify.Event) {
 		logger.Info("Config file changed:", in.Name)
-		loadConfig()
+		if err := loadConfig(); err != nil {
+			logger.Error(err.Error())
+		}
 	})
 
 	return loadConfig()
@@ -179,8 +181,9 @@ func loadConfig() error {
 		// use temp dir as workdir
 		dir, err := os.MkdirTemp("", "gobackup")
 		if err != nil {
-			logger.Fatal(err)
+			return err
 		}
+
 		viper.Set("workdir", dir)
 		viper.Set("useTempWorkDir", true)
 	}
@@ -188,11 +191,16 @@ func loadConfig() error {
 	Exist = true
 	Models = []ModelConfig{}
 	for key := range viper.GetStringMap("models") {
-		Models = append(Models, loadModel(key))
+		model, err := loadModel(key)
+		if err != nil {
+			return fmt.Errorf("load model %s: %v", key, err)
+		}
+
+		Models = append(Models, model)
 	}
 
 	if len(Models) == 0 {
-		logger.Fatalf("No model found in %s", viperConfigFile)
+		return fmt.Errorf("No model found in %s", viperConfigFile)
 	}
 
 	// Load web config
@@ -210,7 +218,8 @@ func loadConfig() error {
 	return nil
 }
 
-func loadModel(key string) (model ModelConfig) {
+func loadModel(key string) (ModelConfig, error) {
+	var model ModelConfig
 	model.Name = key
 
 	workdir, _ := os.Getwd()
@@ -241,12 +250,12 @@ func loadModel(key string) (model ModelConfig) {
 	loadStoragesConfig(&model)
 
 	if len(model.Storages) == 0 {
-		logger.Fatalf("No storage found in model %s", model.Name)
+		return ModelConfig{}, fmt.Errorf("No storage found in model %s", model.Name)
 	}
 
 	loadNotifiersConfig(&model)
 
-	return
+	return model, nil
 }
 
 func loadScheduleConfig(model *ModelConfig) {

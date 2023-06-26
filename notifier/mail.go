@@ -6,8 +6,6 @@ import (
 	"net/smtp"
 	"sort"
 	"strings"
-
-	"github.com/gobackup/gobackup/logger"
 )
 
 type Mail struct {
@@ -20,29 +18,27 @@ type Mail struct {
 	port     string
 }
 
-func NewMail(base *Base) *Mail {
-	logger := logger.Tag("Notifier: mail")
-	mail := &Mail{}
-
+func NewMail(base *Base) (*Mail, error) {
 	base.viper.SetDefault("port", "25")
 
-	mail.username = base.viper.GetString("username")
-	mail.password = base.viper.GetString("password")
-
-	mail.to = strings.Split(base.viper.GetString("to"), ",")
-	if len(base.viper.GetString("username")) == 0 {
-		logger.Fatalf("username is required for mail notifier")
+	username := base.viper.GetString("username")
+	if len(username) == 0 {
+		return nil, fmt.Errorf("username is required for mail notifier")
 	}
 
-	mail.from = base.viper.GetString("from")
-	if len(mail.from) == 0 {
-		mail.from = mail.username
+	from := base.viper.GetString("from")
+	if len(from) == 0 {
+		from = username
 	}
 
-	mail.host = base.viper.GetString("host")
-	mail.port = base.viper.GetString("port")
-
-	return mail
+	return &Mail{
+		username: username,
+		password: base.viper.GetString("password"),
+		to:       strings.Split(base.viper.GetString("to"), ","),
+		from:     from,
+		host:     base.viper.GetString("host"),
+		port:     base.viper.GetString("port"),
+	}, nil
 }
 
 func (s Mail) getAddr() string {

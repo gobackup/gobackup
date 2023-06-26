@@ -38,7 +38,8 @@ func newNotifier(name string, config config.SubConfig) (Notifier, *Base, error) 
 
 	switch config.Type {
 	case "mail":
-		return NewMail(base), base, nil
+		mail, err := NewMail(base)
+		return mail, base, err
 	case "webhook":
 		return NewWebhook(base), base, nil
 	case "feishu":
@@ -66,7 +67,7 @@ func newNotifier(name string, config config.SubConfig) (Notifier, *Base, error) 
 	return nil, nil, fmt.Errorf("Notifier: %s is not supported", name)
 }
 
-func notify(model config.ModelConfig, title, message string, notifyType int) error {
+func notify(model config.ModelConfig, title, message string, notifyType int) {
 	logger := logger.Tag("Notifier")
 
 	logger.Infof("Running %d Notifiers", len(model.Notifiers))
@@ -91,19 +92,17 @@ func notify(model config.ModelConfig, title, message string, notifyType int) err
 			}
 		}
 	}
-
-	return nil
 }
 
-func Success(model config.ModelConfig) error {
+func Success(model config.ModelConfig) {
 	title := fmt.Sprintf("[GoBackup] OK: Backup %s has successfully", model.Name)
 	message := fmt.Sprintf("Backup of %s completed successfully at %s", model.Name, time.Now().Local())
-	return notify(model, title, message, notifyTypeSuccess)
+	notify(model, title, message, notifyTypeSuccess)
 }
 
-func Failure(model config.ModelConfig, reason string) error {
+func Failure(model config.ModelConfig, reason string) {
 	title := fmt.Sprintf("[GoBackup] Err: Backup %s has failed", model.Name)
 	message := fmt.Sprintf("Backup of %s failed at %s:\n\n%s", model.Name, time.Now().Local(), reason)
 
-	return notify(model, title, message, notifyTypeFailure)
+	notify(model, title, message, notifyTypeFailure)
 }

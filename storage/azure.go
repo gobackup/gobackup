@@ -37,7 +37,7 @@ type Azure struct {
 	client    *azblob.Client
 }
 
-func (s *Azure) open() (err error) {
+func (s *Azure) open() error {
 	s.viper.SetDefault("timeout", "300")
 	s.viper.SetDefault("container", "gobackup")
 	s.viper.SetDefault("path", "/")
@@ -57,7 +57,7 @@ func (s *Azure) open() (err error) {
 
 	credential, err := azidentity.NewClientSecretCredential(tenantId, clientId, clientSecret, nil)
 	if err != nil {
-		logger.Fatal("Invalid credentials with error: " + err.Error())
+		return fmt.Errorf("Invalid credentials with error: %w", err)
 	}
 
 	s.client, err = azblob.NewClient(s.getBucketURL(), credential, nil)
@@ -65,7 +65,7 @@ func (s *Azure) open() (err error) {
 		return err
 	}
 
-	return
+	return nil
 }
 
 func (s *Azure) close() {
