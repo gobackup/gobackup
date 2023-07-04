@@ -40,4 +40,4 @@ ENV PATH="${PATH}:/opt/sqlpackage"
 ADD install /install
 RUN /install ${VERSION} && rm /install
 
-CMD ["/usr/local/bin/gobackup"]
+CMD ["/usr/local/bin/gobackup", "run"]
