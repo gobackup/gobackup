@@ -5,6 +5,7 @@ RUN apk add \
   ca-certificates \
   openssl \
   postgresql-client \
+  mariadb-connector-c \
   mysql-client \
   redis \
   mongodb-tools \
