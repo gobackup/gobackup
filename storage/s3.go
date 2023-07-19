@@ -230,11 +230,7 @@ func (s *S3) open() (err error) {
 
 	s.bucket = s.viper.GetString("bucket")
 	s.path = s.viper.GetString("path")
-
-	// Only present storage_class when it is set.
-	if len(s.viper.GetString("storage_class")) > 0 {
-		s.storageClass = s.viper.GetString("storage_class")
-	}
+	s.storageClass = s.viper.GetString("storage_class")
 
 	timeout := s.viper.GetInt("timeout")
 	uploadTimeoutDuration := time.Duration(timeout) * time.Second
@@ -279,10 +275,16 @@ func (s *S3) upload(fileKey string) (err error) {
 		progress := helper.NewProgressBar(logger, f)
 
 		input := &s3manager.UploadInput{
-			Bucket:       aws.String(s.bucket),
-			Key:          aws.String(remotePath),
-			Body:         progress.Reader,
-			StorageClass: aws.String(s.storageClass),
+			Bucket: aws.String(s.bucket),
+			Key:    aws.String(remotePath),
+			Body:   progress.Reader,
+		}
+
+		// Only present storage_class when it is set.
+		// Some storage backend may not support storage_class.
+		// https://github.com/gobackup/gobackup/issues/183
+		if len(s.storageClass) > 0 {
+			input.StorageClass = aws.String(s.storageClass)
 		}
 
 		result, err := s.client.Upload(input, func(uploader *s3manager.Uploader) {
