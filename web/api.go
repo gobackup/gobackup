@@ -103,9 +103,6 @@ func setupRouter(version string) *gin.Engine {
 			return
 		}
 
-		for _, err := range c.Errors {
-			logger.Error(err)
-		}
 		c.AbortWithStatusJSON(c.Writer.Status(), gin.H{
 			"message": c.Errors.String(),
 		})

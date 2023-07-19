@@ -334,9 +334,15 @@ func (s *S3) list(parent string) ([]FileItem, error) {
 
 	for {
 		input := &s3.ListObjectsV2Input{
-			Bucket:            aws.String(s.bucket),
-			Prefix:            aws.String(remotePath),
-			ContinuationToken: aws.String(continueToken),
+			Bucket: aws.String(s.bucket),
+			Prefix: aws.String(remotePath),
+		}
+
+		// Only present ContinuationToken when it is set.
+		// Some S3 compatible storage like MinIO will raise error when ContinuationToken is empty.
+		// https://github.com/gobackup/gobackup/issues/179
+		if len(continueToken) > 0 {
+			input.ContinuationToken = aws.String(continueToken)
 		}
 
 		result, err := s.client.S3.ListObjectsV2(input)
