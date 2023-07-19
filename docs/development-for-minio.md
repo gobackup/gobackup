@@ -53,3 +53,9 @@ With
 mc admin user add minio test-user test-user-secret
 mc admin policy attach minio readwrite --user test-user
 ```
+
+## Start GoBackup in local for MinIO
+
+```bash
+GO_ENV=dev go run main.go -- run --config ./tests/minio.yml
+```

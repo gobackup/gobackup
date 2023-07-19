@@ -95,8 +95,24 @@ func setupRouter(version string) *gin.Engine {
 		})
 	})
 
-	group := r.Group("/api")
+	r.Use(func(c *gin.Context) {
+		c.Next()
 
+		// Skip if no errors
+		if len(c.Errors) == 0 {
+			return
+		}
+
+		for _, err := range c.Errors {
+			logger.Error(err)
+		}
+		c.AbortWithStatusJSON(c.Writer.Status(), gin.H{
+			"message": c.Errors.String(),
+		})
+
+	})
+
+	group := r.Group("/api")
 	group.GET("/config", getConfig)
 	group.GET("/list", list)
 	group.GET("/download", download)
@@ -132,7 +148,7 @@ func perform(c *gin.Context) {
 
 	m := model.GetModelByName(param.Model)
 	if m == nil {
-		c.AbortWithStatusJSON(404, gin.H{"message": fmt.Sprintf("Model: \"%s\" not found", param.Model)})
+		c.AbortWithError(404, fmt.Errorf("Model: \"%s\" not found", param.Model))
 		return
 	}
 
@@ -145,7 +161,7 @@ func list(c *gin.Context) {
 	modelName := c.Query("model")
 	m := model.GetModelByName(modelName)
 	if m == nil {
-		c.AbortWithStatusJSON(404, gin.H{"message": fmt.Sprintf("Model: \"%s\" not found", modelName)})
+		c.AbortWithError(404, fmt.Errorf("Model: \"%s\" not found", modelName))
 		return
 	}
 
@@ -156,7 +172,7 @@ func list(c *gin.Context) {
 
 	files, err := storage.List(m.Config, parent)
 	if err != nil {
-		c.AbortWithStatusJSON(500, gin.H{"message": err.Error()})
+		c.AbortWithError(500, err)
 		return
 	}
 
@@ -168,19 +184,19 @@ func download(c *gin.Context) {
 	modelName := c.Query("model")
 	m := model.GetModelByName(modelName)
 	if m == nil {
-		c.AbortWithStatusJSON(404, gin.H{"message": fmt.Sprintf("Model: \"%s\" not found", modelName)})
+		c.AbortWithError(404, fmt.Errorf("Model: \"%s\" not found", modelName))
 		return
 	}
 
 	file := c.Query("path")
 	if file == "" {
-		c.AbortWithStatusJSON(404, gin.H{"message": "File not found"})
+		c.AbortWithError(404, fmt.Errorf("File not found"))
 		return
 	}
 
 	downloadURL, err := storage.Download(m.Config, file)
 	if err != nil || len(downloadURL) == 0 {
-		c.AbortWithStatusJSON(500, gin.H{"message": err.Error()})
+		c.AbortWithError(500, err)
 		return
 	}
 
