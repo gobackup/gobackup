@@ -32,6 +32,8 @@ var (
 
 	// The config file loaded at
 	UpdatedAt time.Time
+
+	onConfigChanges = make([]func(fsnotify.Event), 0)
 )
 
 type WebConfig struct {
@@ -133,10 +135,23 @@ func Init(configFile string) error {
 	viper.WatchConfig()
 	viper.OnConfigChange(func(in fsnotify.Event) {
 		logger.Info("Config file changed:", in.Name)
+		defer onConfigChanged(in)
 		loadConfig()
 	})
 
 	return loadConfig()
+}
+
+// OnConfigChange add callback when config changed
+func OnConfigChange(run func(in fsnotify.Event)) {
+	onConfigChanges = append(onConfigChanges, run)
+}
+
+// Invoke callbacks when config changed
+func onConfigChanged(in fsnotify.Event) {
+	for _, fn := range onConfigChanges {
+		fn(in)
+	}
 }
 
 func loadConfig() error {
