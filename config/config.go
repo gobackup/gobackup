@@ -12,6 +12,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 
+	"github.com/gobackup/gobackup/helper"
 	"github.com/gobackup/gobackup/logger"
 )
 
@@ -113,7 +114,9 @@ func Init(configFile string) error {
 
 	// set config file directly
 	if len(configFile) > 0 {
+		configFile = helper.AbsolutePath(configFile)
 		logger.Info("Load config:", configFile)
+
 		viper.SetConfigFile(configFile)
 	} else {
 		logger.Info("Load config from default path.")
