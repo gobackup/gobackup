@@ -1,55 +1,25 @@
-## Install the MinIO Server and Client
 
-Use can use [MinIO](https://min.io) for local development. It is a self-hosted S3-compatible object storage server.
+We are welcome to any contributions. Please read the following guides before you start.
 
-```bash
-brew install minio/stable/minio
-brew install minio/stable/mc
-```
+This document describes how to develop GoBackup.
 
-Start MinIO server:
+- gobackup_test.yml is a test configuration file for development.
+- tests/ folder contains some test for special cases.
 
-```bash
-minio server /tmp/minio
-```
+## Run tests
 
-And then visit http://localhost:9000 to see the MinIO browser.
+We have a `Makefile` provided some commands:
 
-The Admin user:
+- `make test` run unit test.
+- `make test:all` run all tests, this will execute test for `tests/` folder.
 
-- username: `minioadmin`
-- password: `minioadmin`
+## Guide for adding a new storage
 
-## Initialize a MinIO bucket
+- Add a new storage in `storages/` folder, you can follow the `storages/gcs.go` as an example.
+    - If the storage is a AWS S3 compatible storage, you can use `storages/s3.go` as a base.
+- Add a new test file in `tests/` folder, you can follow the `tests/oss.yml` as an example.
+    - Don't put your credentials in the test file, you can use environment variables to pass them.
 
-Now we need to create a bucket for testing, we will use the following credentials:
+## Storages development guides
 
-- Bucket: `gobackup-test`
-- AccessKeyId: `test-user`
-- SecretAccessKey: `test-user-secret`
-
-### Configure MinIO Client
-
-Config MinIO Client with a default alias: `minio`
-
-```bash
-mc config host add minio http://localhost:9000 minioadmin minioadmin
-```
-
-Create a Bucket
-
-```bash
-mc mb minio/gobackup-test
-```
-
-Add Test AccessKeyId and SecretAccessKey.
-
-With
-
-- access_key_id: `test-user`
-- secret_access_key: `test-user-secret`
-
-```bash
-mc admin user add minio test-user test-user-secret
-mc admin policy attach minio readwrite --user test-user
-```
+- [MinIO](./docs/development-for-minio.md)
