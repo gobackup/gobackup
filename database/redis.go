@@ -57,6 +57,11 @@ func (db *Redis) init() (err error) {
 	db.rdbPath = viper.GetString("rdb_path")
 	db.invokeSave = viper.GetBool("invoke_save")
 
+	// Force set invokeSave = false, when mode = copy
+	if viper.GetString("mode") == "copy" {
+		db.invokeSave = false
+	}
+
 	// socket
 	if len(db.socket) != 0 {
 		db.host = ""
