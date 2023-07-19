@@ -230,7 +230,11 @@ func (s *S3) open() (err error) {
 
 	s.bucket = s.viper.GetString("bucket")
 	s.path = s.viper.GetString("path")
-	s.storageClass = s.viper.GetString("storage_class")
+
+	// Only present storage_class when it is set.
+	if len(s.viper.GetString("storage_class")) > 0 {
+		s.storageClass = s.viper.GetString("storage_class")
+	}
 
 	timeout := s.viper.GetInt("timeout")
 	uploadTimeoutDuration := time.Duration(timeout) * time.Second
