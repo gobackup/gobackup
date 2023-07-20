@@ -1,0 +1,12 @@
+models:
+  test:
+    archive:
+      includes:
+        - /etc/hosts
+    storages:
+      oss:
+        type: upyun
+        bucket: gobackup-dev
+        path: backups
+        access_key_id: $UPYUN_ACCESS_KEY_ID
+        access_key_secret: $UPYUN_SECRET_ACCESS_KEY
