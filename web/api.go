@@ -80,7 +80,11 @@ func StartHTTP(version string) (err error) {
 	}
 
 	fe, _ := fs.Sub(staticFS, "dist")
-	r.Use(static.Serve("/", embedFileSystem{http.FS(fe), true}))
+	embedFs := embedFileSystem{http.FS(fe), true}
+	r.Use(static.Serve("/", embedFs))
+	r.NoRoute(func(c *gin.Context) {
+		c.FileFromFS("/", embedFs)
+	})
 
 	return r.Run(config.Web.Host + ":" + config.Web.Port)
 }
