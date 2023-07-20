@@ -65,6 +65,7 @@ https://gobackup.github.io
 - [MinIO](https://min.io)
 - [Huawei OBS](https://www.huaweicloud.com/intl/en-us/product/obs.html)
 - [Volcengine TOS](https://www.volcengine.com/product/tos)
+- [UpYun](https://upyun.com)
 - [WebDAV](http://www.webdav.org)
 
 ## Notifier
