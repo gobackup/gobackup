@@ -66,6 +66,8 @@ func (s S3) providerName() string {
 		return "Huawei OBS"
 	case "tos":
 		return "Volcengine TOS"
+	case "upyun":
+		return "UpYun"
 	}
 
 	return "AWS S3"
@@ -98,6 +100,9 @@ func (s S3) defaultRegion() string {
 	case "tos":
 		// https://www.volcengine.com/docs/6349/107356
 		return "cn-beijing"
+	case "upyun":
+		// UpYun does not support region
+		return "none"
 	}
 
 	return "us-east-1"
@@ -125,6 +130,8 @@ func (s S3) defaultEndpoint() *string {
 		return aws.String(fmt.Sprintf("obs.%s.myhuaweicloud.com", s.viper.GetString("region")))
 	case "tos":
 		return aws.String(fmt.Sprintf("tos-s3-%s.volces.com", s.viper.GetString("region")))
+	case "upyun":
+		return aws.String("s3.api.upyun.com")
 	}
 
 	return aws.String("")
@@ -166,6 +173,11 @@ func (s *S3) defaultStorageClass() string {
 		// https://www.volcengine.com/docs/6349/147050
 		// STANDARD, STANDARD_IA, GLACIER_IR
 		return "STANDARD_IA"
+	case "upyun":
+		// https://help.upyun.com/knowledge-base/s3-api
+		// UpYun API only support STANDARD, so keep this in empty.
+		// And they S3 API only support upload to STANDARD (普通) bucket, it will return 403 when the bucket type is STANDARD_IA (低频).
+		return ""
 	}
 
 	return ""

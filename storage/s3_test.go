@@ -61,6 +61,7 @@ func Test_providerName(t *testing.T) {
 		"oss":    {"Aliyun OSS", "oss-cn-hangzhou.aliyuncs.com", "cn-hangzhou", "STANDARD_IA", false},
 		"obs":    {"Huawei OBS", "obs.cn-north-1.myhuaweicloud.com", "cn-north-1", "STANDARD_IA", true},
 		"tos":    {"Volcengine TOS", "tos-s3-cn-beijing.volces.com", "cn-beijing", "STANDARD_IA", false},
+		"upyun":  {"UpYun", "s3.api.upyun.com", "none", "", true},
 		"minio":  {"MinIO", "", "us-east-1", "", true},
 	}
 
