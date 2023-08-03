@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/go-co-op/gocron"
 	"github.com/gobackup/gobackup/config"
 	superlogger "github.com/gobackup/gobackup/logger"
@@ -14,6 +15,12 @@ import (
 var (
 	mycron *gocron.Scheduler
 )
+
+func init() {
+	config.OnConfigChange(func(in fsnotify.Event) {
+		Restart()
+	})
+}
 
 // Start scheduler
 func Start() error {
@@ -66,6 +73,13 @@ func Start() error {
 	mycron.StartAsync()
 
 	return nil
+}
+
+func Restart() error {
+	logger := superlogger.Tag("Scheduler")
+	logger.Info("Reloading...")
+	Stop()
+	return Start()
 }
 
 func Stop() {

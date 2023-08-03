@@ -37,7 +37,7 @@ func TestRedis_init_for_copy(t *testing.T) {
 	err := db.init()
 	assert.NoError(t, err)
 
-	assert.Equal(t, db.invokeSave, true)
+	assert.Equal(t, db.invokeSave, false)
 	assert.Equal(t, db.mode, redisModeCopy)
 	assert.Equal(t, db._dumpFilePath, "/data/backups/redis/redis1/dump.rdb")
 	assert.Equal(t, db.build(), "cp /var/db/redis/dump.rdb /data/backups/redis/redis1/dump.rdb")

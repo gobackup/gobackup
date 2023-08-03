@@ -12,6 +12,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 
+	"github.com/gobackup/gobackup/helper"
 	"github.com/gobackup/gobackup/logger"
 )
 
@@ -31,6 +32,8 @@ var (
 
 	// The config file loaded at
 	UpdatedAt time.Time
+
+	onConfigChanges = make([]func(fsnotify.Event), 0)
 )
 
 type WebConfig struct {
@@ -113,7 +116,9 @@ func Init(configFile string) error {
 
 	// set config file directly
 	if len(configFile) > 0 {
+		configFile = helper.AbsolutePath(configFile)
 		logger.Info("Load config:", configFile)
+
 		viper.SetConfigFile(configFile)
 	} else {
 		logger.Info("Load config from default path.")
@@ -130,12 +135,25 @@ func Init(configFile string) error {
 	viper.WatchConfig()
 	viper.OnConfigChange(func(in fsnotify.Event) {
 		logger.Info("Config file changed:", in.Name)
+		defer onConfigChanged(in)
 		if err := loadConfig(); err != nil {
 			logger.Error(err.Error())
 		}
 	})
 
 	return loadConfig()
+}
+
+// OnConfigChange add callback when config changed
+func OnConfigChange(run func(in fsnotify.Event)) {
+	onConfigChanges = append(onConfigChanges, run)
+}
+
+// Invoke callbacks when config changed
+func onConfigChanged(in fsnotify.Event) {
+	for _, fn := range onConfigChanges {
+		fn(in)
+	}
 }
 
 func loadConfig() error {

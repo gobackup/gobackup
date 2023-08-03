@@ -43,3 +43,21 @@ func TestExplandHome(t *testing.T) {
 	newPath = ExplandHome("~/foo/bar/dar")
 	assert.Equal(t, newPath, path.Join(os.Getenv("HOME"), "/foo/bar/dar"))
 }
+
+func TestAbsolutePath(t *testing.T) {
+	pwd, _ := os.Getwd()
+	newPath := AbsolutePath("foo/bar")
+	assert.Equal(t, newPath, path.Join(pwd, "foo/bar"))
+
+	newPath = AbsolutePath("/home/jason/111")
+	assert.Equal(t, newPath, "/home/jason/111")
+
+	newPath = AbsolutePath("~")
+	assert.NotEqual(t, newPath[:2], "~/")
+
+	newPath = AbsolutePath("~/")
+	assert.NotEqual(t, newPath[:2], "~/")
+
+	newPath = AbsolutePath("~/foo/bar/dar")
+	assert.Equal(t, newPath, path.Join(os.Getenv("HOME"), "/foo/bar/dar"))
+}
