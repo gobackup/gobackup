@@ -145,7 +145,9 @@ func perform(c *gin.Context) {
 	}
 
 	var param performParam
-	c.Bind(&param)
+	if err := c.Bind(&param); err != nil {
+		logger.Errorf("Bind error: %v", err)
+	}
 
 	m := model.GetModelByName(param.Model)
 	if m == nil {
@@ -153,7 +155,11 @@ func perform(c *gin.Context) {
 		return
 	}
 
-	go m.Perform()
+	go func() {
+		if err := m.Perform(); err != nil {
+			logger.Errorf("Perform error: %v", err)
+		}
+	}()
 	c.JSON(200, gin.H{"message": fmt.Sprintf("Backup: %s performed in background.", param.Model)})
 }
 
@@ -220,7 +226,9 @@ func log(c *gin.Context) {
 				println(msg)
 			}
 
-			c.Writer.WriteString(msg + "\n")
+			if _, err := c.Writer.WriteString(msg + "\n"); err != nil {
+				logger.Errorf("Failed to write to stream: %v", err)
+			}
 			c.Writer.Flush()
 			return true
 		}
@@ -232,7 +240,9 @@ func tailFile() chan string {
 	out_chan := make(chan string)
 
 	file := fls.LineFile(logFile)
-	file.SeekLine(-50, io.SeekEnd)
+	if _, err := file.SeekLine(-50, io.SeekEnd); err != nil {
+		logger.Errorf("Failed to seek log file: %v", err)
+	}
 	bf := bufio.NewReader(file)
 
 	go func() {

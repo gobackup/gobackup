@@ -37,7 +37,9 @@ func (s *Local) upload(fileKey string) (err error) {
 
 	targetPath := path.Join(s.path, fileKey)
 	targetDir := path.Dir(targetPath)
-	helper.MkdirP(targetDir)
+	if err := helper.MkdirP(targetDir); err != nil {
+		logger.Errorf("failed to mkdir %q, %v", targetDir, err)
+	}
 
 	_, err = helper.Exec("cp", "-a", s.archivePath, targetPath)
 	if err != nil {

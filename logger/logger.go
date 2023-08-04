@@ -12,7 +12,7 @@ import (
 
 type Logger struct {
 	logFlag int
-	myLog   log.Logger
+	myLog   *log.Logger
 }
 
 var (
@@ -35,7 +35,10 @@ func (w writer) Write(b []byte) (n int, err error) {
 
 func init() {
 	if isTest {
-		os.MkdirAll("../log", 0777)
+		if err := os.MkdirAll("../log", 0777); err != nil {
+			log.Printf("create log dir failed: %v\n", err)
+		}
+
 		logfile, _ := os.OpenFile("../log/test.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 		_myLog = log.New(logfile, "", _logFlag)
 	}
@@ -50,7 +53,7 @@ func SetLogger(logPath string) {
 }
 
 func newLogger() Logger {
-	return Logger{_logFlag, *_myLog}
+	return Logger{_logFlag, _myLog}
 }
 
 func Tag(tag string) Logger {

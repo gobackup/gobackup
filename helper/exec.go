@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	spaceRegexp = regexp.MustCompile("[\\s]+")
+	spaceRegexp = regexp.MustCompile(`[\s]+`)
 )
 
 // Exec cli commands

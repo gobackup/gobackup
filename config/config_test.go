@@ -15,7 +15,9 @@ var (
 func init() {
 	os.Setenv("S3_ACCESS_KEY_ID", "xxxxxxxxxxxxxxxxxxxx")
 	os.Setenv("S3_SECRET_ACCESS_KEY", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-	Init(testConfigFile)
+	if err := Init(testConfigFile); err != nil {
+		panic(err.Error())
+	}
 }
 
 func TestModelsLength(t *testing.T) {
@@ -153,12 +155,14 @@ func TestInitWithNotExistsConfigFile(t *testing.T) {
 }
 
 func TestWatchConfigToReload(t *testing.T) {
-	Init(testConfigFile)
+	err := Init(testConfigFile)
+	assert.Nil(t, err)
+
 	lastUpdatedAt := UpdatedAt.UnixNano()
 	time.Sleep(1 * time.Millisecond)
 
 	// Touch `testConfigFile` to trigger file changes event
-	err := updateFile(testConfigFile)
+	err = updateFile(testConfigFile)
 	assert.Nil(t, err)
 
 	// Wait for reload

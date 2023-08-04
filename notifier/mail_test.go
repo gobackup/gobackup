@@ -17,7 +17,8 @@ func Test_Mail(t *testing.T) {
 	base.viper.Set("password", "this-is-password")
 	base.viper.Set("host", "smtp.myhost.com")
 
-	mail := NewMail(&base)
+	mail, err := NewMail(&base)
+	assert.Nil(t, err)
 
 	assert.Equal(t, "user@myhost.com", mail.from)
 	assert.Equal(t, []string{"to@myhost.com", "to1@myhost.com"}, mail.to)
@@ -34,7 +35,9 @@ func Test_Mail(t *testing.T) {
 	base.viper.Set("from", "from@myhost.com")
 	base.viper.Set("port", "587")
 
-	mail = NewMail(&base)
+	mail, err = NewMail(&base)
+	assert.Nil(t, err)
+
 	assert.Equal(t, "from@myhost.com", mail.from)
 	assert.Equal(t, "587", mail.port)
 	assert.Equal(t, "smtp.myhost.com:587", mail.getAddr())

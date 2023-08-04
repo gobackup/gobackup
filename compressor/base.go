@@ -3,7 +3,7 @@ package compressor
 import (
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/gobackup/gobackup/config"
@@ -26,7 +26,7 @@ type Compressor interface {
 }
 
 func (c *Base) archiveFilePath(ext string) string {
-	return path.Join(c.model.TempPath, time.Now().Format("2006.01.02.15.04.05")+ext)
+	return filepath.Join(c.model.TempPath, time.Now().Format("2006.01.02.15.04.05")+ext)
 }
 
 func newBase(model config.ModelConfig) (base Base) {
@@ -38,8 +38,8 @@ func newBase(model config.ModelConfig) (base Base) {
 	return
 }
 
-// Run compressor
-func Run(model config.ModelConfig) (archivePath string, err error) {
+// Run compressor, return archive path
+func Run(model config.ModelConfig) (string, error) {
 	logger := logger.Tag("Compressor")
 
 	base := newBase(model)
@@ -72,8 +72,7 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 		ext = ".tar"
 		model.CompressWith.Type = "tar"
 	default:
-		err = fmt.Errorf("Unsupported compress type: %s", model.CompressWith.Type)
-		return
+		return "", fmt.Errorf("Unsupported compress type: %s", model.CompressWith.Type)
 	}
 
 	// save Extension
@@ -86,12 +85,15 @@ func Run(model config.ModelConfig) (archivePath string, err error) {
 	logger.Info("=> Compress | " + model.CompressWith.Type)
 
 	// set workdir
-	os.Chdir(path.Join(model.DumpPath, "../"))
-	archivePath, err = c.perform()
+	if err := os.Chdir(filepath.Join(model.DumpPath, "../")); err != nil {
+		return "", fmt.Errorf("chdir to dump path: %s: %w", model.DumpPath, err)
+	}
+
+	archivePath, err := c.perform()
 	if err != nil {
-		return
+		return "", err
 	}
 	logger.Info("->", archivePath)
 
-	return
+	return archivePath, nil
 }

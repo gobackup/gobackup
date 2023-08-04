@@ -13,7 +13,9 @@ import (
 )
 
 func init() {
-	config.Init("../gobackup_test.yml")
+	if err := config.Init("../gobackup_test.yml"); err != nil {
+		panic(err.Error())
+	}
 }
 
 func assertMatchJSON(t *testing.T, expected map[string]any, actual string) {

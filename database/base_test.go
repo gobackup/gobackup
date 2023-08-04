@@ -9,7 +9,9 @@ import (
 )
 
 func init() {
-	config.Init("../gobackup_test.yml")
+	if err := config.Init("../gobackup_test.yml"); err != nil {
+		panic(err.Error())
+	}
 }
 
 type Monkey struct {
