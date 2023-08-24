@@ -178,7 +178,7 @@ func loadConfig() error {
 
 	logger.Info("Config file:", viperConfigFile)
 
-	// load .env if exists in the same direcotry of used config file and expand variables in the config
+	// load .env if exists in the same directory of used config file and expand variables in the config
 	dotEnv := filepath.Join(filepath.Dir(viperConfigFile), ".env")
 	if _, err := os.Stat(dotEnv); err == nil {
 		if err := godotenv.Load(dotEnv); err != nil {
