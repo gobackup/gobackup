@@ -12,7 +12,7 @@ get_latest_release() {
     awk 'BEGIN{FS=": |,|\""}; /tag_name/{print $5}'
 }
 
-repo="gobackup/gobackup"
+repo="ibadarrohman/gobackup"
 version="$(get_latest_release "${repo}")"  # v1.2.0
 
 # if args has version override it and not eq "latest"

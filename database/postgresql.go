@@ -60,8 +60,14 @@ func (db *PostgreSQL) init() (err error) {
 	if len(db.database) == 0 {
 		return fmt.Errorf("PostgreSQL database config is required")
 	}
-
-	db._dumpFilePath = path.Join(db.dumpPath, db.database+".sql")
+	if (len(db.excludeTables) > 0 || len(db.tables) > 0) && db.database == ":all" {
+		return fmt.Errorf("Invalid config: tables and exclude_tables can't be used with database: :all")
+	}
+	if db.database == ":all" {
+		db._dumpFilePath = path.Join(db.dumpPath, "all.sql")
+	} else {
+		db._dumpFilePath = path.Join(db.dumpPath, db.database+".sql")
+	}
 
 	// socket
 	if len(db.socket) != 0 {
@@ -104,10 +110,15 @@ func (db *PostgreSQL) build() string {
 		dumpArgs = append(dumpArgs, db.args)
 	}
 
-	dumpArgs = append(dumpArgs, db.database)
 	dumpArgs = append(dumpArgs, "-f", db._dumpFilePath)
 
-	return "pg_dump " + strings.Join(dumpArgs, " ")
+	var dumpCommand string
+	if db.database == ":all" {
+		dumpCommand = "pg_dumpall"
+	} else {
+		dumpCommand = "pg_dump"
+	}
+	return dumpCommand + strings.Join(dumpArgs, " ")
 }
 
 func (db *PostgreSQL) perform() error {
