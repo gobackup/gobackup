@@ -12,11 +12,15 @@
 
 GoBackup is a backup tool design for application servers, to backup your databases, files to cloud storages (FTP, SCP, S3, GCS, Aliyun OSS ...) in schedully.
 
+Simple, easy to use, one time setup, run years without any maintenance, low cost (recycle), secure (encrypt compress).
+
 > Inspired by [backup/backup](https://github.com/backup/backup) and replace it for without Ruby dependency.
 
 [![asciicast](https://asciinema.org/a/543564.svg)](https://asciinema.org/a/543564)
 
 GoBackup 是一个为中小型服务器而设计备份工具，内置计划任务，帮你定时备份数据库、配置文件，通过导出、打包压缩，最终存储到外部云存储（如：FTP、SCP、S3、GCS、Aliyun OSS ...）。
+
+简单易用，一次性部署后能持续运行数年无需任何维护，存储成本低（回收机制），安全可靠（加密压缩）。
 
 https://gobackup.github.io
 
