@@ -22,7 +22,7 @@ GoBackup 是一个为中小型服务器而设计备份工具，内置计划任�
 
 简单易用，一次性部署后能持续运行数年无需任何维护，存储成本低（回收机制），安全可靠（加密压缩）。
 
-> 🎈 [Ruby China](https://ruby-china.org) 的应用服务器从 GoBackup 设计之初（2017 年）开始就每日全量备份到外部的云存储，并持续数年一直默默的备份着，完全不需要维护。
+> 🎈 [Ruby China](https://ruby-china.org) 的应用服务器从 GoBackup 设计之初（2017 年）开始就每日全量备份到外部的云存储，并持续数年一直默默的备份着，完全不需要维护。Aliyun OSS 上，每月成本仅为 0.2 RMB（文件回收周期为 1 个月）。
 
 https://gobackup.github.io
 
