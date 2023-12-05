@@ -8,18 +8,8 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
-// MongoDB database
-//
-// type: mongodb
-// host: 127.0.0.1
-// port: 27017
-// database:
-// username:
-// password:
-// authdb:
-// exclude_tables:
-// oplog: false
-// args:
+// InfluxDB v2 database through `influx` cli
+// See https://docs.influxdata.com/influxdb/v2/reference/cli/influx/backup/
 type InfluxDB2 struct {
 	Base
 	host       string
@@ -44,12 +34,13 @@ func (db *InfluxDB2) init() (err error) {
 	db.org = viper.GetString("org")
 	db.orgId = viper.GetString("orgId")
 	db.skipVerify = viper.GetBool("skipVerify")
+	db.httpDebug = viper.GetBool("httpDebug")
 
 	if db.host == "" {
-		return fmt.Errorf("no host specified in influxdb2 configuration: %s", db.name)
+		return fmt.Errorf("no host specified in influxdb2 configuration '%s'", db.name)
 	}
 	if db.token == "" {
-		return fmt.Errorf("no token specified in influxdb2 configuration: %s", db.name)
+		return fmt.Errorf("no token specified in influxdb2 configuration '%s'", db.name)
 	}
 
 	return nil
