@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/gobackup/gobackup/helper"
 	"github.com/gobackup/gobackup/logger"
@@ -46,38 +45,38 @@ func (db *InfluxDB2) init() (err error) {
 	return nil
 }
 
-func (db *InfluxDB2) build() string {
-	opts := make([]string, 0, 15)
-	opts = append(opts, "influx backup")
-	opts = append(opts, "--host="+db.host+"")
-	opts = append(opts, "--token="+db.token+"")
+func (db *InfluxDB2) influxCliArguments() []string {
+	args := make([]string, 0, 15)
+	args = append(args, "backup")
+	args = append(args, "--host="+db.host+"")
+	args = append(args, "--token="+db.token+"")
 	if db.bucket != "" {
-		opts = append(opts, "--bucket="+db.bucket+"")
+		args = append(args, "--bucket="+db.bucket+"")
 	}
 	if db.bucketId != "" {
-		opts = append(opts, "--bucket-id="+db.bucketId+"")
+		args = append(args, "--bucket-id="+db.bucketId+"")
 	}
 	if db.org != "" {
-		opts = append(opts, "--org="+db.org+"")
+		args = append(args, "--org="+db.org+"")
 	}
 	if db.orgId != "" {
-		opts = append(opts, "--org-id="+db.orgId+"")
+		args = append(args, "--org-id="+db.orgId+"")
 	}
 	if db.skipVerify {
-		opts = append(opts, "--skip-verify")
+		args = append(args, "--skip-verify")
 	}
 	if db.httpDebug {
-		opts = append(opts, "--http-debug")
+		args = append(args, "--http-debug")
 	}
-	opts = append(opts, db.dumpPath)
-	return strings.Join(opts, " ")
+	args = append(args, db.dumpPath)
+	return args
 }
 
 func (db *InfluxDB2) perform() error {
 	logger := logger.Tag("InfluxDB2")
 
-	command := db.build()
-	out, err := helper.Exec(command)
+	args := db.influxCliArguments()
+	out, err := helper.Exec("influx", args...)
 	if err != nil {
 		return fmt.Errorf("-> Dump error: %s", err)
 	}

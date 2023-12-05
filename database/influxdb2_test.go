@@ -37,7 +37,7 @@ func TestInfluxDB2_init(t *testing.T) {
 	assert.EqualError(t, err2, "no token specified in influxdb2 configuration 'influxdb-v2-oss'")
 }
 
-func TestInfluxDB2_build(t *testing.T) {
+func TestInfluxDB2_influxCliArguments(t *testing.T) {
 	viper := viper.New()
 	viper.Set("host", "http://localhost:8086")
 	viper.Set("token", "my-token")
@@ -66,5 +66,7 @@ func TestInfluxDB2_build(t *testing.T) {
 
 	err := db.init()
 	assert.NoError(t, err)
-	assert.Equal(t, db.build(), "influx backup --host=http://localhost:8086 --token=my-token --bucket=my-bucket --bucket-id=my-bucket-id --org=my-org --org-id=my-org-id --skip-verify --http-debug /data/backups/influxdb2/influxdb-v2-oss")
+	assert.Equal(t, db.influxCliArguments(), []string{"backup",
+		"--host=http://localhost:8086", "--token=my-token", "--bucket=my-bucket", "--bucket-id=my-bucket-id",
+		"--org=my-org", "--org-id=my-org-id", "--skip-verify", "--http-debug", "/data/backups/influxdb2/influxdb-v2-oss"})
 }
