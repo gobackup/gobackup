@@ -23,17 +23,17 @@ type InfluxDB2 struct {
 
 func (db *InfluxDB2) init() (err error) {
 	viper := db.viper
-	viper.SetDefault("skipVerify", false)
-	viper.SetDefault("httpDebug", false)
+	viper.SetDefault("skip_verify", false)
+	viper.SetDefault("http_debug", false)
 
 	db.host = viper.GetString("host")
 	db.token = viper.GetString("token")
 	db.bucket = viper.GetString("bucket")
-	db.bucketId = viper.GetString("bucketId")
+	db.bucketId = viper.GetString("bucket_id")
 	db.org = viper.GetString("org")
-	db.orgId = viper.GetString("orgId")
-	db.skipVerify = viper.GetBool("skipVerify")
-	db.httpDebug = viper.GetBool("httpDebug")
+	db.orgId = viper.GetString("org_id")
+	db.skipVerify = viper.GetBool("skip_verify")
+	db.httpDebug = viper.GetBool("http_debug")
 
 	if db.host == "" {
 		return fmt.Errorf("no host specified in influxdb2 configuration '%s'", db.name)

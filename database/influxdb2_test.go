@@ -42,11 +42,11 @@ func TestInfluxDB2_influxCliArguments(t *testing.T) {
 	viper.Set("host", "http://localhost:8086")
 	viper.Set("token", "my-token")
 	viper.Set("org", "my-org")
-	viper.Set("orgId", "my-org-id")
+	viper.Set("org_id", "my-org-id")
 	viper.Set("bucket", "my-bucket")
-	viper.Set("bucketId", "my-bucket-id")
-	viper.Set("httpDebug", true)
-	viper.Set("skipVerify", true)
+	viper.Set("bucket_id", "my-bucket-id")
+	viper.Set("http_debug", true)
+	viper.Set("skip_verify", true)
 
 	base := newBase(
 		config.ModelConfig{
