@@ -44,6 +44,7 @@ https://gobackup.github.io
 - MongoDB
 - SQLite
 - Microsoft SQL Server
+- InfluxDB
 
 ### Storages
 
