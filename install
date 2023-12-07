@@ -25,7 +25,7 @@ if test $# -eq 1; then
 fi
 
 platform="$(uname | tr "[A-Z]" "[a-z]")"  # Linux => linux
-arch="$(uname -m | sed 's/x86_64/amd64/')"  # x86_64 => amd64
+arch="$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" # x86_64 => amd64, aarch64 => arm64
 package="gobackup-${platform}-${arch}.tar.gz"
 package_url="https://github.com/${repo}/releases/download/${version}/${package}"
 bin="gobackup"
