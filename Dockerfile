@@ -26,6 +26,8 @@ RUN apk add \
   libstdc++ \
   gcompat \
   icu \
+  # support change timezone
+  tzdata \
   && \
   rm -rf /var/cache/apk/*
 
