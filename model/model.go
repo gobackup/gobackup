@@ -6,7 +6,6 @@ import (
 
 	"github.com/spf13/viper"
 
-	"github.com/gobackup/gobackup/archive"
 	"github.com/gobackup/gobackup/compressor"
 	"github.com/gobackup/gobackup/config"
 	"github.com/gobackup/gobackup/database"
@@ -48,13 +47,6 @@ func (m Model) Perform() (err error) {
 	err = database.Run(m.Config)
 	if err != nil {
 		return
-	}
-
-	if m.Config.Archive != nil {
-		err = archive.Run(m.Config)
-		if err != nil {
-			return
-		}
 	}
 
 	// It always to use compressor, default use tar, even not enable compress.
