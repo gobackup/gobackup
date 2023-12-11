@@ -63,6 +63,11 @@ func (m Model) Perform() (err error) {
 		return
 	}
 
+	logger.Infof("Cleanup WorkDir: %s/", m.Config.DumpPath)
+	if err := os.RemoveAll(m.Config.DumpPath); err != nil {
+		logger.Errorf("Cleanup temp dir %s error: %v", m.Config.DumpPath, err)
+	}
+
 	archivePath, err = encryptor.Run(archivePath, m.Config)
 	if err != nil {
 		return
