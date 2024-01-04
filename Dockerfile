@@ -39,6 +39,23 @@ RUN wget https://aka.ms/sqlpackage-linux && \
 
 ENV PATH="${PATH}:/opt/sqlpackage"
 
+# Install the influx CLI
+ARG INFLUX_CLI_VERSION=2.7.3
+RUN case "$(uname -m)" in \
+      x86_64) arch=amd64 ;; \
+      aarch64) arch=arm64 ;; \
+      *) echo 'Unsupported architecture' && exit 1 ;; \
+    esac && \
+    curl -fLO "https://dl.influxdata.com/influxdb/releases/influxdb2-client-${INFLUX_CLI_VERSION}-linux-${arch}.tar.gz" \
+         -fLO "https://dl.influxdata.com/influxdb/releases/influxdb2-client-${INFLUX_CLI_VERSION}-linux-${arch}.tar.gz.asc" && \
+    tar xzf "influxdb2-client-${INFLUX_CLI_VERSION}-linux-${arch}.tar.gz" && \
+    cp influx /usr/local/bin/influx && \
+    rm -rf "influxdb2-client-${INFLUX_CLI_VERSION}-linux-${arch}" \
+           "influxdb2-client-${INFLUX_CLI_VERSION}-linux-${arch}.tar.gz" \
+           "influxdb2-client-${INFLUX_CLI_VERSION}-linux-${arch}.tar.gz.asc" \
+           "influx" && \
+    influx version
+
 ADD install /install
 RUN /install ${VERSION} && rm /install
 
