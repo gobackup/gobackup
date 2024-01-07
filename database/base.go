@@ -84,6 +84,8 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 	switch dbConfig.Type {
 	case "mysql":
 		db = &MySQL{Base: base}
+	case "mariadb":
+		db = &MariaDB{Base: base}
 	case "redis":
 		db = &Redis{Base: base}
 	case "postgresql":
