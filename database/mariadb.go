@@ -95,7 +95,7 @@ func (db *MariaDB) build() string {
 		databasesfile := path.Join(db.dumpPath, "databases-file.txt")
 		err := createdatabasesfile(databasesfile, db.databases)
 		if err != nil {
-			return fmt.Errorf("-> Dump error: %s", err)
+			logger.Error("-> Dump error: %s", err)
 		}
 		dumpArgs = append(dumpArgs, "--databases-file=" + databasesfile)
 	}
