@@ -3,8 +3,6 @@ package database
 import (
 	"fmt"
 	"strings"
-	"os"
-	"path"
 
 	"github.com/gobackup/gobackup/helper"
 	"github.com/gobackup/gobackup/logger"
@@ -16,7 +14,7 @@ import (
 // host: 127.0.0.1
 // port: 3306
 // socket:
-// databases:
+// database:
 // username: root
 // password:
 // args:
@@ -26,7 +24,7 @@ type MariaDB struct {
 	host          		string
 	port          		string
 	socket        		string
-	databases     		[]string
+	database     		string
 	username      		string
 	password      		string
 	args          		string
@@ -41,7 +39,7 @@ func (db *MariaDB) init() (err error) {
 	db.host = viper.GetString("host")
 	db.port = viper.GetString("port")
 	db.socket = viper.GetString("socket")
-	db.databases = viper.GetStringSlice("databases")
+	db.database = viper.GetString("database")
 	db.username = viper.GetString("username")
 	db.password = viper.GetString("password")
 
@@ -55,21 +53,10 @@ func (db *MariaDB) init() (err error) {
 		db.port = ""
 	}
 
-	return nil
-}
+	if len(db.database) == 0 {
+		return fmt.Errorf("mariadb database config is required")
+	}
 
-func createdatabasesfile(databasesfile string, databases []string) error {
-	file, err := os.Create(databasesfile)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	for _, database := range databases {
-		_, err := file.WriteString(database + "\n")
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
@@ -91,21 +78,13 @@ func (db *MariaDB) build() string {
 		dumpArgs = append(dumpArgs, `-p`+db.password)
 	}
 
-	if len(db.databases) > 0 {
-		databasesfile := path.Join(db.dumpPath, "databases-file.txt")
-		err := createdatabasesfile(databasesfile, db.databases)
-		if err != nil {
-			logger.Error("-> Dump error: ", err)
-		}
-		dumpArgs = append(dumpArgs, "--databases-file=" + databasesfile)
-	}
-
 	if len(db.args) > 0 {
 		dumpArgs = append(dumpArgs, db.args)
 	}
-
+	dumpArgs = append(dumpArgs, "--databases="+db.database)
 	dumpArgs = append(dumpArgs, "--target-dir="+db.dumpPath)
-	return "mariadb-backup --backup" + " " + strings.Join(dumpArgs, " ")
+
+	return "mariadb-backup --backup " + strings.Join(dumpArgs, " ")
 }
 
 func (db *MariaDB) perform() error {
