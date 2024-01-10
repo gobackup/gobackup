@@ -53,10 +53,6 @@ func (db *MariaDB) init() (err error) {
 		db.port = ""
 	}
 
-	if len(db.database) == 0 {
-		return fmt.Errorf("mariadb database config is required")
-	}
-
 	return nil
 }
 
@@ -81,7 +77,9 @@ func (db *MariaDB) build() string {
 	if len(db.args) > 0 {
 		dumpArgs = append(dumpArgs, db.args)
 	}
-	dumpArgs = append(dumpArgs, "--databases="+db.database)
+	if len(db.database) > 0 {
+		dumpArgs = append(dumpArgs, "--databases="+db.database)
+	}
 	dumpArgs = append(dumpArgs, "--target-dir="+db.dumpPath)
 
 	return "mariadb-backup --backup " + strings.Join(dumpArgs, " ")
