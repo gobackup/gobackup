@@ -7,6 +7,7 @@ RUN apk add \
   postgresql-client \
   mariadb-connector-c \
   mysql-client \
+  mariadb-backup \
   redis \
   mongodb-tools \
   sqlite \
