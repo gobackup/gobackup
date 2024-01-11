@@ -40,11 +40,12 @@ https://gobackup.github.io
 
 - MySQL
 - PostgreSQL
-- Redis - `mode: sync/copy`
+- Redis
 - MongoDB
 - SQLite
 - Microsoft SQL Server
 - InfluxDB
+- MariaDB
 
 ### Storages
 
