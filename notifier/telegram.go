@@ -18,8 +18,12 @@ func NewTelegram(base *Base) *Webhook {
 		contentType: "application/json",
 		buildWebhookURL: func(url string) (string, error) {
 			token := base.viper.GetString("token")
+			endpoint := "api.telegram.org"
+			if base.viper.IsSet("endpoint") {
+				endpoint = base.viper.GetString("endpoint")
+			}
 
-			return fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", token), nil
+			return fmt.Sprintf("https://%s/bot%s/sendMessage", endpoint, token), nil
 		},
 		buildBody: func(title, message string) ([]byte, error) {
 			chat_id := base.viper.GetString("chat_id")
