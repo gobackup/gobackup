@@ -27,3 +27,12 @@ func CleanHost(host string) string {
 
 	return host
 }
+
+// FormatEndpoint to add `https://` prefix if not present
+func FormatEndpoint(endpoint string) string {
+	if !strings.HasPrefix(endpoint, "http") {
+		endpoint = "https://" + endpoint
+	}
+
+	return endpoint
+}

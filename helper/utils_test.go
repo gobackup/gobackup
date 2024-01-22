@@ -21,3 +21,9 @@ func TestCleanHost(t *testing.T) {
 	assert.Equal(t, "foo.bar.com", CleanHost("http://foo.bar.com"))
 	assert.Equal(t, "", CleanHost("http://"))
 }
+
+func TestFormatEndpoint(t *testing.T) {
+	assert.Equal(t, "http://foo.bar.com", FormatEndpoint("http://foo.bar.com"))
+	assert.Equal(t, "https://foo.bar.com", FormatEndpoint("https://foo.bar.com"))
+	assert.Equal(t, "https://foo.bar.com", FormatEndpoint("https://foo.bar.com"))
+}
