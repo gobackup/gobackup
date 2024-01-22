@@ -18,6 +18,10 @@ var (
 
 // Exec cli commands
 func Exec(command string, args ...string) (output string, err error) {
+	return ExecWithStdio(command, false, args...)
+}
+
+func ExecWithStdio(command string, stdout bool, args ...string) (output string, err error) {
 	commands := spaceRegexp.Split(command, -1)
 	command = commands[0]
 	commandArgs := []string{}
@@ -37,17 +41,21 @@ func Exec(command string, args ...string) (output string, err error) {
 	cmd.Env = os.Environ()
 
 	var stdErr bytes.Buffer
+	var stdOut bytes.Buffer
 	cmd.Stderr = &stdErr
 
-	// logger.Debug(fullCommand, " ", strings.Join(commandArgs, " "))
+	if stdout {
+		cmd.Stdout = os.Stdout
+	} else {
+		cmd.Stdout = &stdOut
+	}
 
-	out, err := cmd.Output()
+	err = cmd.Run()
 	if err != nil {
 		logger.Debug(fullCommand, " ", strings.Join(commandArgs, " "))
 		err = errors.New(stdErr.String())
-		return
 	}
+	output = strings.Trim(stdOut.String(), "\n")
 
-	output = strings.Trim(string(out), "\n")
 	return
 }
