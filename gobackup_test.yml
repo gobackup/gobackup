@@ -129,6 +129,10 @@ models:
       type: openssl
       password: 123456
     notifiers:
+    before_script: |
+      echo "before_script invoked."
+    after_script: |
+      echo "after_script invoked."
     storages:
       local:
         type: local

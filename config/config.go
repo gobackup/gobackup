@@ -87,6 +87,8 @@ type ModelConfig struct {
 	DefaultStorage string
 	Notifiers      map[string]SubConfig
 	Viper          *viper.Viper
+	BeforeScript   string
+	AfterScript    string
 }
 
 func getGoBackupDir() string {
@@ -218,7 +220,7 @@ func loadConfig() error {
 	}
 
 	if len(Models) == 0 {
-		return fmt.Errorf("No model found in %s", viperConfigFile)
+		return fmt.Errorf("no model found in %s", viperConfigFile)
 	}
 
 	// Load web config
@@ -263,12 +265,15 @@ func loadModel(key string) (ModelConfig, error) {
 	model.Archive = model.Viper.Sub("archive")
 	model.Splitter = model.Viper.Sub("split_with")
 
+	model.BeforeScript = model.Viper.GetString("before_script")
+	model.AfterScript = model.Viper.GetString("after_script")
+
 	loadScheduleConfig(&model)
 	loadDatabasesConfig(&model)
 	loadStoragesConfig(&model)
 
 	if len(model.Storages) == 0 {
-		return ModelConfig{}, fmt.Errorf("No storage found in model %s", model.Name)
+		return ModelConfig{}, fmt.Errorf("no storage found in model %s", model.Name)
 	}
 
 	loadNotifiersConfig(&model)

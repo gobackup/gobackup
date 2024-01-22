@@ -11,6 +11,7 @@ import (
 	"github.com/gobackup/gobackup/config"
 	"github.com/gobackup/gobackup/database"
 	"github.com/gobackup/gobackup/encryptor"
+	"github.com/gobackup/gobackup/helper"
 	"github.com/gobackup/gobackup/logger"
 	"github.com/gobackup/gobackup/notifier"
 	"github.com/gobackup/gobackup/splitter"
@@ -26,6 +27,8 @@ type Model struct {
 func (m Model) Perform() (err error) {
 	logger := logger.Tag(fmt.Sprintf("Model: %s", m.Config.Name))
 
+	m.before()
+
 	defer func() {
 		if err != nil {
 			logger.Error(err)
@@ -39,10 +42,10 @@ func (m Model) Perform() (err error) {
 
 	defer func() {
 		if r := recover(); r != nil {
-			m.cleanup()
+			m.after()
 		}
 
-		m.cleanup()
+		m.after()
 	}()
 
 	err = database.Run(m.Config)
@@ -81,8 +84,19 @@ func (m Model) Perform() (err error) {
 	return nil
 }
 
+func (m Model) before() {
+	// Execute before_script
+	if len(m.Config.BeforeScript) > 0 {
+		logger.Info("Executing before_script...")
+		_, err := helper.ExecWithStdio(m.Config.BeforeScript, true)
+		if err != nil {
+			logger.Error(err)
+		}
+	}
+}
+
 // Cleanup model temp files
-func (m Model) cleanup() {
+func (m Model) after() {
 	logger := logger.Tag("Model")
 
 	tempDir := m.Config.TempPath
@@ -92,6 +106,15 @@ func (m Model) cleanup() {
 	logger.Infof("Cleanup temp: %s/", tempDir)
 	if err := os.RemoveAll(tempDir); err != nil {
 		logger.Errorf("Cleanup temp dir %s error: %v", tempDir, err)
+	}
+
+	// Execute after_script
+	if len(m.Config.AfterScript) > 0 {
+		logger.Info("Executing after_script...")
+		_, err := helper.ExecWithStdio(m.Config.AfterScript, true)
+		if err != nil {
+			logger.Error(err)
+		}
 	}
 }
 
