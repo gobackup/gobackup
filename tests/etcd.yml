@@ -1,0 +1,14 @@
+models:
+  test:
+    schedule:
+      every: "10s"
+    storages:
+      local:
+        type: local
+        keep: 10
+        path: /tmp/gobackup
+    databases:
+      etcd-test:
+        type: etcd
+        endpoints:
+          - 127.0.0.1:2379
