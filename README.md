@@ -46,6 +46,7 @@ https://gobackup.github.io
 - Microsoft SQL Server
 - InfluxDB
 - MariaDB
+- etcd
 
 ### Storages
 
