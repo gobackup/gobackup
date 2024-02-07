@@ -114,6 +114,14 @@ type SubConfig struct {
 func Init(configFile string) error {
 	logger := logger.Tag("Config")
 
+	if _, err := os.Stat(GoBackupDir); os.IsNotExist(err) {
+		// Directory does not exist, so create it
+		err = os.MkdirAll(GoBackupDir, os.ModePerm) // 0755 permissions
+		if err != nil {
+			logger.Fatal(err)
+		}
+	}
+
 	viper.SetConfigType("yaml")
 
 	// set config file directly

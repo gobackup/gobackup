@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime"
 	"syscall"
 
 	"github.com/sevlyar/go-daemon"
@@ -67,6 +68,11 @@ func main() {
 	daemon.AddCommand(daemon.StringFlag(signal, "stop"), syscall.SIGTERM, termHandler)
 	daemon.AddCommand(daemon.StringFlag(signal, "reload"), syscall.SIGHUP, reloadHandler)
 
+	err := initApplication()
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
+
 	app.Commands = []*cli.Command{
 		{
 			Name: "perform",
@@ -79,10 +85,6 @@ func main() {
 			}),
 			Action: func(ctx *cli.Context) error {
 				var modelNames []string
-				err := initApplication()
-				if err != nil {
-					return err
-				}
 				modelNames = append(ctx.StringSlice("model"), ctx.Args().Slice()...)
 				return perform(modelNames)
 			},
@@ -106,6 +108,10 @@ func main() {
 					Args:        args,
 				}
 
+				// check if we're running on windows
+				if runtime.GOOS == "windows" {
+					fmt.Println("You can see how to run GoBackup as a service on Windows here: https://github.com/gobackup/gobackup/blob/main/docs/windows-service.md")
+				}
 				d, err := dm.Reborn()
 				if err != nil {
 					return fmt.Errorf("start failed, please check is there another instance running: %w", err)
@@ -116,11 +122,6 @@ func main() {
 				defer dm.Release() //nolint:errcheck
 
 				logger.SetLogger(config.LogFilePath)
-
-				err = initApplication()
-				if err != nil {
-					return err
-				}
 
 				if err := scheduler.Start(); err != nil {
 					return fmt.Errorf("failed to start scheduler: %w", err)
@@ -135,11 +136,6 @@ func main() {
 			Flags: buildFlags([]cli.Flag{}),
 			Action: func(ctx *cli.Context) error {
 				logger.SetLogger(config.LogFilePath)
-
-				err := initApplication()
-				if err != nil {
-					return err
-				}
 
 				if err := scheduler.Start(); err != nil {
 					return fmt.Errorf("failed to start scheduler: %w", err)
