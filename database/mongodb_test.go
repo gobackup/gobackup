@@ -42,6 +42,11 @@ func TestMongoDB_init(t *testing.T) {
 
 	assert.Equal(t, db.build(), "mongodump --db=my_db --username=user1 --password=pass1 --authenticationDatabase=sssbbb --host=1.2.3.4 --port=1234 --oplog --excludeCollection=aa --excludeCollection=bb --foo --bar --dar --out=/data/backups/mongodb/mongodb1")
 
+	viper.Set("uri", "mongodb://user1:pass1@1:2:3:4:1234/my_db?authSource=sssbbb")
+	viper.Set("oplog", false)
+	err = db.init()
+	assert.NoError(t, err)
+	assert.Equal(t, db.build(), "mongodump --uri=mongodb://user1:pass1@1:2:3:4:1234/my_db?authSource=sssbbb --excludeCollection=aa --excludeCollection=bb --foo --bar --dar --out=/data/backups/mongodb/mongodb1")
 }
 
 func TestMongoDB_credentialOptions(t *testing.T) {
@@ -95,4 +100,11 @@ func TestMongoDB_mongodump(t *testing.T) {
 		args:     "--collection foo --gzip",
 	}
 	assert.Equal(t, db.build(), "mongodump --db=hello --username=foo --password=bar --authenticationDatabase=sssbbb --host=127.0.0.1 --port=4567 --oplog --collection foo --gzip --out=/tmp/gobackup/test")
+
+	db = &MongoDB{
+		Base:          base,
+		uri:           "mongodb://foo:bar@127:0:0:1:4567/hello?authSource=sssbbb",
+		excludeTables: []string{"aa", "bb"},
+	}
+	assert.Equal(t, db.build(), "mongodump --uri=mongodb://foo:bar@127:0:0:1:4567/hello?authSource=sssbbb --excludeCollection=aa --excludeCollection=bb --out=/tmp/gobackup/test")
 }

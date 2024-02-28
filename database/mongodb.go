@@ -11,6 +11,7 @@ import (
 // MongoDB database
 //
 // type: mongodb
+// uri: mongodb://username:password@host:port/database?authSource=database
 // host: 127.0.0.1
 // port: 27017
 // database:
@@ -22,6 +23,7 @@ import (
 // args:
 type MongoDB struct {
 	Base
+	uri           string
 	host          string
 	port          string
 	database      string
@@ -43,6 +45,7 @@ func (db *MongoDB) init() (err error) {
 	viper.SetDefault("host", "127.0.0.1")
 	viper.SetDefault("port", 27017)
 
+	db.uri = viper.GetString("uri")
 	db.host = viper.GetString("host")
 	db.port = viper.GetString("port")
 	db.database = viper.GetString("database")
@@ -57,6 +60,12 @@ func (db *MongoDB) init() (err error) {
 }
 
 func (db *MongoDB) build() string {
+	if len(db.uri) > 0 {
+		return mongodumpCli + " " +
+			"--uri=" + db.uri + " " +
+			db.additionOption() + " " +
+			"--out=" + db.dumpPath
+	}
 	return mongodumpCli + " " +
 		db.nameOption() + " " +
 		db.credentialOptions() + " " +
