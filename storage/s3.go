@@ -115,7 +115,7 @@ func (s S3) defaultEndpoint() *string {
 	case "us3":
 		return aws.String(fmt.Sprintf("%s.ufileos.com", s.viper.GetString("region")))
 	case "cos":
-		return aws.String(fmt.Sprintf("cos.%s.myqcloud.com", s.viper.GetString("region")))
+		return aws.String(fmt.Sprintf("%s.cos.%s.myqcloud.com", s.viper.GetString("bucket"), s.viper.GetString("region")))
 	case "kodo":
 		return aws.String(fmt.Sprintf("s3-%s.qiniucs.com", s.viper.GetString("region")))
 	case "r2":
