@@ -58,7 +58,7 @@ func (s *SES) buildEmail(title, message string) *ses.SendEmailInput {
 	}
 }
 
-func (s *SES) notify(title string, message string) error {
+func (s *SES) notify(title string, message string, notifyType ...int) error {
 	logger := logger.Tag("Notifier: SES")
 
 	logger.Info("Sending notification...")

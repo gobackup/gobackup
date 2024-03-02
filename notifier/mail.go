@@ -73,7 +73,7 @@ func (s Mail) buildBody(title string, message string) string {
 	return fmt.Sprintf("%s\n%s", strings.Join(headerTexts, "\n"), base64.StdEncoding.EncodeToString([]byte(message)))
 }
 
-func (s *Mail) notify(title string, message string) error {
+func (s *Mail) notify(title string, message string, notifyType ...int) error {
 	auth := s.getAuth()
 
 	// Connect to the server, authenticate, set the sender and recipient,

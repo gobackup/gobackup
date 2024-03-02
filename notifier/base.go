@@ -17,7 +17,7 @@ type Base struct {
 }
 
 type Notifier interface {
-	notify(title, message string) error
+	notify(title, message string, notifyType ...int) error
 }
 
 var (
@@ -80,13 +80,13 @@ func notify(model config.ModelConfig, title, message string, notifyType int) {
 
 		if notifyType == notifyTypeSuccess {
 			if base.onSuccess {
-				if err := notifier.notify(title, message); err != nil {
+				if err := notifier.notify(title, message, notifyType); err != nil {
 					logger.Error(err)
 				}
 			}
 		} else if notifyType == notifyTypeFailure {
 			if base.onFailure {
-				if err := notifier.notify(title, message); err != nil {
+				if err := notifier.notify(title, message, notifyType); err != nil {
 					logger.Error(err)
 				}
 			}
