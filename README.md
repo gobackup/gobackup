@@ -258,7 +258,7 @@ $ kill -QUIT 20443
 
 ## Contributing
 
-The [DEVELOPMENT](./DEVELOPMENT.md) document will help you to setup development environment, and guide you how to test them in local.
+The [DEVELOPMENT](./DEVELOPMENT) document will help you to setup development environment, and guide you how to test them in local.
 
 When you finish your work, please send a PR.
 
