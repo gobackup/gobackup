@@ -17,18 +17,11 @@ import (
 // # keys
 //
 //   - type: etcd
-//   - endpoints: [localhost]
-//   - port: 2379
-//   - user:
-//   - password:
-//   - cacert:
-//   - cert:
-//   - key:
-//   - insecure-skip-tls-verify: false
+//   - endpoint: localhost:2379
 //   - args:
 type Etcd struct {
 	Base
-	endpoints     []string
+	endpoint      string
 	args          string
 	_dumpFilePath string
 }
@@ -36,14 +29,14 @@ type Etcd struct {
 func (db *Etcd) init() (err error) {
 	viper := db.viper
 
-	db.endpoints = viper.GetStringSlice("endpoints")
+	db.endpoint = viper.GetString("endpoint")
 	db.args = viper.GetString("args")
 
-	if len(db.endpoints) == 0 {
+	if len(db.endpoint) == 0 {
 		return fmt.Errorf("etcd endpoint config is required")
 	}
 
-	db._dumpFilePath = path.Join(db.dumpPath, strings.Join(db.endpoints, "-"))
+	db._dumpFilePath = path.Join(db.dumpPath + "-" + db.endpoint)
 
 	return nil
 }
@@ -55,8 +48,8 @@ func (db *Etcd) build() string {
 	etcdctlArgs = append(etcdctlArgs, "snapshot save")
 	etcdctlArgs = append(etcdctlArgs, db._dumpFilePath)
 
-	if len(db.endpoints) > 0 {
-		etcdctlArgs = append(etcdctlArgs, "--endpoints="+strings.Join(db.endpoints, ","))
+	if len(db.endpoint) > 0 {
+		etcdctlArgs = append(etcdctlArgs, "--endpoints "+db.endpoint)
 	}
 
 	if len(db.args) > 0 {
