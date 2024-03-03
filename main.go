@@ -3,7 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/gobackup/gobackup/helper"
+	"log"
 	"os"
+	ossignal "os/signal"
 	"syscall"
 
 	"github.com/sevlyar/go-daemon"
@@ -40,6 +43,7 @@ func buildFlags(flags []cli.Flag) []cli.Flag {
 }
 
 func termHandler(sig os.Signal) error {
+	logger.Tag("Program")
 	logger.Info("Received QUIT signal, exiting...")
 	scheduler.Stop()
 	os.Exit(0)
@@ -57,6 +61,9 @@ func reloadHandler(sig os.Signal) error {
 }
 
 func main() {
+	sigs := make(chan os.Signal, 1)
+	ossignal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
 	app := cli.NewApp()
 
 	app.Version = version
@@ -66,6 +73,19 @@ func main() {
 	daemon.AddCommand(daemon.StringFlag(signal, "quit"), syscall.SIGQUIT, termHandler)
 	daemon.AddCommand(daemon.StringFlag(signal, "stop"), syscall.SIGTERM, termHandler)
 	daemon.AddCommand(daemon.StringFlag(signal, "reload"), syscall.SIGHUP, reloadHandler)
+
+	err := initApplication()
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
+
+	go func() {
+		sig := <-sigs
+		err = termHandler(sig)
+		if err != nil {
+			logger.Errorf("Failed to terminate the process properly: %s", err.Error())
+		}
+	}()
 
 	app.Commands = []*cli.Command{
 		{
@@ -79,10 +99,6 @@ func main() {
 			}),
 			Action: func(ctx *cli.Context) error {
 				var modelNames []string
-				err := initApplication()
-				if err != nil {
-					return err
-				}
 				modelNames = append(ctx.StringSlice("model"), ctx.Args().Slice()...)
 				return perform(modelNames)
 			},
@@ -92,6 +108,10 @@ func main() {
 			Usage: "Start as daemon",
 			Flags: buildFlags([]cli.Flag{}),
 			Action: func(ctx *cli.Context) error {
+				if helper.IsWindows() {
+					log.Fatalln("Daemon mode is not supported on Windows. You can see how to run GoBackup as a service on Windows here: https://github.com/gobackup/gobackup/blob/main/docs/windows-service.md")
+				}
+
 				fmt.Println("GoBackup starting...")
 
 				args := []string{"gobackup", "run"}
@@ -117,11 +137,6 @@ func main() {
 
 				logger.SetLogger(config.LogFilePath)
 
-				err = initApplication()
-				if err != nil {
-					return err
-				}
-
 				if err := scheduler.Start(); err != nil {
 					return fmt.Errorf("failed to start scheduler: %w", err)
 				}
@@ -135,11 +150,6 @@ func main() {
 			Flags: buildFlags([]cli.Flag{}),
 			Action: func(ctx *cli.Context) error {
 				logger.SetLogger(config.LogFilePath)
-
-				err := initApplication()
-				if err != nil {
-					return err
-				}
 
 				if err := scheduler.Start(); err != nil {
 					return fmt.Errorf("failed to start scheduler: %w", err)

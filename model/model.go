@@ -2,9 +2,8 @@ package model
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/spf13/viper"
+	"os"
 
 	"github.com/gobackup/gobackup/archive"
 	"github.com/gobackup/gobackup/compressor"

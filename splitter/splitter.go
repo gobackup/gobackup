@@ -23,6 +23,12 @@ func Run(archivePath string, model config.ModelConfig) (archiveDirPath string, e
 		return
 	}
 
+	if helper.IsWindows() {
+		logger.Errorf("Splitter is not supported on Windows yet. Splitter settings will be ignored.")
+		archiveDirPath = archivePath
+		return
+	}
+
 	logger.Info("Split to chunks")
 
 	splitter.SetDefault("suffix_length", 3)

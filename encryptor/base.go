@@ -2,6 +2,7 @@ package encryptor
 
 import (
 	"github.com/gobackup/gobackup/config"
+	"github.com/gobackup/gobackup/helper"
 	"github.com/gobackup/gobackup/logger"
 	"github.com/spf13/viper"
 )
@@ -35,6 +36,13 @@ func Run(archivePath string, model config.ModelConfig) (encryptPath string, err 
 	var enc Encryptor
 	switch model.EncryptWith.Type {
 	case "openssl":
+		if helper.IsWindows() {
+			if !helper.IsExistsBin("openssl") {
+				logger.Errorf("openssl binary was not found. Encryption setting is ignored.")
+				encryptPath = archivePath
+				return
+			}
+		}
 		enc = NewOpenSSL(base)
 	default:
 		encryptPath = archivePath

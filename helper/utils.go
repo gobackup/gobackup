@@ -1,6 +1,8 @@
 package helper
 
 import (
+	"os/exec"
+	"runtime"
 	"strings"
 )
 
@@ -35,4 +37,23 @@ func FormatEndpoint(endpoint string) string {
 	}
 
 	return endpoint
+}
+
+// IsWindows check if the OS is Windows
+func IsWindows() bool {
+	if runtime.GOOS == "windows" {
+		return true
+	}
+	return false
+}
+
+// IsExistsBin search for binary in PATH and returns true if exists
+func IsExistsBin(bin string) bool {
+	if path, err := exec.LookPath(bin); err == nil {
+		if len(path) > 0 {
+			return true
+		}
+		return false
+	}
+	return false
 }

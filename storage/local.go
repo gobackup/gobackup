@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/gobackup/gobackup/helper"
@@ -31,17 +30,22 @@ func (s *Local) upload(fileKey string) (err error) {
 	logger := logger.Tag("Local")
 
 	// Related path
-	if !path.IsAbs(s.path) {
-		s.path = path.Join(s.model.WorkDir, s.path)
+	if !filepath.IsAbs(s.path) {
+		s.path = filepath.Join(s.model.WorkDir, s.path)
 	}
 
-	targetPath := path.Join(s.path, fileKey)
-	targetDir := path.Dir(targetPath)
+	targetPath := filepath.Join(s.path, fileKey)
+	targetDir := filepath.Dir(targetPath)
 	if err := helper.MkdirP(targetDir); err != nil {
 		logger.Errorf("failed to mkdir %q, %v", targetDir, err)
 	}
 
-	_, err = helper.Exec("cp", "-a", s.archivePath, targetPath)
+	if helper.IsWindows() {
+		_, err = helper.Exec("powershell", "-NoProfile", "-NonInteractive", "Copy-Item", "-Path", s.archivePath, "-Destination", targetPath)
+	} else {
+		_, err = helper.Exec("cp", "-a", s.archivePath, targetPath)
+	}
+
 	if err != nil {
 		return err
 	}
