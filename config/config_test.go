@@ -143,7 +143,7 @@ func TestExpandEnv(t *testing.T) {
 }
 
 func TestWebConfig(t *testing.T) {
-	assert.Equal(t, Web.Host, "127.0.0.1")
+	assert.Equal(t, Web.Host, "0.0.0.0")
 	assert.Equal(t, Web.Port, "2703")
 	assert.Equal(t, Web.Username, "gobackup")
 	assert.Equal(t, Web.Password, "123456")
