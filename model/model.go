@@ -66,17 +66,32 @@ func (m Model) Perform() (err error) {
 		return
 	}
 
-	archivePath, err = encryptor.Run(archivePath, m.Config)
+	logger.Infof("Cleanup WorkDir: %s/", m.Config.DumpPath)
+	if err := os.RemoveAll(m.Config.DumpPath); err != nil {
+		logger.Errorf("Cleanup temp dir %s error: %v", m.Config.DumpPath, err)
+	}
+
+	encryptedPath, err := encryptor.Run(archivePath, m.Config)
 	if err != nil {
 		return
 	}
+	if encryptedPath != archivePath {
+		if err := os.Remove(archivePath); err != nil {
+			logger.Errorf("Cleanup archive file %s error: %v", archivePath, err)
+		}
+	}
 
-	archivePath, err = splitter.Run(archivePath, m.Config)
+	backupPath, err := splitter.Run(encryptedPath, m.Config)
 	if err != nil {
 		return
 	}
+	if encryptedPath != backupPath {
+		if err := os.Remove(encryptedPath); err != nil {
+			logger.Errorf("Cleanup encrypted archive file %s error: %v", encryptedPath, err)
+		}
+	}
 
-	err = storage.Run(m.Config, archivePath)
+	err = storage.Run(m.Config, backupPath)
 	if err != nil {
 		return
 	}
