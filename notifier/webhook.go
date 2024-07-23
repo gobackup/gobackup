@@ -15,12 +15,13 @@ type Webhook struct {
 
 	Service string
 
-	method          string
-	contentType     string
-	buildBody       func(title, message string) ([]byte, error)
-	buildWebhookURL func(url string) (string, error)
-	checkResult     func(status int, responseBody []byte) error
-	buildHeaders    func() map[string]string
+	method                 string
+	contentType            string
+	buildBody              func(title, message string) ([]byte, error)
+	buildWebhookURL        func(url string) (string, error)
+	buildWebhookStatusURLs func(successURL, failureURL string) (string, string, error)
+	checkResult            func(status int, responseBody []byte) error
+	buildHeaders           func() map[string]string
 }
 
 type webhookPayload struct {
@@ -74,12 +75,37 @@ func (s *Webhook) webhookURL() (string, error) {
 	return s.buildWebhookURL(url)
 }
 
-func (s *Webhook) notify(title string, message string) error {
+func (s *Webhook) webhookStatusURLs() (string, string, error) {
+	successURL := s.viper.GetString("success.url")
+	failureURL := s.viper.GetString("failure.url")
+
+	if s.buildWebhookStatusURLs == nil {
+		return successURL, failureURL, nil
+	}
+
+	return s.buildWebhookStatusURLs(successURL, failureURL)
+}
+
+func (s *Webhook) notify(title string, message string, notifyType ...int) error {
 	logger := s.getLogger()
+
+	successURL, failureURL, err := s.webhookStatusURLs()
+	if err != nil {
+		return err
+	}
 
 	url, err := s.webhookURL()
 	if err != nil {
 		return err
+	}
+
+	if len(notifyType) > 0 {
+		if len(successURL) > 0 && notifyType[0] == notifyTypeSuccess {
+			url = successURL
+		}
+		if len(failureURL) > 0 && notifyType[0] == notifyTypeFailure {
+			url = failureURL
+		}
 	}
 
 	payload, err := s.buildBody(title, message)
