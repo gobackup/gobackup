@@ -33,7 +33,7 @@ func NewTelegram(base *Base) *Webhook {
 		},
 		buildBody: func(title, message string) ([]byte, error) {
 			chat_id := base.viper.GetString("chat_id")
-			message_thread_id = base.viper.GetString("message_thread_id")
+			message_thread_id := base.viper.GetString("message_thread_id")
 
 			payload := telegramPayload{
 				ChatID: chat_id,
