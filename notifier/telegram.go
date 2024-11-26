@@ -8,8 +8,9 @@ import (
 )
 
 type telegramPayload struct {
-	ChatID string `json:"chat_id"`
-	Text   string `json:"text"`
+	ChatID 		string `json:"chat_id"`
+	Text   		string `json:"text"`
+	MessageThreadId string `json:"message_thread_id"`
 }
 
 const DEFAULT_TELEGRAM_ENDPOINT = "api.telegram.org"
