@@ -19,20 +19,22 @@ import (
 // password:
 // authdb:
 // exclude_tables:
+// exclude_tables_prefix:
 // oplog: false
 // args:
 type MongoDB struct {
 	Base
-	uri           string
-	host          string
-	port          string
-	database      string
-	username      string
-	password      string
-	authdb        string
-	excludeTables []string
-	oplog         bool
-	args          string
+	uri                 string
+	host                string
+	port                string
+	database            string
+	username            string
+	password            string
+	authdb              string
+	excludeTables       []string
+	excludeTablesPrefix []string
+	oplog               bool
+	args                string
 }
 
 var (
@@ -54,6 +56,7 @@ func (db *MongoDB) init() (err error) {
 	db.oplog = viper.GetBool("oplog")
 	db.authdb = viper.GetString("authdb")
 	db.excludeTables = viper.GetStringSlice("exclude_tables")
+	db.excludeTablesPrefix = viper.GetStringSlice("exclude_tables_prefix")
 	db.args = viper.GetString("args")
 
 	return nil
@@ -112,6 +115,10 @@ func (db *MongoDB) additionOption() string {
 
 	for _, table := range db.excludeTables {
 		opts = append(opts, "--excludeCollection="+table)
+	}
+
+	for _, table := range db.excludeTablesPrefix {
+		opts = append(opts, "--excludeCollectionsWithPrefix="+table)
 	}
 
 	if len(db.args) > 0 {
