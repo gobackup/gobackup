@@ -74,8 +74,12 @@ func (s Mail) buildBody(title string, message string) string {
 }
 
 func (s *Mail) notify(title string, message string) error {
-	auth := s.getAuth()
-
+	var auth smtp.Auth
+	if len(s.password) == 0 {
+		auth = nil
+	} else {
+		auth = s.getAuth()
+	}
 	// Connect to the server, authenticate, set the sender and recipient,
 	// and send the email all in one step.
 	to := s.to
