@@ -64,7 +64,6 @@ func newNotifier(name string, config config.SubConfig) (Notifier, *Base, error) 
 		return NewResend(base), base, nil
 	case "wxwork":
 		return NewWxWork(base), base, nil
-	}
 	case "googlechat":
 	        return NewGoogleChat(base), base, nil
  	}
