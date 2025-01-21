@@ -38,9 +38,19 @@ type PostgreSQL struct {
 	tables        []string
 	excludeTables []string
 	password      string
+	compress      string
+	format        string
 	args          string
 	_dumpFilePath string
 }
+
+var (
+	PostgreSQLCompressionExt = map[string]string{
+		"gzip": "gz",
+		"lz4":  "lz4",
+		"zstd": "zst",
+	}
+)
 
 func (db *PostgreSQL) init() (err error) {
 	viper := db.viper
@@ -55,13 +65,23 @@ func (db *PostgreSQL) init() (err error) {
 	db.password = viper.GetString("password")
 	db.tables = viper.GetStringSlice("tables")
 	db.excludeTables = viper.GetStringSlice("exclude_tables")
+	db.compress = viper.GetString("compress")
+	db.format = ".sql"
 	db.args = viper.GetString("args")
 
 	if len(db.database) == 0 {
 		return fmt.Errorf("PostgreSQL database config is required")
 	}
 
-	db._dumpFilePath = path.Join(db.dumpPath, db.database+".sql")
+	if len(db.compress) > 0 {
+		compression := strings.Split(db.compress, ":")[0]
+		if _, ok := PostgreSQLCompressionExt[compression]; !ok {
+			return fmt.Errorf("PostgreSQL compression type is not allowed: %s", compression)
+		}
+		db.format = fmt.Sprintf("%s.%s", db.format, PostgreSQLCompressionExt[compression])
+	}
+
+	db._dumpFilePath = path.Join(db.dumpPath, db.database+db.format)
 
 	// socket
 	if len(db.socket) != 0 {
@@ -98,6 +118,10 @@ func (db *PostgreSQL) build() string {
 
 	if len(db.excludeTables) > 0 {
 		dumpArgs = append(dumpArgs, "--exclude-table="+strings.Join(db.excludeTables, " --exclude-table="))
+	}
+
+	if len(db.compress) > 0 {
+		dumpArgs = append(dumpArgs, "--compress="+db.compress, "--format=custom")
 	}
 
 	if len(db.args) > 0 {
