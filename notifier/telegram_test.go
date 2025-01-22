@@ -22,7 +22,7 @@ func Test_Telegram(t *testing.T) {
 
 	body, err := s.buildBody("This is title", "This is body")
 	assert.NoError(t, err)
-	assert.Equal(t, `{"chat_id":"@gobackuptest","text":"This is title\n\nThis is body"}`, string(body))
+	assert.Equal(t, `{"chat_id":"@gobackuptest","text":"This is title\n\nThis is body","message_thread_id":""}`, string(body))
 
 	url, err := s.buildWebhookURL("")
 	assert.NoError(t, err)
