@@ -72,7 +72,7 @@ func (s *GoogleChat) GoogleChatURL() (string, error) {
 	return s.buildGoogleChatURL(url)
 }
 
-func (s *GoogleChat) notify(title string, message string) error {
+func (s *GoogleChat) notify(title string, message string, notifyType ...int) error {
 	logger := s.getLogger()
 
 	url, err := s.GoogleChatURL()
