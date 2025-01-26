@@ -73,9 +73,13 @@ func (s Mail) buildBody(title string, message string) string {
 	return fmt.Sprintf("%s\n%s", strings.Join(headerTexts, "\n"), base64.StdEncoding.EncodeToString([]byte(message)))
 }
 
-func (s *Mail) notify(title string, message string, notifyType ...int) error {
-	auth := s.getAuth()
-
+func (s *Mail) notify(title string, message string) error {
+	var auth smtp.Auth
+	if len(s.password) == 0 {
+		auth = nil
+	} else {
+		auth = s.getAuth()
+	}
 	// Connect to the server, authenticate, set the sender and recipient,
 	// and send the email all in one step.
 	to := s.to

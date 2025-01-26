@@ -62,7 +62,11 @@ func newNotifier(name string, config config.SubConfig) (Notifier, *Base, error) 
 		return NewSES(base), base, nil
 	case "resend":
 		return NewResend(base), base, nil
-	}
+	case "wxwork":
+		return NewWxWork(base), base, nil
+	case "googlechat":
+	        return NewGoogleChat(base), base, nil
+ 	}
 
 	return nil, nil, fmt.Errorf("Notifier: %s is not supported", name)
 }

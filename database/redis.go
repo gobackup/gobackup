@@ -37,6 +37,7 @@ type Redis struct {
 	invokeSave bool
 	// path of rdb file, example: /var/lib/redis/dump.rdb
 	rdbPath string
+	args    string
 
 	_dumpFilePath string
 }
@@ -56,6 +57,7 @@ func (db *Redis) init() (err error) {
 	db.password = viper.GetString("password")
 	db.rdbPath = viper.GetString("rdb_path")
 	db.invokeSave = viper.GetBool("invoke_save")
+	db.args = viper.GetString("args")
 
 	// Force set invokeSave = false, when mode = copy
 	if viper.GetString("mode") == "copy" {
@@ -101,6 +103,10 @@ func (db *Redis) build() string {
 	}
 	if len(db.password) > 0 {
 		args = append(args, `-a `+db.password)
+	}
+
+	if len(db.args) > 0 {
+		args = append(args, db.args)
 	}
 
 	args = append(args, "--rdb", db._dumpFilePath)

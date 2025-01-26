@@ -123,14 +123,6 @@ func (s *SCP) upload(fileKey string) error {
 		// directory
 		// 2022.12.04.07.09.47/2022.12.04.07.09.47.tar.xz-000
 		fileKeys = s.fileKeys
-
-		remotePath := filepath.Join(s.path, fileKey)
-		remoteDir := filepath.Dir(remotePath)
-
-		// mkdir
-		if err := s.run(fmt.Sprintf("mkdir -p %s", remoteDir)); err != nil {
-			return err
-		}
 	} else {
 		// file
 		// 2022.12.04.07.09.25.tar.xz
@@ -141,6 +133,12 @@ func (s *SCP) upload(fileKey string) error {
 		sourcePath := filepath.Join(filepath.Dir(s.archivePath), key)
 		remotePath := filepath.Join(s.path, key)
 
+		// mkdir
+		if err := s.run(fmt.Sprintf("mkdir -p %s", filepath.Dir(remotePath))); err != nil {
+			return err
+		}
+
+		// upload file
 		if err := s.up(sourcePath, remotePath); err != nil {
 			return err
 		}

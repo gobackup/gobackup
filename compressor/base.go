@@ -2,6 +2,7 @@ package compressor
 
 import (
 	"fmt"
+	"github.com/gobackup/gobackup/helper"
 	"os"
 	"path/filepath"
 	"time"
@@ -83,6 +84,11 @@ func Run(model config.ModelConfig) (string, error) {
 	c = &Tar{Base: base}
 
 	logger.Info("=> Compress | " + model.CompressWith.Type)
+
+	if err := helper.MkdirP(model.DumpPath); err != nil {
+		logger.Errorf("Failed to mkdir dump path %s: %v", model.DumpPath, err)
+		return "", err
+	}
 
 	// set workdir
 	if err := os.Chdir(filepath.Join(model.DumpPath, "../")); err != nil {

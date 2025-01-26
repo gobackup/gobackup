@@ -11,7 +11,7 @@ import (
 func TestEtcd_init(t *testing.T) {
 
 	viper := viper.New()
-	viper.Set("endpoints", "127.0.0.1:2379")
+	viper.Set("endpoint", "127.0.0.1:2379")
 	viper.Set("args", "--foo --bar --baz")
 
 	base := newBase(
@@ -33,5 +33,5 @@ func TestEtcd_init(t *testing.T) {
 	err := db.init()
 	assert.NoError(t, err)
 
-	assert.Equal(t, db.build(), "etcdctl snapshot save "+db._dumpFilePath+" --endpoints=127.0.0.1:2379 --foo --bar --baz")
+	assert.Equal(t, db.build(), "etcdctl snapshot save "+db._dumpFilePath+" --endpoints 127.0.0.1:2379 --foo --bar --baz")
 }

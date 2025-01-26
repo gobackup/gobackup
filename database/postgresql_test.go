@@ -51,3 +51,63 @@ func Test_PostgreSQL_prepareForSocket(t *testing.T) {
 
 	assert.Equal(t, db.build(), "pg_dump --host=/var/run/postgresql --port=5432 --foo foo -f /tmp/foo.sql")
 }
+
+func Test_PostgreSQL_compressionGzip(t *testing.T) {
+	viper := viper.New()
+	viper.Set("host", "1.2.3.4")
+	viper.Set("port", "1234")
+	viper.Set("database", "my_db")
+	viper.Set("username", "user1")
+	viper.Set("password", "pass1")
+	viper.Set("compress", "gzip:2")
+
+	base := newBase(
+		config.ModelConfig{
+			DumpPath: "/data/backups/",
+		},
+		// Creating a new base object.
+		config.SubConfig{
+			Type:  "postgresql",
+			Name:  "postgresql1",
+			Viper: viper,
+		},
+	)
+
+	db := &PostgreSQL{
+		Base: base,
+	}
+
+	err := db.init()
+	assert.NoError(t, err)
+
+	assert.Equal(t, db.build(), "pg_dump --host=1.2.3.4 --port=1234 --username=user1 --compress=gzip:2 --format=custom my_db -f /data/backups/postgresql/postgresql1/my_db.sql.gz")
+}
+
+func Test_PostgreSQL_compressionNotSupported(t *testing.T) {
+	viper := viper.New()
+	viper.Set("host", "1.2.3.4")
+	viper.Set("port", "1234")
+	viper.Set("database", "my_db")
+	viper.Set("username", "user1")
+	viper.Set("password", "pass1")
+	viper.Set("compress", "arj")
+
+	base := newBase(
+		config.ModelConfig{
+			DumpPath: "/data/backups/",
+		},
+		// Creating a new base object.
+		config.SubConfig{
+			Type:  "postgresql",
+			Name:  "postgresql1",
+			Viper: viper,
+		},
+	)
+
+	db := &PostgreSQL{
+		Base: base,
+	}
+
+	err := db.init()
+	assert.Error(t, err)
+}
