@@ -52,6 +52,7 @@ func TestRedis_init_for_sync(t *testing.T) {
 	viper.Set("username", "user1")
 	viper.Set("password", "pass1")
 	viper.Set("invoke_save", "true")
+	viper.Set("args", "--tls --cacert redis_ca.pem")
 
 	base := newBase(
 		config.ModelConfig{
@@ -72,5 +73,5 @@ func TestRedis_init_for_sync(t *testing.T) {
 	err := db.init()
 	assert.NoError(t, err)
 
-	assert.Equal(t, db.build(), "redis-cli -h 1.2.3.4 -p 1234 -a pass1 --rdb /data/backups/redis/redis1/dump.rdb")
+	assert.Equal(t, db.build(), "redis-cli -h 1.2.3.4 -p 1234 -a pass1 --tls --cacert redis_ca.pem --rdb /data/backups/redis/redis1/dump.rdb")
 }

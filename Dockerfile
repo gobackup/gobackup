@@ -16,6 +16,7 @@ RUN apk add \
   gzip \
   pigz \
   bzip2 \
+  coreutils \
   # there is no pbzip2 yet
   lzip \
   xz-dev \
@@ -41,7 +42,7 @@ RUN wget https://aka.ms/sqlpackage-linux && \
 ENV PATH="${PATH}:/opt/sqlpackage"
 
 # Install the influx CLI
-ARG INFLUX_CLI_VERSION=2.7.3
+ARG INFLUX_CLI_VERSION=2.7.5
 RUN case "$(uname -m)" in \
       x86_64) arch=amd64 ;; \
       aarch64) arch=arm64 ;; \

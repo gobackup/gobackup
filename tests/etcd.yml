@@ -10,5 +10,4 @@ models:
     databases:
       etcd-test:
         type: etcd
-        endpoints:
-          - 127.0.0.1:2379
+        endpoint: 127.0.0.1:2379
