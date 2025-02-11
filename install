@@ -2,21 +2,24 @@
 
 set -u
 
-type curl > /dev/null || { echo "curl: not found"; exit 1; }
+type curl >/dev/null || {
+  echo "curl: not found"
+  exit 1
+}
 
 set -e
 
 get_latest_release() {
-  local repo="$1"
-	curl -sSL "https://api.github.com/repos/${repo}/releases/latest" | \
+  repo="$1"
+  curl -sSL "https://api.github.com/repos/${repo}/releases/latest" |
     awk 'BEGIN{FS=": |,|\""}; /tag_name/{print $5}'
 }
 
 repo="gobackup/gobackup"
-version="$(get_latest_release "${repo}")"  # v1.2.0
+version="$(get_latest_release "${repo}")" # v1.2.0
 
 # if args has version override it and not eq "latest"
-if test $# -eq 1; then
+if test "$#" -eq 1; then
   if test "$1" != "latest"; then
     version="$1"
 
@@ -24,7 +27,7 @@ if test $# -eq 1; then
   fi
 fi
 
-platform="$(uname | tr "[A-Z]" "[a-z]")"  # Linux => linux
+platform="$(uname | tr "[:upper:]" "[:lower:]")"                    # Linux => linux
 arch="$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" # x86_64 => amd64, aarch64 => arm64
 package="gobackup-${platform}-${arch}.tar.gz"
 package_url="https://github.com/${repo}/releases/download/${version}/${package}"
@@ -33,6 +36,7 @@ dest_dir="/usr/local/bin"
 bin_path="${dest_dir}/${bin}"
 tmp_dir="$(mktemp -d)"
 
+# shellcheck disable=SC2064
 trap "rm -r ${tmp_dir}" EXIT
 
 if test -e "${bin_path}"; then
@@ -47,7 +51,7 @@ fi
 cd "${tmp_dir}"
 curl -sSL "${package_url}" | tar xzf -
 
-if test $(id -u) -eq 0; then
+if test "$(id -u)" -eq 0; then
   mv "${bin}" "${dest_dir}"
 else
   sudo mv "${bin}" "${dest_dir}"
