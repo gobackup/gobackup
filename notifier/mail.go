@@ -6,6 +6,8 @@ import (
 	"net/smtp"
 	"sort"
 	"strings"
+
+	"gopkg.in/gomail.v2"
 )
 
 type Mail struct {
@@ -15,21 +17,23 @@ type Mail struct {
 	username string
 	password string
 	host     string
-	port     string
+	port     int
 }
 
 func NewMail(base *Base) (*Mail, error) {
-	base.viper.SetDefault("port", "25")
+	base.viper.SetDefault("port", 25)
 
 	username := base.viper.GetString("username")
-	if len(username) == 0 {
+	if username == "" {
 		return nil, fmt.Errorf("username is required for mail notifier")
 	}
 
 	from := base.viper.GetString("from")
-	if len(from) == 0 {
+	if from == "" {
 		from = username
 	}
+
+	port := base.viper.GetInt("port")
 
 	return &Mail{
 		username: username,
@@ -37,12 +41,12 @@ func NewMail(base *Base) (*Mail, error) {
 		to:       strings.Split(base.viper.GetString("to"), ","),
 		from:     from,
 		host:     base.viper.GetString("host"),
-		port:     base.viper.GetString("port"),
+		port:     port,
 	}, nil
 }
 
 func (s Mail) getAddr() string {
-	return fmt.Sprintf("%s:%s", s.host, s.port)
+	return fmt.Sprintf("%s:%d", s.host, s.port)
 }
 
 func (s Mail) getAuth() smtp.Auth {
@@ -73,20 +77,17 @@ func (s Mail) buildBody(title string, message string) string {
 	return fmt.Sprintf("%s\n%s", strings.Join(headerTexts, "\n"), base64.StdEncoding.EncodeToString([]byte(message)))
 }
 
-func (s *Mail) notify(title string, message string) error {
-	var auth smtp.Auth
-	if len(s.password) == 0 {
-		auth = nil
-	} else {
-		auth = s.getAuth()
-	}
-	// Connect to the server, authenticate, set the sender and recipient,
-	// and send the email all in one step.
-	to := s.to
+func (s *Mail) notify(subject string, body string) error {
+	m := gomail.NewMessage()
+	m.SetHeader("From", s.from)
+	m.SetHeader("To", s.to...)
+	m.SetHeader("Subject", subject)
+	m.SetBody(`text/plain; charset="utf-8"`, body)
 
-	err := smtp.SendMail(s.getAddr(), auth, s.from, to, []byte(s.buildBody(title, message)))
-	if err != nil {
-		return err
+	d := gomail.NewDialer(s.host, s.port, s.username, s.password)
+
+	if err := d.DialAndSend(m); err != nil {
+		return fmt.Errorf("failed to send email: %v", err)
 	}
 
 	return nil
