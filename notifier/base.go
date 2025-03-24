@@ -65,7 +65,7 @@ func newNotifier(name string, config config.SubConfig) (Notifier, *Base, error) 
 	case "wxwork":
 		return NewWxWork(base), base, nil
 	case "googlechat":
-	        return NewGoogleChat(base), base, nil
+		return NewGoogleChat(base), base, nil
 	case "healthchecks":
 		return NewHealthchecks(base), base, nil
 	}
@@ -101,13 +101,13 @@ func notify(model config.ModelConfig, title, message string, notifyType int) {
 }
 
 func Success(model config.ModelConfig) {
-	title := fmt.Sprintf("[GoBackup] OK: Backup %s has successfully", model.Name)
+	title := fmt.Sprintf("[SUCCESS] OK: Backup %s has successfully", model.Name)
 	message := fmt.Sprintf("Backup of %s completed successfully at %s", model.Name, time.Now().Local())
 	notify(model, title, message, notifyTypeSuccess)
 }
 
 func Failure(model config.ModelConfig, reason string) {
-	title := fmt.Sprintf("[GoBackup] Err: Backup %s has failed", model.Name)
+	title := fmt.Sprintf("[FAIL] Err: Backup %s has failed", model.Name)
 	message := fmt.Sprintf("Backup of %s failed at %s:\n\n%s", model.Name, time.Now().Local(), reason)
 
 	notify(model, title, message, notifyTypeFailure)
