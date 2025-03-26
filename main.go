@@ -24,12 +24,18 @@ const (
 
 var (
 	configFile string
-	version    = "master"
+	version    = ""
 	signal     = flag.String("s", "", `Send signal to the daemon:
   quit — graceful shutdown
   stop — fast shutdown
   reload — reloading the configuration file`)
 )
+
+func init() {
+	if info, ok := debug.ReadBuildInfo(); ok && version == "" {
+		version = info.Main.Version
+	}
+}
 
 func buildFlags(flags []cli.Flag) []cli.Flag {
 	return append(flags, &cli.StringFlag{
@@ -59,10 +65,6 @@ func reloadHandler(sig os.Signal) error {
 
 func main() {
 	app := cli.NewApp()
-
-	if info, ok := debug.ReadBuildInfo(); ok {
-		version = info.Main.Version
-	}
 
 	app.Version = version
 	app.Name = "gobackup"
