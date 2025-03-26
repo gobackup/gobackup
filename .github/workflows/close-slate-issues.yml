@@ -27,4 +27,4 @@ jobs:
           ascending: true
           enable-statistics: true
           stale-issue-label: "stale"
-          any-of-issue-labels: "enhancement"
+          exempt-issue-labels: "enhancement"
