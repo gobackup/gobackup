@@ -11,7 +11,7 @@ on:
 
 jobs:
   stale:
-    if: github.repository_owner == 'huacnlee'
+    if: github.repository_owner == 'gobackup'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/stale@v9
