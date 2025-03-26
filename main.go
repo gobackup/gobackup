@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime/debug"
 	"syscall"
 
 	"github.com/sevlyar/go-daemon"
@@ -58,6 +59,10 @@ func reloadHandler(sig os.Signal) error {
 
 func main() {
 	app := cli.NewApp()
+
+	if info, ok := debug.ReadBuildInfo(); ok {
+		version = info.Main.Version
+	}
 
 	app.Version = version
 	app.Name = "gobackup"
