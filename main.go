@@ -32,8 +32,14 @@ var (
 )
 
 func init() {
-	if info, ok := debug.ReadBuildInfo(); ok && version == "" {
+	if version != "" {
+		return
+	}
+	info, ok := debug.ReadBuildInfo()
+	if ok {
 		version = info.Main.Version
+	} else {
+		version = "unknown"
 	}
 }
 
