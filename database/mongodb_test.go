@@ -4,7 +4,7 @@ import (
 	// "github.com/spf13/viper"
 	"testing"
 
-	"github.com/gobackup/gobackup/config"
+	"github.com/KurosawaAngel/gobackup/config"
 	"github.com/longbridgeapp/assert"
 	"github.com/spf13/viper"
 )

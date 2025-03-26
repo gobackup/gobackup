@@ -9,7 +9,7 @@ git push origin v2.5.1
 
 After the GitHub Actions finished, the new version will be released to GitHub Releases.
 
-https://github.com/gobackup/gobackup/releases
+https://github.com/KurosawaAngel/gobackup/releases
 
 Edit the latest release, and add the release note.
 

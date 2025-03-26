@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gobackup/gobackup/config"
-	"github.com/gobackup/gobackup/helper"
+	"github.com/KurosawaAngel/gobackup/config"
+	"github.com/KurosawaAngel/gobackup/helper"
 	"github.com/longbridgeapp/assert"
 )
 

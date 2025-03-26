@@ -7,8 +7,8 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/gobackup/gobackup/helper"
-	"github.com/gobackup/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/helper"
+	"github.com/KurosawaAngel/gobackup/logger"
 )
 
 // Local storage
@@ -59,7 +59,7 @@ func (s *Local) delete(fileKey string) (err error) {
 // List all files
 func (s *Local) list(parent string) ([]FileItem, error) {
 	remotePath := filepath.Join(s.path, parent)
-	var items = []FileItem{}
+	items := []FileItem{}
 
 	files, err := ioutil.ReadDir(remotePath)
 	if err != nil {

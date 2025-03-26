@@ -14,8 +14,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 
-	"github.com/gobackup/gobackup/helper"
-	"github.com/gobackup/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/helper"
+	"github.com/KurosawaAngel/gobackup/logger"
 )
 
 // S3 - Amazon S3 storage
@@ -315,7 +315,6 @@ func (s *S3) upload(fileKey string) (err error) {
 			uploader.LeavePartsOnError = false
 			uploader.PartSize = partSize
 		})
-
 		if err != nil {
 			return progress.Errorf("%v", err)
 		}

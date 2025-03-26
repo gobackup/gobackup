@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gobackup/gobackup/helper"
-	"github.com/gobackup/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/helper"
+	"github.com/KurosawaAngel/gobackup/logger"
 )
 
 // MSSQL database
@@ -29,9 +29,7 @@ type MSSQL struct {
 	args                   string
 }
 
-var (
-	sqlpackageCli = "sqlpackage"
-)
+var sqlpackageCli = "sqlpackage"
 
 func (db *MSSQL) init() (err error) {
 	viper := db.viper
@@ -77,8 +75,8 @@ func (db *MSSQL) credentialOptions() string {
 }
 
 func (db *MSSQL) connectivityOptions() string {
-	var host = db.host
-	var port = db.port
+	host := db.host
+	port := db.port
 
 	if len(host) == 0 {
 		host = "127.0.0.1"

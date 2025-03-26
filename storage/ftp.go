@@ -12,8 +12,8 @@ import (
 
 	"github.com/jlaffaye/ftp"
 
-	"github.com/gobackup/gobackup/helper"
-	"github.com/gobackup/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/helper"
+	"github.com/KurosawaAngel/gobackup/logger"
 )
 
 // FTP storage

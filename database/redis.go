@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/gobackup/gobackup/helper"
-	"github.com/gobackup/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/helper"
+	"github.com/KurosawaAngel/gobackup/logger"
 )
 
 type redisMode int
@@ -43,7 +43,6 @@ type Redis struct {
 }
 
 func (db *Redis) init() (err error) {
-
 	viper := db.viper
 	viper.SetDefault("rdb_path", "/var/db/redis/dump.rdb")
 	viper.SetDefault("host", "127.0.0.1")

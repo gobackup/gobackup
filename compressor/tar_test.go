@@ -3,7 +3,7 @@ package compressor
 import (
 	"testing"
 
-	"github.com/gobackup/gobackup/helper"
+	"github.com/KurosawaAngel/gobackup/helper"
 	"github.com/longbridgeapp/assert"
 )
 
@@ -18,5 +18,4 @@ func TestTar_options(t *testing.T) {
 		assert.Equal(t, opts[0], "-a")
 		assert.Equal(t, opts[1], "-cf")
 	}
-
 }

@@ -1,4 +1,4 @@
-module github.com/gobackup/gobackup
+module github.com/KurosawaAngel/gobackup
 
 go 1.21
 

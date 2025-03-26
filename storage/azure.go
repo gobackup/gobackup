@@ -11,8 +11,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/sas"
 
-	"github.com/gobackup/gobackup/helper"
-	"github.com/gobackup/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/helper"
+	"github.com/KurosawaAngel/gobackup/logger"
 )
 
 // Azure - Microsoft Azure Blob Storage
@@ -78,7 +78,7 @@ func (s Azure) getBucketURL() string {
 func (s *Azure) upload(fileKey string) (err error) {
 	logger := logger.Tag("Azure")
 
-	var ctx = context.Background()
+	ctx := context.Background()
 	var cancel context.CancelFunc
 
 	if s.timeout.Seconds() > 0 {
@@ -125,7 +125,7 @@ func (s *Azure) upload(fileKey string) (err error) {
 
 func (s *Azure) delete(fileKey string) (err error) {
 	remotePath := filepath.Join(s.path, fileKey)
-	var ctx = context.Background()
+	ctx := context.Background()
 
 	if _, err = s.client.DeleteBlob(ctx, s.container, remotePath, nil); err != nil {
 		return fmt.Errorf("Azure failed to delete file %q, %v", remotePath, err)
@@ -138,7 +138,7 @@ func (s *Azure) delete(fileKey string) (err error) {
 // https://pkg.go.dev/github.com/Azure/azure-sdk-for-go/sdk/storage/azblob
 func (s *Azure) list(parent string) ([]FileItem, error) {
 	remotePath := filepath.Join(s.archivePath, parent)
-	var ctx = context.Background()
+	ctx := context.Background()
 
 	var fileItems []FileItem
 

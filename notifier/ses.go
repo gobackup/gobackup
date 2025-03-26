@@ -1,11 +1,11 @@
 package notifier
 
 import (
+	"github.com/KurosawaAngel/gobackup/logger"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
-	"github.com/gobackup/gobackup/logger"
 )
 
 type SES struct {

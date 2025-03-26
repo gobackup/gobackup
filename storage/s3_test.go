@@ -3,7 +3,7 @@ package storage
 import (
 	"testing"
 
-	"github.com/gobackup/gobackup/config"
+	"github.com/KurosawaAngel/gobackup/config"
 	"github.com/longbridgeapp/assert"
 	"github.com/spf13/viper"
 )
@@ -49,7 +49,7 @@ func Test_S3_open(t *testing.T) {
 }
 
 func Test_providerName(t *testing.T) {
-	var cases = map[string]serviceInfo{
+	cases := map[string]serviceInfo{
 		"s3":     {"AWS S3", "", "us-east-1", "STANDARD_IA", true},
 		"b2":     {"Backblaze B2", "us-east-001.backblazeb2.com", "us-east-001", "STANDARD", true},
 		"us3":    {"UCloud US3", "s3-cn-bj.ufileos.com", "s3-cn-bj", "ARCHIVE", true},
@@ -84,5 +84,4 @@ func Test_providerName(t *testing.T) {
 		assert.Equal(t, "3", s.viper.GetString("max_retries"))
 		assert.Equal(t, "300", s.viper.GetString("timeout"))
 	}
-
 }

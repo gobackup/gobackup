@@ -3,7 +3,7 @@ package database
 import (
 	"testing"
 
-	"github.com/gobackup/gobackup/config"
+	"github.com/KurosawaAngel/gobackup/config"
 	"github.com/longbridgeapp/assert"
 	"github.com/spf13/viper"
 )
@@ -66,7 +66,9 @@ func TestInfluxDB2_influxCliArguments(t *testing.T) {
 
 	err := db.init()
 	assert.NoError(t, err)
-	assert.Equal(t, db.influxCliArguments(), []string{"backup",
+	assert.Equal(t, db.influxCliArguments(), []string{
+		"backup",
 		"--host=http://localhost:8086", "--token=my-token", "--bucket=my-bucket", "--bucket-id=my-bucket-id",
-		"--org=my-org", "--org-id=my-org-id", "--skip-verify", "--http-debug", "/data/backups/influxdb2/influxdb-v2-oss"})
+		"--org=my-org", "--org-id=my-org-id", "--skip-verify", "--http-debug", "/data/backups/influxdb2/influxdb-v2-oss",
+	})
 }

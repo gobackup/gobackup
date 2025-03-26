@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gobackup/gobackup/config"
-	"github.com/gobackup/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/config"
+	"github.com/KurosawaAngel/gobackup/logger"
 	"github.com/spf13/viper"
 )
 

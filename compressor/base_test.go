@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gobackup/gobackup/config"
+	"github.com/KurosawaAngel/gobackup/config"
 	"github.com/longbridgeapp/assert"
 )
 

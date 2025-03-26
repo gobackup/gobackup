@@ -8,8 +8,8 @@ import (
 
 	"github.com/studio-b12/gowebdav"
 
-	"github.com/gobackup/gobackup/helper"
-	"github.com/gobackup/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/helper"
+	"github.com/KurosawaAngel/gobackup/logger"
 )
 
 // WebDAV storage
@@ -51,7 +51,7 @@ func (s *WebDAV) open() error {
 
 	s.client = client
 
-	return s.client.MkdirAll(s.path, 0644)
+	return s.client.MkdirAll(s.path, 0o644)
 }
 
 func (s *WebDAV) close() {}
@@ -70,7 +70,7 @@ func (s *WebDAV) upload(fileKey string) error {
 		remoteDir := filepath.Dir(remotePath)
 
 		// mkdir
-		if err := s.client.MkdirAll(remoteDir, 0644); err != nil {
+		if err := s.client.MkdirAll(remoteDir, 0o644); err != nil {
 			return err
 		}
 	} else {
@@ -90,7 +90,7 @@ func (s *WebDAV) upload(fileKey string) error {
 		defer f.Close()
 
 		progress := helper.NewProgressBar(logger, f)
-		if err := s.client.WriteStream(remotePath, progress.Reader, 0644); err != nil {
+		if err := s.client.WriteStream(remotePath, progress.Reader, 0o644); err != nil {
 			return progress.Errorf("upload failed %v", err)
 		}
 		progress.Done(remotePath)

@@ -14,8 +14,8 @@ import (
 	"github.com/bramvdbogaerde/go-scp/auth"
 	"golang.org/x/crypto/ssh"
 
-	"github.com/gobackup/gobackup/helper"
-	"github.com/gobackup/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/helper"
+	"github.com/KurosawaAngel/gobackup/logger"
 )
 
 // SSH

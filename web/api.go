@@ -10,12 +10,12 @@ import (
 	"os"
 	"time"
 
+	"github.com/KurosawaAngel/gobackup/config"
+	"github.com/KurosawaAngel/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/model"
+	"github.com/KurosawaAngel/gobackup/storage"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
-	"github.com/gobackup/gobackup/config"
-	"github.com/gobackup/gobackup/logger"
-	"github.com/gobackup/gobackup/model"
-	"github.com/gobackup/gobackup/storage"
 	"github.com/stoicperlman/fls"
 )
 
@@ -110,7 +110,6 @@ func setupRouter(version string) *gin.Engine {
 		c.AbortWithStatusJSON(c.Writer.Status(), gin.H{
 			"message": c.Errors.String(),
 		})
-
 	})
 
 	group := r.Group("/api")

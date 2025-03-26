@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gobackup/gobackup/helper"
-	"github.com/gobackup/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/helper"
+	"github.com/KurosawaAngel/gobackup/logger"
 )
 
 // MongoDB database
@@ -37,9 +37,7 @@ type MongoDB struct {
 	args                string
 }
 
-var (
-	mongodumpCli = "mongodump"
-)
+var mongodumpCli = "mongodump"
 
 func (db *MongoDB) init() (err error) {
 	viper := db.viper

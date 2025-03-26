@@ -3,8 +3,8 @@ package database
 import (
 	"fmt"
 
-	"github.com/gobackup/gobackup/helper"
-	"github.com/gobackup/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/helper"
+	"github.com/KurosawaAngel/gobackup/logger"
 )
 
 // InfluxDB v2 database through `influx` cli

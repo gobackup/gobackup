@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gobackup/gobackup/helper"
-	"github.com/gobackup/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/helper"
+	"github.com/KurosawaAngel/gobackup/logger"
 )
 
 // PostgreSQL database
@@ -44,13 +44,11 @@ type PostgreSQL struct {
 	_dumpFilePath string
 }
 
-var (
-	PostgreSQLCompressionExt = map[string]string{
-		"gzip": "gz",
-		"lz4":  "lz4",
-		"zstd": "zst",
-	}
-)
+var PostgreSQLCompressionExt = map[string]string{
+	"gzip": "gz",
+	"lz4":  "lz4",
+	"zstd": "zst",
+}
 
 func (db *PostgreSQL) init() (err error) {
 	viper := db.viper

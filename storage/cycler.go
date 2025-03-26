@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gobackup/gobackup/config"
-	"github.com/gobackup/gobackup/helper"
-	"github.com/gobackup/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/config"
+	"github.com/KurosawaAngel/gobackup/helper"
+	"github.com/KurosawaAngel/gobackup/logger"
 )
 
 type PackageList []Package
@@ -21,9 +21,7 @@ type Package struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-var (
-	cyclerPath = filepath.Join(config.GoBackupDir, "cycler")
-)
+var cyclerPath = filepath.Join(config.GoBackupDir, "cycler")
 
 type Cycler struct {
 	name     string
@@ -94,7 +92,7 @@ func (c *Cycler) load(cyclerFileName string) {
 
 	// write example JSON if not exist
 	if !helper.IsExistsPath(cyclerFileName) {
-		if err := os.WriteFile(cyclerFileName, []byte("[]"), 0660); err != nil {
+		if err := os.WriteFile(cyclerFileName, []byte("[]"), 0o660); err != nil {
 			logger.Errorf("Failed to write file %s: %v", cyclerFileName, err)
 			return
 		}
@@ -126,7 +124,7 @@ func (c *Cycler) save(cyclerFileName string) {
 		return
 	}
 
-	err = os.WriteFile(cyclerFileName, data, 0660)
+	err = os.WriteFile(cyclerFileName, data, 0o660)
 	if err != nil {
 		logger.Error("Save cycler.json failed: ", err)
 		return

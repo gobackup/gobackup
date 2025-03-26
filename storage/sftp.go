@@ -12,8 +12,8 @@ import (
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 
-	"github.com/gobackup/gobackup/helper"
-	"github.com/gobackup/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/helper"
+	"github.com/KurosawaAngel/gobackup/logger"
 )
 
 // SFTP storage
@@ -107,7 +107,7 @@ func (s *SFTP) upload(fileKey string) error {
 		fileKeys = append(fileKeys, fileKey)
 	}
 
-	//defer s.client.Session.Close()
+	// defer s.client.Session.Close()
 	for _, key := range fileKeys {
 		sourcePath := filepath.Join(filepath.Dir(s.archivePath), key)
 		remotePath := filepath.Join(s.path, key)

@@ -5,16 +5,14 @@ import (
 	"sync"
 	"time"
 
+	"github.com/KurosawaAngel/gobackup/config"
+	superlogger "github.com/KurosawaAngel/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/model"
 	"github.com/fsnotify/fsnotify"
 	"github.com/go-co-op/gocron"
-	"github.com/gobackup/gobackup/config"
-	superlogger "github.com/gobackup/gobackup/logger"
-	"github.com/gobackup/gobackup/model"
 )
 
-var (
-	mycron *gocron.Scheduler
-)
+var mycron *gocron.Scheduler
 
 func init() {
 	config.OnConfigChange(func(in fsnotify.Event) {

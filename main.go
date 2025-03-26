@@ -10,11 +10,11 @@ import (
 	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
 
-	"github.com/gobackup/gobackup/config"
-	"github.com/gobackup/gobackup/logger"
-	"github.com/gobackup/gobackup/model"
-	"github.com/gobackup/gobackup/scheduler"
-	"github.com/gobackup/gobackup/web"
+	"github.com/KurosawaAngel/gobackup/config"
+	"github.com/KurosawaAngel/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/model"
+	"github.com/KurosawaAngel/gobackup/scheduler"
+	"github.com/KurosawaAngel/gobackup/web"
 )
 
 const (
@@ -101,7 +101,7 @@ func main() {
 
 				dm := &daemon.Context{
 					PidFileName: config.PidFilePath,
-					PidFilePerm: 0644,
+					PidFilePerm: 0o644,
 					WorkDir:     "./",
 					Args:        args,
 				}

@@ -3,10 +3,11 @@ package notifier
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gobackup/gobackup/logger"
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/KurosawaAngel/gobackup/logger"
 )
 
 type Healthchecks struct {

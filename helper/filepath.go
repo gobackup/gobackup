@@ -5,7 +5,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/gobackup/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/logger"
 )
 
 // IsExistsPath check path exist
@@ -20,7 +20,7 @@ func IsExistsPath(p string) bool {
 // MkdirP like mkdir -p
 func MkdirP(dirPath string) error {
 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-		return os.MkdirAll(dirPath, 0750)
+		return os.MkdirAll(dirPath, 0o750)
 	}
 	return nil
 }

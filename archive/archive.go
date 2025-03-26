@@ -5,9 +5,9 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/gobackup/gobackup/config"
-	"github.com/gobackup/gobackup/helper"
-	"github.com/gobackup/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/config"
+	"github.com/KurosawaAngel/gobackup/helper"
+	"github.com/KurosawaAngel/gobackup/logger"
 )
 
 // Run archive

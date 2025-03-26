@@ -2,13 +2,14 @@ package compressor
 
 import (
 	"fmt"
-	"github.com/gobackup/gobackup/helper"
 	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/gobackup/gobackup/config"
-	"github.com/gobackup/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/helper"
+
+	"github.com/KurosawaAngel/gobackup/config"
+	"github.com/KurosawaAngel/gobackup/logger"
 	"github.com/spf13/viper"
 )
 

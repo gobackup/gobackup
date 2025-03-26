@@ -12,8 +12,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 
-	"github.com/gobackup/gobackup/helper"
-	"github.com/gobackup/gobackup/logger"
+	"github.com/KurosawaAngel/gobackup/helper"
+	"github.com/KurosawaAngel/gobackup/logger"
 )
 
 var (
@@ -329,7 +329,6 @@ func loadStoragesConfig(model *ModelConfig) {
 		}
 	}
 	model.Storages = storageConfigs
-
 }
 
 func loadNotifiersConfig(model *ModelConfig) {

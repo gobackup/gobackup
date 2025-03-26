@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/KurosawaAngel/gobackup/config"
 	"github.com/gin-gonic/gin"
-	"github.com/gobackup/gobackup/config"
 	"github.com/longbridgeapp/assert"
 )
 

@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/KurosawaAngel/gobackup/logger"
 	"github.com/cheggaaa/pb/v3"
 	"github.com/dustin/go-humanize"
-	"github.com/gobackup/gobackup/logger"
 	"github.com/hako/durafmt"
 )
 

@@ -3,13 +3,12 @@ package database
 import (
 	"testing"
 
-	"github.com/gobackup/gobackup/config"
+	"github.com/KurosawaAngel/gobackup/config"
 	"github.com/longbridgeapp/assert"
 	"github.com/spf13/viper"
 )
 
 func TestEtcd_init(t *testing.T) {
-
 	viper := viper.New()
 	viper.Set("endpoint", "127.0.0.1:2379")
 	viper.Set("args", "--foo --bar --baz")

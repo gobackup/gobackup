@@ -3,7 +3,7 @@ package storage
 import (
 	"testing"
 
-	"github.com/gobackup/gobackup/config"
+	"github.com/KurosawaAngel/gobackup/config"
 	"github.com/longbridgeapp/assert"
 )
 
