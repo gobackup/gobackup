@@ -15,7 +15,6 @@
 gobackup.yml
 gobackup
 build/
-dist/
 vendor/
 log/
 .idea
