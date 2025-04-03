@@ -1,0 +1,30 @@
+name: "Close Stale Issues"
+permissions:
+  contents: write # only for delete-branch option
+  issues: write
+  pull-requests: write
+
+on:
+  schedule:
+    - cron: "12 3 * * 4"
+  workflow_dispatch:
+
+jobs:
+  stale:
+    if: github.repository_owner == 'gobackup'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          close-issue-message: >
+            This issue was closed due to inactivity at least 180 days. If you still encounter this issue, please open a new issue and link to this issue.
+
+            Thank you.
+          days-before-stale: 180
+          days-before-close: 7
+          operations-per-run: 1000
+          ascending: true
+          enable-statistics: true
+          stale-issue-label: "stale"
+          exempt-issue-labels: "enhancement"
