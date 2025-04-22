@@ -40,5 +40,10 @@ func (tar *Tar) options() (opts []string) {
 	}
 	opts = append(opts, "-cf")
 
+	args := tar.viper.GetString("args")
+	if len(args) > 0 {
+		opts = append(opts, args)
+	}
+
 	return
 }
