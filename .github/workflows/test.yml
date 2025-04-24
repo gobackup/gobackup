@@ -25,7 +25,7 @@ jobs:
         run: |
           cd web
           yarn && yarn build
-      - name: Get dependencies
-        run: go get -v -t -d ./...
+      - name: Download dependencies
+        run: go mod download
       - name: Test
-        run: go test ./...
+        run: go test -vet=all ./...
