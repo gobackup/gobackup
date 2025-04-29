@@ -25,25 +25,23 @@ type Model struct {
 
 // Perform model
 func (m Model) Perform() (err error) {
-	logger := logger.Tag(fmt.Sprintf("Model: %s", m.Config.Name))
+	l := logger.Tag(fmt.Sprintf("Model: %s", m.Config.Name))
 
 	m.before()
 
 	defer func() {
 		if err != nil {
-			logger.Error(err)
+			l.Error(err)
 			notifier.Failure(m.Config, err.Error())
 		} else {
 			notifier.Success(m.Config)
 		}
 	}()
 
-	logger.Info("WorkDir:", m.Config.DumpPath)
+	l.Info("WorkDir:", m.Config.DumpPath)
 
 	defer func() {
-		if r := recover(); r != nil {
-			m.after()
-		}
+		_ = recover()
 
 		m.after()
 	}()
@@ -97,23 +95,21 @@ func (m Model) before() {
 
 // Cleanup model temp files
 func (m Model) after() {
-	logger := logger.Tag("Model")
+	l := logger.Tag("Model")
 
-	tempDir := m.Config.TempPath
-	if viper.GetBool("useTempWorkDir") {
-		tempDir = viper.GetString("workdir")
-	}
-	logger.Infof("Cleanup temp: %s/", tempDir)
+	tempDir := viper.GetString("workdir")
+
+	l.Infof("Cleanup temp: %s/", tempDir)
 	if err := os.RemoveAll(tempDir); err != nil {
-		logger.Errorf("Cleanup temp dir %s error: %v", tempDir, err)
+		l.Errorf("Cleanup temp dir %s error: %v", tempDir, err)
 	}
 
 	// Execute after_script
 	if len(m.Config.AfterScript) > 0 {
-		logger.Info("Executing after_script...")
+		l.Info("Executing after_script...")
 		_, err := helper.ExecWithStdio(m.Config.AfterScript, true)
 		if err != nil {
-			logger.Error(err)
+			l.Error(err)
 		}
 	}
 }

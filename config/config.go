@@ -22,10 +22,9 @@ var (
 	// Models configs
 	Models []ModelConfig
 	// gobackup base dir
-	GoBackupDir string = getGoBackupDir()
+	GoBackupDir = getGoBackupDir()
 
-	PidFilePath string = filepath.Join(GoBackupDir, "gobackup.pid")
-	LogFilePath string = filepath.Join(GoBackupDir, "gobackup.log")
+	LogFilePath = filepath.Join(GoBackupDir, "gobackup.log")
 	Web         WebConfig
 
 	wLock = sync.Mutex{}
@@ -112,18 +111,18 @@ type SubConfig struct {
 // - ~/.gobackup/gobackup.yml
 // - /etc/gobackup/gobackup.yml
 func Init(configFile string) error {
-	logger := logger.Tag("Config")
+	l := logger.Tag("Config")
 
 	viper.SetConfigType("yaml")
 
 	// set config file directly
 	if len(configFile) > 0 {
 		configFile = helper.AbsolutePath(configFile)
-		logger.Info("Load config:", configFile)
+		l.Info("Load config:", configFile)
 
 		viper.SetConfigFile(configFile)
 	} else {
-		logger.Info("Load config from default path.")
+		l.Info("Load config from default path.")
 		viper.SetConfigName("gobackup")
 
 		// ./gobackup.yml
@@ -135,13 +134,15 @@ func Init(configFile string) error {
 	}
 
 	viper.WatchConfig()
-	viper.OnConfigChange(func(in fsnotify.Event) {
-		logger.Info("Config file changed:", in.Name)
-		defer onConfigChanged(in)
-		if err := loadConfig(); err != nil {
-			logger.Error(err.Error())
-		}
-	})
+	viper.OnConfigChange(
+		func(in fsnotify.Event) {
+			logger.Info("Config file changed:", in.Name)
+			defer onConfigChanged(in)
+			if err := loadConfig(); err != nil {
+				logger.Error(err.Error())
+			}
+		},
+	)
 
 	return loadConfig()
 }
@@ -162,11 +163,11 @@ func loadConfig() error {
 	wLock.Lock()
 	defer wLock.Unlock()
 
-	logger := logger.Tag("Config")
+	l := logger.Tag("Config")
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		logger.Error("Load gobackup config failed: ", err)
+		l.Error("Load gobackup config failed: ", err)
 		return err
 	}
 
@@ -174,29 +175,27 @@ func loadConfig() error {
 	if info, err := os.Stat(viperConfigFile); err == nil {
 		// max permission: 0770
 		if info.Mode()&(1<<2) != 0 {
-			logger.Warnf("Other users are able to access %s with mode %v", viperConfigFile, info.Mode())
+			l.Warnf("Other users are able to access %s with mode %v", viperConfigFile, info.Mode())
 		}
 	}
 
-	logger.Info("Config file:", viperConfigFile)
+	l.Info("Config file:", viperConfigFile)
 
 	// load .env if exists in the same directory of used config file and expand variables in the config
 	dotEnv := filepath.Join(filepath.Dir(viperConfigFile), ".env")
 	if _, err := os.Stat(dotEnv); err == nil {
 		if err := godotenv.Load(dotEnv); err != nil {
-			logger.Errorf("Load %s failed: %v", dotEnv, err)
+			l.Errorf("Load %s failed: %v", dotEnv, err)
 			return err
 		}
 	}
 
 	cfg, _ := os.ReadFile(viperConfigFile)
 	if err := viper.ReadConfig(strings.NewReader(os.ExpandEnv(string(cfg)))); err != nil {
-		logger.Errorf("Load expanded config failed: %v", err)
+		l.Errorf("Load expanded config failed: %v", err)
 		return err
 	}
 
-	// TODO: Here the `useTempWorkDir` and `workdir`, is not in config document. We need removed it.
-	viper.Set("useTempWorkDir", false)
 	if workdir := viper.GetString("workdir"); len(workdir) == 0 {
 		// use temp dir as workdir
 		dir, err := os.MkdirTemp("", "gobackup")
@@ -205,7 +204,6 @@ func loadConfig() error {
 		}
 
 		viper.Set("workdir", dir)
-		viper.Set("useTempWorkDir", true)
 	}
 
 	Exist = true
@@ -233,7 +231,7 @@ func loadConfig() error {
 	Web.Password = viper.GetString("web.password")
 
 	UpdatedAt = time.Now()
-	logger.Infof("Config loaded, found %d models.", len(Models))
+	l.Infof("Config loaded, found %d models.", len(Models))
 
 	return nil
 }

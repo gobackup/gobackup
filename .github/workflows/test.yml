@@ -3,7 +3,7 @@ on:
   pull_request:
   push:
     branches:
-      - "*"
+      - "main"
     tags:
       - "*"
 jobs:
@@ -19,13 +19,13 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v1
         with:
-          go-version: 1.21
+          go-version: 1.24
         id: go
       - name: "Build Web"
         run: |
           cd web
           yarn && yarn build
-      - name: Build
-        run: go build -v ./...
+      - name: Vet
+        run: go vet ./...
       - name: Test
-        run: go test -v ./...
+        run: go test -vet=off ./...

@@ -12,14 +12,14 @@ import (
 
 // Run archive
 func Run(model config.ModelConfig) error {
-	logger := logger.Tag("Archive")
+	l := logger.Tag("Archive")
 
 	if model.Archive == nil {
 		return nil
 	}
 
 	if err := helper.MkdirP(model.DumpPath); err != nil {
-		logger.Errorf("Failed to mkdir dump path %s: %v", model.DumpPath, err)
+		l.Errorf("Failed to mkdir dump path %s: %v", model.DumpPath, err)
 		return err
 	}
 
@@ -32,7 +32,7 @@ func Run(model config.ModelConfig) error {
 	if len(includes) == 0 {
 		return fmt.Errorf("archive.includes have no config")
 	}
-	logger.Info("=> includes", len(includes), "rules")
+	l.Info("=> includes", len(includes), "rules")
 
 	opts := options(model.DumpPath, excludes, includes)
 

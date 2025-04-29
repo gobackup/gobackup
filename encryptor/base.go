@@ -1,9 +1,10 @@
 package encryptor
 
 import (
+	"github.com/spf13/viper"
+
 	"github.com/KurosawaAngel/gobackup/config"
 	"github.com/KurosawaAngel/gobackup/logger"
-	"github.com/spf13/viper"
 )
 
 // Base encryptor
@@ -27,9 +28,9 @@ func newBase(archivePath string, model config.ModelConfig) (base *Base) {
 	return
 }
 
-// Run compressor
+// Run encryptor
 func Run(archivePath string, model config.ModelConfig) (encryptPath string, err error) {
-	logger := logger.Tag("Encryptor")
+	l := logger.Tag("Encryptor")
 
 	base := newBase(archivePath, model)
 	var enc Encryptor
@@ -41,12 +42,12 @@ func Run(archivePath string, model config.ModelConfig) (encryptPath string, err 
 		return
 	}
 
-	logger.Info("encrypt | " + model.EncryptWith.Type)
+	l.Info("encrypt | " + model.EncryptWith.Type)
 	encryptPath, err = enc.perform()
 	if err != nil {
 		return
 	}
-	logger.Info("encrypted:", encryptPath)
+	l.Info("encrypted:", encryptPath)
 
 	// save Extension
 	model.Viper.Set("Ext", model.Viper.GetString("Ext")+".enc")
