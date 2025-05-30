@@ -46,8 +46,13 @@ func init() {
 }
 
 func SetLogger(logPath string) {
-	logfile, _ := os.OpenFile(logPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	multi := io.MultiWriter(logfile, os.Stdout)
+	writers := make([]io.Writer, 0)
+	writers = append(writers, os.Stdout)
+	logfile, err := os.OpenFile(logPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err == nil {
+		writers = append(writers, logfile)
+	}
+	multi := io.MultiWriter(writers...)
 	_myLog = log.New(&writer{multi, TimeFormat}, "", 0)
 	sharedLogger = newLogger()
 }
