@@ -3,7 +3,6 @@ package database
 import (
 	"fmt"
 	"path"
-	"regexp"
 	"strings"
 
 	"github.com/gobackup/gobackup/helper"
@@ -147,11 +146,7 @@ func (db *Redis) trySave() error {
 	if err != nil {
 		return fmt.Errorf("redis-cli SAVE failed %s", err)
 	}
-
-	if !regexp.MustCompile("OK$").MatchString(strings.TrimSpace(out)) {
-		return fmt.Errorf(`failed to invoke the "SAVE" command Response was: %s`, out)
-	}
-
+	logger.Info("Perform save result:", out)
 	return nil
 }
 
