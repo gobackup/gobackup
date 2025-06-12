@@ -90,52 +90,51 @@ func (s *Mail) notify(title string, message string) error {
 	msg := s.buildBody(title, message)
 
 	if s.useTLS {
-		return s.SendMailTLS(auth, []byte(msg))
+		return s.sendByTLS(auth, []byte(msg))
 	} else {
 		return smtp.SendMail(s.getAddr(), auth, s.from, to, []byte(msg))
 	}
 }
 
-func (s Mail) SendMailTLS(a smtp.Auth, msg []byte) error {
+func (s *Mail) sendByTLS(auth smtp.Auth, msg []byte) error {
 	conn, err := tls.Dial("tcp", s.getAddr(), nil)
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
 
-	c, err := smtp.NewClient(conn, s.host)
+	client, err := smtp.NewClient(conn, s.host)
 	if err != nil {
 		return err
 	}
 
-	if a != nil {
-		ok, _ := c.Extension("AUTH")
+	if auth != nil {
+		ok, _ := client.Extension("AUTH")
 		if !ok {
 			return errors.New("smtp: server doesn't support AUTH")
 		}
-		if err = c.Auth(a); err != nil {
+		if err = client.Auth(auth); err != nil {
 			return err
 		}
 	}
-	if err = c.Mail(s.from); err != nil {
+
+	if err = client.Mail(s.from); err != nil {
 		return err
 	}
 	for _, addr := range s.to {
-		if err = c.Rcpt(addr); err != nil {
+		if err = client.Rcpt(addr); err != nil {
 			return err
 		}
 	}
-	w, err := c.Data()
+
+	w, err := client.Data()
 	if err != nil {
 		return err
 	}
-	_, err = w.Write(msg)
-	if err != nil {
+	defer w.Close()
+	if _, err = w.Write(msg); err != nil {
 		return err
 	}
-	err = w.Close()
-	if err != nil {
-		return err
-	}
-	return c.Quit()
+
+	return client.Quit()
 }
