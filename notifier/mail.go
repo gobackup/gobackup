@@ -18,7 +18,7 @@ type Mail struct {
 	password string
 	host     string
 	port     string
-	useTLS   bool
+	tls      bool
 }
 
 func NewMail(base *Base) (*Mail, error) {
@@ -41,7 +41,7 @@ func NewMail(base *Base) (*Mail, error) {
 		from:     from,
 		host:     base.viper.GetString("host"),
 		port:     base.viper.GetString("port"),
-		useTLS:   base.viper.GetBool("useTLS"),
+		tls:      base.viper.GetBool("tls"),
 	}, nil
 }
 
@@ -89,7 +89,7 @@ func (s *Mail) notify(title string, message string) error {
 	to := s.to
 	msg := s.buildBody(title, message)
 
-	if s.useTLS {
+	if s.tls {
 		return s.sendByTLS(auth, []byte(msg))
 	} else {
 		return smtp.SendMail(s.getAddr(), auth, s.from, to, []byte(msg))
