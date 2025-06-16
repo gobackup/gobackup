@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"regexp"
 	"strings"
 
 	"github.com/gobackup/gobackup/logger"
+	"github.com/google/uuid"
 )
 
 var (
@@ -58,4 +60,30 @@ func ExecWithStdio(command string, stdout bool, args ...string) (output string, 
 	output = strings.Trim(stdOut.String(), "\n")
 
 	return
+}
+
+// Execute multiple line script with stdio
+func ExecScriptWithStdio(script string, stdout bool) (string, error) {
+	tmpFileName, _ := uuid.NewUUID()
+	tmpFile := path.Join(os.TempDir(), tmpFileName.String())
+
+	f, err := os.Create(tmpFile)
+	if err != nil {
+		return "", err
+	}
+	f.WriteString(script)
+	err = os.Chmod(tmpFile, 0755)
+	if err != nil {
+		return "", err
+	}
+
+	defer f.Close()
+	defer os.Remove(tmpFile)
+
+	return ExecWithStdio("sh", stdout, tmpFile)
+}
+
+// Execute multiple line script
+func ExecScript(script string) (output string, err error) {
+	return ExecScriptWithStdio(script, false)
 }
