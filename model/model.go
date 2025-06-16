@@ -88,7 +88,7 @@ func (m Model) before() {
 	// Execute before_script
 	if len(m.Config.BeforeScript) > 0 {
 		logger.Info("Executing before_script...")
-		_, err := helper.ExecWithStdio(m.Config.BeforeScript, true)
+		_, err := helper.ExecScriptWithStdio(m.Config.BeforeScript, true)
 		if err != nil {
 			logger.Error(err)
 		}
@@ -111,7 +111,7 @@ func (m Model) after() {
 	// Execute after_script
 	if len(m.Config.AfterScript) > 0 {
 		logger.Info("Executing after_script...")
-		_, err := helper.ExecWithStdio(m.Config.AfterScript, true)
+		_, err := helper.ExecScriptWithStdio(m.Config.AfterScript, true)
 		if err != nil {
 			logger.Error(err)
 		}

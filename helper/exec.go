@@ -59,3 +59,35 @@ func ExecWithStdio(command string, stdout bool, args ...string) (output string, 
 
 	return
 }
+
+// Execute multiple line script with stdio
+func ExecScriptWithStdio(script string, stdout bool) (output string, err error) {
+	output = ""
+	for i, line := range strings.Split(script, "\n") {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "#") {
+			continue
+		}
+		if len(line) == 0 {
+			continue
+		}
+
+		var lineOutput string
+		lineOutput, err = ExecWithStdio(line, stdout)
+		if err != nil {
+			return
+		}
+
+		if i > 0 {
+			output += "\n"
+		}
+		output += lineOutput
+	}
+
+	return
+}
+
+// Execute multiple line script
+func ExecScript(script string) (output string, err error) {
+	return ExecScriptWithStdio(script, false)
+}
