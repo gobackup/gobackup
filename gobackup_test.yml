@@ -130,9 +130,13 @@ models:
       password: 123456
     notifiers:
     before_script: |
-      echo "before_script invoked."
+      echo before_script invoked.
+      ls -lh | wc -l
+      echo This is before_script second line.
     after_script: |
-      echo "after_script invoked."
+      echo after_script invoked.
+      ls -lh | wc -l
+      echo This is after_script second line.
     storages:
       local:
         type: local
