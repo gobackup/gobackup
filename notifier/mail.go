@@ -1,7 +1,9 @@
 package notifier
 
 import (
+	"crypto/tls"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"net/smtp"
 	"sort"
@@ -16,6 +18,7 @@ type Mail struct {
 	password string
 	host     string
 	port     string
+	tls      bool
 }
 
 func NewMail(base *Base) (*Mail, error) {
@@ -38,6 +41,7 @@ func NewMail(base *Base) (*Mail, error) {
 		from:     from,
 		host:     base.viper.GetString("host"),
 		port:     base.viper.GetString("port"),
+		tls:      base.viper.GetBool("tls"),
 	}, nil
 }
 
@@ -83,11 +87,54 @@ func (s *Mail) notify(title string, message string) error {
 	// Connect to the server, authenticate, set the sender and recipient,
 	// and send the email all in one step.
 	to := s.to
+	msg := s.buildBody(title, message)
 
-	err := smtp.SendMail(s.getAddr(), auth, s.from, to, []byte(s.buildBody(title, message)))
+	if s.tls {
+		return s.sendByTLS(auth, []byte(msg))
+	} else {
+		return smtp.SendMail(s.getAddr(), auth, s.from, to, []byte(msg))
+	}
+}
+
+func (s *Mail) sendByTLS(auth smtp.Auth, msg []byte) error {
+	conn, err := tls.Dial("tcp", s.getAddr(), nil)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client, err := smtp.NewClient(conn, s.host)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	if auth != nil {
+		ok, _ := client.Extension("AUTH")
+		if !ok {
+			return errors.New("smtp: server doesn't support AUTH")
+		}
+		if err = client.Auth(auth); err != nil {
+			return err
+		}
+	}
+
+	if err = client.Mail(s.from); err != nil {
+		return err
+	}
+	for _, addr := range s.to {
+		if err = client.Rcpt(addr); err != nil {
+			return err
+		}
+	}
+
+	w, err := client.Data()
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+	if _, err = w.Write(msg); err != nil {
+		return err
+	}
+
+	return client.Quit()
 }
