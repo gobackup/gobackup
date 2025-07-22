@@ -203,7 +203,7 @@ func List(model config.ModelConfig, parent string) (items []FileItem, err error)
 
 		// Sort items by LastModified, Filename in descending
 		sort.Slice(items, func(i, j int) bool {
-			if items[i].LastModified == items[j].LastModified {
+			if items[i].LastModified.Equal(items[j].LastModified) {
 				return items[i].Filename > items[j].Filename
 			}
 			return items[i].LastModified.After(items[j].LastModified)

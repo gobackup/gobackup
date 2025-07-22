@@ -3,10 +3,11 @@ package notifier
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gobackup/gobackup/logger"
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/gobackup/gobackup/logger"
 )
 
 type Healthchecks struct {
@@ -53,6 +54,10 @@ func (s *Healthchecks) notify(title string, message string) error {
 		"title":   title,
 		"message": message,
 	})
+	if err != nil {
+		logger.Error(err)
+		return err
+	}
 
 	logger.Infof("Send notification to %s...", url)
 	req, err := http.NewRequest(http.MethodPost, url, strings.NewReader(string(payload)))
