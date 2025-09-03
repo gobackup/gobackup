@@ -67,7 +67,7 @@ func TestMySQL_dumpArgsWithAdditionalOptions(t *testing.T) {
 func TestMySQL_dumpArgsWithDollarInPassword(t *testing.T) {
 	base := newBase(
 		config.ModelConfig{
-			DumpPath: "/data/backups/",
+			DumpPath: "/tmp/backups/",
 		},
 		config.SubConfig{
 			Type: "mysql",
@@ -77,13 +77,19 @@ func TestMySQL_dumpArgsWithDollarInPassword(t *testing.T) {
 	db := &MySQL{
 		Base:     base,
 		database: "dummy_test",
-		host:     "127.0.0.2",
-		port:     "6378",
-		password: "password$$",
-		args:     "--single-transaction --quick",
+		host:     "127.0.0.1",
+		port:     "3306",
+		username: "test",
+		password: "$ecure_pa$$word",
+		args:     "--skip-ssl-verify-server-cert",
 	}
 
-	assert.Equal(t, db.build(), "mysqldump --host 127.0.0.2 --port 6378 -p'password$$' --single-transaction --quick dummy_test --result-file=/data/backups/mysql/mysql1/dummy_test.sql")
+	err := db.perform()
+	if err != nil {
+		println(err.Error())
+	}
+
+	assert.Equal(t, db.build(), "mysqldump --host 127.0.0.1 --port 3306 -u test -p'$ecure_pa$$word' --skip-ssl-verify-server-cert dummy_test --result-file=/tmp/backups/mysql/mysql1/dummy_test.sql")
 }
 
 func TestMySQL_dumpWithSocket(t *testing.T) {

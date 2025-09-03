@@ -67,7 +67,7 @@ func (db *MySQL) init() (err error) {
 }
 
 func (db *MySQL) build() string {
-	dumpArgs := []string{}
+	var dumpArgs []string
 	if len(db.host) > 0 {
 		dumpArgs = append(dumpArgs, "--host", db.host)
 	}
@@ -82,9 +82,9 @@ func (db *MySQL) build() string {
 	}
 	if len(db.password) > 0 {
 		if helper.PasswordContainsSpecialCharacters(db.password) {
-			dumpArgs = append(dumpArgs, `-p'`+db.password+`'`)
+			dumpArgs = append(dumpArgs, "-p'"+db.password+"'")
 		} else {
-			dumpArgs = append(dumpArgs, `-p`+db.password)
+			dumpArgs = append(dumpArgs, "-p"+db.password)
 		}
 	}
 
@@ -111,10 +111,18 @@ func (db *MySQL) perform() error {
 	lgr := logger.Tag("MySQL")
 
 	lgr.Info("-> Dumping MySQL...")
-	_, err := helper.Exec(db.build())
-	if err != nil {
-		return fmt.Errorf("-> Dump error: %s", err)
+	if helper.PasswordContainsSpecialCharacters(db.password) {
+		_, err := helper.ExecShell(db.build())
+		if err != nil {
+			return fmt.Errorf("-> Dump error: %s", err)
+		}
+	} else {
+		_, err := helper.Exec(db.build())
+		if err != nil {
+			return fmt.Errorf("-> Dump error: %s", err)
+		}
 	}
+
 	lgr.Info("dump path:", db.dumpPath)
 	return nil
 }
