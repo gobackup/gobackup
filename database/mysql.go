@@ -81,7 +81,11 @@ func (db *MySQL) build() string {
 		dumpArgs = append(dumpArgs, "-u", db.username)
 	}
 	if len(db.password) > 0 {
-		dumpArgs = append(dumpArgs, `-p`+db.password)
+		if helper.PasswordContainsSpecialCharacters(db.password) {
+			dumpArgs = append(dumpArgs, `-p'`+db.password+`'`)
+		} else {
+			dumpArgs = append(dumpArgs, `-p`+db.password)
+		}
 	}
 
 	for _, table := range db.excludeTables {
@@ -104,13 +108,13 @@ func (db *MySQL) build() string {
 }
 
 func (db *MySQL) perform() error {
-	logger := logger.Tag("MySQL")
+	lgr := logger.Tag("MySQL")
 
-	logger.Info("-> Dumping MySQL...")
+	lgr.Info("-> Dumping MySQL...")
 	_, err := helper.Exec(db.build())
 	if err != nil {
 		return fmt.Errorf("-> Dump error: %s", err)
 	}
-	logger.Info("dump path:", db.dumpPath)
+	lgr.Info("dump path:", db.dumpPath)
 	return nil
 }
