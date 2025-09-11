@@ -25,6 +25,7 @@ const LogView = () => {
             stream
             follow={follow}
             onScroll={onScroll}
+            fetchOptions={{ credentials: 'include' }}
           />
         )}
       />
