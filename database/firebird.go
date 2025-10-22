@@ -61,13 +61,13 @@ func (db *Firebird) build() string {
 	gbakArgs = append(gbakArgs, "-b")
 
 	if len(db.username) > 0 {
-		gbakArgs = append(gbakArgs, "--user "+db.username)
+		gbakArgs = append(gbakArgs, "-user "+db.username)
 	}
 	if len(db.password) > 0 {
-		gbakArgs = append(gbakArgs, "--pass "+db.password)
+		gbakArgs = append(gbakArgs, "-pass "+db.password)
 	}
 	if len(db.role) > 0 {
-		gbakArgs = append(gbakArgs, "--role "+db.role)
+		gbakArgs = append(gbakArgs, "-role "+db.role)
 	}
 
 	var dbString string

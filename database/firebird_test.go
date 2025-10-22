@@ -36,7 +36,7 @@ func TestFirebirdSQL_init(t *testing.T) {
 	err := db.init()
 	assert.NoError(t, err)
 
-	assert.Equal(t, db.build(), "gbak -b --user user1 --pass pass1 --role role1 1.2.3.4/3051:my_db /data/backups/firebird/firebird1/my_db.fbk")
+	assert.Equal(t, db.build(), "gbak -b -user user1 -pass pass1 -role role1 1.2.3.4/3051:my_db /data/backups/firebird/firebird1/my_db.fbk")
 }
 
 func TestFirebirdSQL_withDatabasePath(t *testing.T) {
@@ -67,7 +67,7 @@ func TestFirebirdSQL_withDatabasePath(t *testing.T) {
 	err := db.init()
 	assert.NoError(t, err)
 
-	assert.Equal(t, db.build(), "gbak -b --user user1 --pass pass1 --role role1 1.2.3.4/3050:/var/databases/test.fdb /data/backups/firebird/firebird1/test.fbk")
+	assert.Equal(t, db.build(), "gbak -b -user user1 -pass pass1 -role role1 1.2.3.4/3050:/var/databases/test.fdb /data/backups/firebird/firebird1/test.fbk")
 }
 
 func TestFirebirdSQL_withoutHost(t *testing.T) {
@@ -95,5 +95,5 @@ func TestFirebirdSQL_withoutHost(t *testing.T) {
 	err := db.init()
 	assert.NoError(t, err)
 
-	assert.Equal(t, db.build(), "gbak -b --user user1 --pass pass1 127.0.0.1/3050:DB_ALIAS /data/backups/firebird/firebird1/DB_ALIAS.fbk")
+	assert.Equal(t, db.build(), "gbak -b -user user1 -pass pass1 127.0.0.1/3050:DB_ALIAS /data/backups/firebird/firebird1/DB_ALIAS.fbk")
 }
