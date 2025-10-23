@@ -5,7 +5,7 @@ This document describes how to develop GoBackup.
 - gobackup_test.yml is a test configuration file for development.
 - tests/ folder contains some test for special cases.
 
-## Documentions
+## Documentations
 
 - [Release new version](./docs/release-new-version.md)
 

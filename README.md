@@ -222,7 +222,7 @@ models:
 
 ### Start Daemon & Web UI
 
-GoBackup bulit a HTTP Server for Web UI, you can start it by `gobackup start`.
+GoBackup built a HTTP Server for Web UI, you can start it by `gobackup start`.
 
 It also will handle the backup schedule.
 
@@ -256,12 +256,6 @@ $ kill -HUP 20443
 # Exit daemon
 $ kill -QUIT 20443
 ```
-
-## Contributing
-
-The [DEVELOPMENT](./DEVELOPMENT) document will help you to setup development environment, and guide you how to test them in local.
-
-When you finish your work, please send a PR.
 
 ## License
 
