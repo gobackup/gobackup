@@ -47,6 +47,7 @@ https://gobackup.github.io
 - InfluxDB
 - MariaDB
 - etcd
+- Firebird
 
 ### Storages
 

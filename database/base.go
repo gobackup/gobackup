@@ -83,6 +83,8 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 		db = &InfluxDB2{Base: base}
 	case "etcd":
 		db = &Etcd{Base: base}
+	case "firebird":
+		db = &Firebird{Base: base}
 	default:
 		logger.Warn(fmt.Errorf("model: %s databases.%s config `type: %s`, but is not implement", model.Name, dbConfig.Name, dbConfig.Type))
 		return
