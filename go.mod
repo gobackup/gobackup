@@ -1,6 +1,6 @@
 module github.com/gobackup/gobackup
 
-go 1.21
+go 1.23.0
 
 require (
 	cloud.google.com/go/storage v1.28.0
@@ -12,7 +12,6 @@ require (
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fatih/color v1.14.1
 	github.com/go-co-op/gocron v1.18.0
-	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
 	github.com/jlaffaye/ftp v0.1.0
 	github.com/joho/godotenv v1.4.0
@@ -34,8 +33,7 @@ require (
 
 require (
 	cloud.google.com/go v0.107.0 // indirect
-	cloud.google.com/go/compute v1.15.1 // indirect
-	cloud.google.com/go/compute/metadata v0.2.3 // indirect
+	cloud.google.com/go/compute/metadata v0.3.0 // indirect
 	cloud.google.com/go/iam v0.8.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.1.4 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.0.1 // indirect
@@ -56,7 +54,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
-	github.com/google/uuid v1.3.0 // indirect
+	github.com/google/uuid v1.3.0
 	github.com/googleapis/enterprise-certificate-proxy v0.2.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.7.0 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
@@ -94,7 +92,7 @@ require (
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/arch v0.3.0 // indirect
 	golang.org/x/net v0.33.0 // indirect
-	golang.org/x/oauth2 v0.4.0
+	golang.org/x/oauth2 v0.27.0
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
