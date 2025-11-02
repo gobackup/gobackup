@@ -27,7 +27,8 @@ type Compressor interface {
 }
 
 func (c *Base) archiveFilePath(ext string) string {
-	return filepath.Join(c.model.TempPath, time.Now().Format("2006.01.02.15.04.05")+ext)
+    format := c.model.CompressWith.Viper.GetString("filename_format")
+    return filepath.Join(c.model.TempPath, time.Now().Format(format)+ext)
 }
 
 func newBase(model config.ModelConfig) (base Base) {

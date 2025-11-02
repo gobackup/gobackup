@@ -12,6 +12,7 @@ models:
       # At 04:05 on Sunday.
       cron: "5 4 * * sun"
     compress_with:
+      filename_format: "2006.01.01.15.00.00"
       type: tgz
     encrypt_with:
       type: openssl

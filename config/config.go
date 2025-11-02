@@ -252,10 +252,15 @@ func loadModel(key string) (ModelConfig, error) {
 	model.Description = model.Viper.GetString("description")
 	model.Schedule = ScheduleConfig{Enabled: false}
 
-	model.Viper.SetDefault("compress_with.type", "tar")
+    compressViper := model.Viper.Sub("compress_with")
+    if compressViper == nil {
+        compressViper = viper.New()
+    }
+    compressViper.SetDefault("type", "tar")
+    compressViper.SetDefault("filename_format", "2006.01.02.15.04.05")
 	model.CompressWith = SubConfig{
-		Type:  model.Viper.GetString("compress_with.type"),
-		Viper: model.Viper.Sub("compress_with"),
+		Type:  compressViper.GetString("type"),
+		Viper: compressViper,
 	}
 
 	model.EncryptWith = SubConfig{
