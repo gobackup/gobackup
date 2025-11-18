@@ -204,7 +204,7 @@ models:
   other_backup:
     # At 04:05 on every day.
     schedule:
-      every: "1day",
+      every: "1day"
       at: "04:05"
     storages:
       local:
