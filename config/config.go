@@ -41,6 +41,7 @@ type WebConfig struct {
 	Port     string
 	Username string
 	Password string
+	Enabled  bool
 }
 
 type ScheduleConfig struct {
@@ -227,10 +228,12 @@ func loadConfig() error {
 	Web = WebConfig{}
 	viper.SetDefault("web.host", "0.0.0.0")
 	viper.SetDefault("web.port", 2703)
+	viper.SetDefault("web.enabled", true)
 	Web.Host = viper.GetString("web.host")
 	Web.Port = viper.GetString("web.port")
 	Web.Username = viper.GetString("web.username")
 	Web.Password = viper.GetString("web.password")
+	Web.Enabled = viper.GetBool("web.enabled")
 
 	UpdatedAt = time.Now()
 	logger.Infof("Config loaded, found %d models.", len(Models))
@@ -252,12 +255,12 @@ func loadModel(key string) (ModelConfig, error) {
 	model.Description = model.Viper.GetString("description")
 	model.Schedule = ScheduleConfig{Enabled: false}
 
-    compressViper := model.Viper.Sub("compress_with")
-    if compressViper == nil {
-        compressViper = viper.New()
-    }
-    compressViper.SetDefault("type", "tar")
-    compressViper.SetDefault("filename_format", "2006.01.02.15.04.05")
+	compressViper := model.Viper.Sub("compress_with")
+	if compressViper == nil {
+		compressViper = viper.New()
+	}
+	compressViper.SetDefault("type", "tar")
+	compressViper.SetDefault("filename_format", "2006.01.02.15.04.05")
 	model.CompressWith = SubConfig{
 		Type:  compressViper.GetString("type"),
 		Viper: compressViper,
