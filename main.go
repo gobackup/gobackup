@@ -145,6 +145,10 @@ func main() {
 					return fmt.Errorf("failed to start scheduler: %w", err)
 				}
 
+				if !config.Web.Enabled {
+					select {}
+				}
+
 				return web.StartHTTP(version)
 			},
 		},
