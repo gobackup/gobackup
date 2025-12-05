@@ -26,14 +26,14 @@ import (
 // password:
 // timeout: 300
 // private_key: ~/.ssh/id_rsa
-// passpharase:
+// passphrase:
 type SSH struct {
-	host        string
-	port        string
-	privateKey  string
-	passpharase string
-	username    string
-	password    string
+	host       string
+	port       string
+	privateKey string
+	passphrase string
+	username   string
+	password   string
 }
 
 // SCP storage
@@ -57,7 +57,7 @@ func (s *SCP) open() (err error) {
 	s.username = s.viper.GetString("username")
 	s.password = s.viper.GetString("password")
 	s.privateKey = helper.ExplandHome(s.viper.GetString("private_key"))
-	s.passpharase = s.viper.GetString("passpharase")
+	s.passphrase = s.viper.GetString("passphrase")
 
 	if len(s.host) == 0 {
 		return fmt.Errorf("host is required")
@@ -73,10 +73,10 @@ func (s *SCP) open() (err error) {
 	}
 
 	sc := sshConfig{
-		username:    s.username,
-		password:    s.password,
-		privateKey:  s.privateKey,
-		passpharase: s.passpharase,
+		username:   s.username,
+		password:   s.password,
+		privateKey: s.privateKey,
+		passphrase: s.passphrase,
 	}
 
 	clientConfig := newSSHClientConfig(sc)
@@ -192,10 +192,10 @@ func (s *SCP) delete(fileKey string) (err error) {
 }
 
 type sshConfig struct {
-	username    string
-	password    string
-	privateKey  string
-	passpharase string
+	username   string
+	password   string
+	privateKey string
+	passphrase string
 }
 
 func newSSHClientConfig(c sshConfig) ssh.ClientConfig {
@@ -206,17 +206,17 @@ func newSSHClientConfig(c sshConfig) ssh.ClientConfig {
 
 	// PrivateKeyWithPassphrase, PrivateKey
 	logger.Debugf("PrivateKey: %s", c.privateKey)
-	if len(c.passpharase) != 0 {
+	if len(c.passphrase) != 0 {
 		if cc, err := auth.PrivateKeyWithPassphrase(
 			c.username,
-			[]byte(c.passpharase),
+			[]byte(c.passphrase),
 			c.privateKey,
 			keyCallBack,
 		); err != nil {
-			logger.Debugf("PrivateKey with passpharase failed: %v", err)
+			logger.Debugf("PrivateKey with passphrase failed: %v", err)
 		} else {
 			auths = append(auths, cc.Auth...)
-			logger.Debug("Added passpharase private key")
+			logger.Debug("Added passphrase private key")
 		}
 	} else {
 		if cc, err := auth.PrivateKey(
