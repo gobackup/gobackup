@@ -36,11 +36,17 @@ var (
 	onConfigChanges = make([]func(fsnotify.Event), 0)
 )
 
+type TlsConfig struct {
+	Certificate string
+	PrivateKey  string
+}
+
 type WebConfig struct {
 	Host     string
 	Port     string
 	Username string
 	Password string
+	Tls      TlsConfig
 }
 
 type ScheduleConfig struct {
@@ -231,6 +237,8 @@ func loadConfig() error {
 	Web.Port = viper.GetString("web.port")
 	Web.Username = viper.GetString("web.username")
 	Web.Password = viper.GetString("web.password")
+	Web.Tls.Certificate = viper.GetString("web.tls.certificate")
+	Web.Tls.PrivateKey = viper.GetString("web.tls.private_key")
 
 	UpdatedAt = time.Now()
 	logger.Infof("Config loaded, found %d models.", len(Models))
@@ -252,12 +260,12 @@ func loadModel(key string) (ModelConfig, error) {
 	model.Description = model.Viper.GetString("description")
 	model.Schedule = ScheduleConfig{Enabled: false}
 
-    compressViper := model.Viper.Sub("compress_with")
-    if compressViper == nil {
-        compressViper = viper.New()
-    }
-    compressViper.SetDefault("type", "tar")
-    compressViper.SetDefault("filename_format", "2006.01.02.15.04.05")
+	compressViper := model.Viper.Sub("compress_with")
+	if compressViper == nil {
+		compressViper = viper.New()
+	}
+	compressViper.SetDefault("type", "tar")
+	compressViper.SetDefault("filename_format", "2006.01.02.15.04.05")
 	model.CompressWith = SubConfig{
 		Type:  compressViper.GetString("type"),
 		Viper: compressViper,

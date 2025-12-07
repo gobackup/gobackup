@@ -86,7 +86,12 @@ func StartHTTP(version string) (err error) {
 		c.FileFromFS("/", embedFs)
 	})
 
-	return r.Run(config.Web.Host + ":" + config.Web.Port)
+	// Enable TLS
+	listenAddr := config.Web.Host + ":" + config.Web.Port
+	if len(config.Web.Tls.Certificate) > 0 && len(config.Web.Tls.PrivateKey) > 0 {
+		return r.RunTLS(listenAddr, config.Web.Tls.Certificate, config.Web.Tls.PrivateKey)
+	}
+	return r.Run(listenAddr)
 }
 
 func setupRouter(version string) *gin.Engine {
