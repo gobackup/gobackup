@@ -57,7 +57,11 @@ func StartHTTP(version string) (err error) {
 	}
 	defer logFile.Close()
 
-	logger.Infof("Starting API server on port http://%s:%s", config.Web.Host, config.Web.Port)
+	scheme := "http"
+	if len(config.Web.Tls.Certificate) > 0 && len(config.Web.Tls.PrivateKey) > 0 {
+		scheme = "https"
+	}
+	logger.Infof("Starting API server on port %s://%s:%s", scheme, config.Web.Host, config.Web.Port)
 
 	if os.Getenv("GO_ENV") == "dev" {
 		go func() {
