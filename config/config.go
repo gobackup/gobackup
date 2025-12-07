@@ -47,6 +47,7 @@ type WebConfig struct {
 	Username string
 	Password string
 	Tls      TlsConfig
+	Enabled  bool
 }
 
 type ScheduleConfig struct {
@@ -233,12 +234,14 @@ func loadConfig() error {
 	Web = WebConfig{}
 	viper.SetDefault("web.host", "0.0.0.0")
 	viper.SetDefault("web.port", 2703)
+	viper.SetDefault("web.enabled", true)
 	Web.Host = viper.GetString("web.host")
 	Web.Port = viper.GetString("web.port")
 	Web.Username = viper.GetString("web.username")
 	Web.Password = viper.GetString("web.password")
 	Web.Tls.Certificate = viper.GetString("web.tls.certificate")
 	Web.Tls.PrivateKey = viper.GetString("web.tls.private_key")
+	Web.Enabled = viper.GetBool("web.enabled")
 
 	UpdatedAt = time.Now()
 	logger.Infof("Config loaded, found %d models.", len(Models))
