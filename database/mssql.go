@@ -28,7 +28,7 @@ type MSSQL struct {
 	username               string
 	password               string
 	trustServerCertificate bool
-	backupAllDatases       bool
+	includeAllDatabases    bool
 	skipDatabases          []string
 	args                   string
 }
@@ -51,7 +51,7 @@ func (db *MSSQL) init() (err error) {
 	db.username = viper.GetString("username")
 	db.password = viper.GetString("password")
 	db.trustServerCertificate = viper.GetBool("trustServerCertificate")
-	db.backupAllDatases = viper.GetBool("backupAllDatases")
+	db.includeAllDatabases = viper.GetBool("backupAllDatases")
 	db.skipDatabases = viper.GetStringSlice("skipDatabases")
 	db.args = viper.GetString("args")
 
@@ -111,19 +111,10 @@ func (db *MSSQL) additionOption() string {
 }
 
 func (db *MSSQL) getAllDatabases() ([]string, error) {
-	var host = db.host
-	var port = db.port
-
-	if len(host) == 0 {
-		host = "127.0.0.1"
-	}
-	if len(port) == 0 {
-		port = "1433"
-	}
-
-	query := "SET NOCOUNT ON; SELECT name FROM sys.databases WHERE database_id > 4"
+	// Exclude system databases
+	query := "SET NOCOUNT ON; SELECT name FROM sys.databases WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb')"
 	args := []string{
-		"-S", host + "," + port,
+		"-S", db.host + "," + db.port,
 		"-Q", query,
 		"-h-1",
 		"-W",
@@ -157,7 +148,7 @@ func (db *MSSQL) getAllDatabases() ([]string, error) {
 }
 
 func (db *MSSQL) shouldSkipDatabase(databaseName string) bool {
-	if !db.backupAllDatases {
+	if !db.includeAllDatabases {
 		return false
 	}
 	for _, skipDB := range db.skipDatabases {
@@ -171,7 +162,7 @@ func (db *MSSQL) shouldSkipDatabase(databaseName string) bool {
 func (db *MSSQL) perform() error {
 	logger := logger.Tag("MSSQL")
 
-	if db.backupAllDatases {
+	if db.includeAllDatabases {
 		databases, err := db.getAllDatabases()
 		if err != nil {
 			return fmt.Errorf("-> Failed to get databases: %s", err)

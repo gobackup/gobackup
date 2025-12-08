@@ -36,7 +36,7 @@ func TestMSSQL_init(t *testing.T) {
 
 	err := db.init()
 	assert.NoError(t, err)
-	assert.Equal(t, db.backupAllDatases, false)
+	assert.Equal(t, db.includeAllDatabases, false)
 	assert.Equal(t, db.build(), "sqlpackage /Action:Export /SourceDatabaseName:AdventureWorks /SourceUser:AdminUser /SourcePassword:AdminPassword1 /SourceServerName:1.2.3.4,1234 /SourceTrustServerCertificate:True /OverwriteFiles:True /MaxParallelism:4 /TargetFile:/data/backups/mssql/mssql1/AdventureWorks.bacpac")
 }
 
@@ -91,7 +91,7 @@ func TestMSSQL_sqlpackage(t *testing.T) {
 		username:               "testUser",
 		password:               "xxxYYY2$",
 		trustServerCertificate: true,
-		backupAllDatases:       false,
+		includeAllDatabases:    false,
 	}
 	assert.Equal(t, db.build(), "sqlpackage /Action:Export /SourceDatabaseName:test /SourceUser:testUser /SourcePassword:xxxYYY2$ /SourceServerName:127.0.0.1,1433 /SourceTrustServerCertificate:True /TargetFile:/tmp/gobackup/test/test.bacpac")
 }
@@ -124,7 +124,7 @@ func TestMSSQL_build_withAllDatabases(t *testing.T) {
 			username:               "testUser",
 			password:               "testPass",
 			trustServerCertificate: true,
-			backupAllDatases:       true,
+			includeAllDatabases:    true,
 		},
 		mockDatabases: mockDBs,
 	}
@@ -148,13 +148,13 @@ func TestMSSQL_build_withAllDatabases(t *testing.T) {
 
 func TestMSSQL_shouldSkipDatabase(t *testing.T) {
 	db := &MSSQL{
-		backupAllDatases: false,
-		skipDatabases:    []string{"db1", "db2"},
+		includeAllDatabases: false,
+		skipDatabases:       []string{"db1", "db2"},
 	}
 	assert.Equal(t, db.shouldSkipDatabase("db1"), false)
 	assert.Equal(t, db.shouldSkipDatabase("db3"), false)
 
-	db.backupAllDatases = true
+	db.includeAllDatabases = true
 	assert.Equal(t, db.shouldSkipDatabase("db1"), true)
 	assert.Equal(t, db.shouldSkipDatabase("db2"), true)
 	assert.Equal(t, db.shouldSkipDatabase("DB1"), true)
@@ -190,7 +190,7 @@ func TestMSSQL_init_withSkipDatabases(t *testing.T) {
 
 	err := db.init()
 	assert.NoError(t, err)
-	assert.Equal(t, db.backupAllDatases, true)
+	assert.Equal(t, db.includeAllDatabases, true)
 	assert.Equal(t, db.skipDatabases, []string{"test_db", "temp_db"})
 	assert.Equal(t, db.shouldSkipDatabase("test_db"), true)
 	assert.Equal(t, db.shouldSkipDatabase("temp_db"), true)
