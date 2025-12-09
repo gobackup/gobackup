@@ -17,8 +17,8 @@ import (
 // username: [string]
 // password: [string]
 // trustServerCertificate: [true, false]
-// backupAllDatases: [true, false] # if true, backup all databases excluding system databases and ignores database parameter
-// skipDatabases: [array] # list of database names to skip when backupAllDatases is true
+// allDatabases: [true, false] # if true, backup all databases excluding system databases and ignores database parameter
+// skipDatabases: [array] # list of database names to skip when allDatabases is true
 // args:
 type MSSQL struct {
 	Base
@@ -28,7 +28,7 @@ type MSSQL struct {
 	username               string
 	password               string
 	trustServerCertificate bool
-	includeAllDatabases    bool
+	allDatabases           bool
 	skipDatabases          []string
 	args                   string
 }
@@ -43,7 +43,7 @@ func (db *MSSQL) init() (err error) {
 	viper.SetDefault("host", "127.0.0.1")
 	viper.SetDefault("port", 1433)
 	viper.SetDefault("username", "sa")
-	viper.SetDefault("backupAllDatases", false)
+	viper.SetDefault("allDatabases", false)
 
 	db.host = viper.GetString("host")
 	db.port = viper.GetString("port")
@@ -51,7 +51,7 @@ func (db *MSSQL) init() (err error) {
 	db.username = viper.GetString("username")
 	db.password = viper.GetString("password")
 	db.trustServerCertificate = viper.GetBool("trustServerCertificate")
-	db.includeAllDatabases = viper.GetBool("backupAllDatases")
+	db.allDatabases = viper.GetBool("allDatabases")
 	db.skipDatabases = viper.GetStringSlice("skipDatabases")
 	db.args = viper.GetString("args")
 
@@ -148,7 +148,7 @@ func (db *MSSQL) getAllDatabases() ([]string, error) {
 }
 
 func (db *MSSQL) shouldSkipDatabase(databaseName string) bool {
-	if !db.includeAllDatabases {
+	if !db.allDatabases {
 		return false
 	}
 	for _, skipDB := range db.skipDatabases {
@@ -162,7 +162,7 @@ func (db *MSSQL) shouldSkipDatabase(databaseName string) bool {
 func (db *MSSQL) perform() error {
 	logger := logger.Tag("MSSQL")
 
-	if db.includeAllDatabases {
+	if db.allDatabases {
 		databases, err := db.getAllDatabases()
 		if err != nil {
 			return fmt.Errorf("-> Failed to get databases: %s", err)
@@ -204,7 +204,7 @@ func (db *MSSQL) perform() error {
 	}
 
 	if len(db.database) == 0 {
-		return fmt.Errorf("database config is required when backupAllDatases is false")
+		return fmt.Errorf("database config is required when allDatabases is false")
 	}
 
 	out, err := helper.Exec(db.build())
