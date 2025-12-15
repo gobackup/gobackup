@@ -108,3 +108,122 @@ func TestMongoDB_mongodump(t *testing.T) {
 	}
 	assert.Equal(t, db.build(), "mongodump --uri=mongodb://foo:bar@127:0:0:1:4567/hello?authSource=sssbbb --excludeCollection=aa --excludeCollection=bb --out=/tmp/gobackup/test")
 }
+
+func TestMongoDB_allDatabases(t *testing.T) {
+	viper := viper.New()
+	viper.Set("host", "1.2.3.4")
+	viper.Set("port", "1234")
+	viper.Set("username", "user1")
+	viper.Set("password", "pass1")
+	viper.Set("authdb", "admin")
+	viper.Set("oplog", true)
+	viper.Set("allDatabases", true)
+	viper.Set("args", "--foo --bar")
+
+	base := newBase(
+		config.ModelConfig{
+			DumpPath: "/data/backups",
+		},
+		config.SubConfig{
+			Type:  "mongodb",
+			Name:  "mongodb1",
+			Viper: viper,
+		},
+	)
+
+	db := &MongoDB{
+		Base: base,
+	}
+
+	err := db.init()
+	assert.NoError(t, err)
+	script := db.build()
+	assert.Equal(t, script, "mongodump --username=user1 --password=pass1 --authenticationDatabase=admin --host=1.2.3.4 --port=1234 --oplog --foo --bar --out=/data/backups/mongodb/mongodb1")
+}
+
+func TestMongoDB_allDatabasesWithoutDatabase(t *testing.T) {
+	viper := viper.New()
+	viper.Set("host", "localhost")
+	viper.Set("port", "27017")
+	viper.Set("username", "admin")
+	viper.Set("allDatabases", true)
+
+	base := newBase(
+		config.ModelConfig{
+			DumpPath: "/data/backups",
+		},
+		config.SubConfig{
+			Type:  "mongodb",
+			Name:  "mongodb1",
+			Viper: viper,
+		},
+	)
+
+	db := &MongoDB{
+		Base: base,
+	}
+
+	err := db.init()
+	assert.NoError(t, err)
+	script := db.build()
+	// Note: credentialOptions comes before connectivityOptions in build()
+	// When additionOption is empty, there's a single space before --out
+	// Actual output: "mongodump --username=admin --host=localhost --port=27017 --out=/data/backups/mongodb/mongodb1"
+	assert.Equal(t, script, "mongodump --username=admin --host=localhost --port=27017 --out=/data/backups/mongodb/mongodb1")
+}
+
+func TestMongoDB_allDatabasesRequiresDatabaseWhenFalse(t *testing.T) {
+	viper := viper.New()
+	viper.Set("host", "localhost")
+	viper.Set("port", "27017")
+	viper.Set("username", "admin")
+	viper.Set("allDatabases", false)
+
+	base := newBase(
+		config.ModelConfig{
+			DumpPath: "/data/backups",
+		},
+		config.SubConfig{
+			Type:  "mongodb",
+			Name:  "mongodb1",
+			Viper: viper,
+		},
+	)
+
+	db := &MongoDB{
+		Base: base,
+	}
+
+	err := db.init()
+	assert.Error(t, err)
+	assert.Equal(t, err.Error(), "MongoDB database config is required")
+}
+
+func TestMongoDB_allDatabasesWithURI(t *testing.T) {
+	viper := viper.New()
+	viper.Set("uri", "mongodb://user1:pass1@1.2.3.4:1234/?authSource=admin")
+	viper.Set("allDatabases", true)
+	viper.Set("oplog", true)
+	viper.Set("args", "--foo")
+
+	base := newBase(
+		config.ModelConfig{
+			DumpPath: "/data/backups",
+		},
+		config.SubConfig{
+			Type:  "mongodb",
+			Name:  "mongodb1",
+			Viper: viper,
+		},
+	)
+
+	db := &MongoDB{
+		Base: base,
+	}
+
+	err := db.init()
+	assert.NoError(t, err)
+	script := db.build()
+	// When URI is provided, allDatabases doesn't affect the command since URI already specifies the connection
+	assert.Equal(t, script, "mongodump --uri=mongodb://user1:pass1@1.2.3.4:1234/?authSource=admin --oplog --foo --out=/data/backups/mongodb/mongodb1")
+}

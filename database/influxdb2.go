@@ -11,20 +11,22 @@ import (
 // See https://docs.influxdata.com/influxdb/v2/reference/cli/influx/backup/
 type InfluxDB2 struct {
 	Base
-	host       string
-	token      string
-	bucket     string
-	bucketId   string
-	org        string
-	orgId      string
-	skipVerify bool
-	httpDebug  bool
+	host         string
+	token        string
+	bucket       string
+	bucketId     string
+	org          string
+	orgId        string
+	skipVerify   bool
+	httpDebug    bool
+	allDatabases bool
 }
 
 func (db *InfluxDB2) init() (err error) {
 	viper := db.viper
 	viper.SetDefault("skip_verify", false)
 	viper.SetDefault("http_debug", false)
+	viper.SetDefault("allDatabases", false)
 
 	db.host = viper.GetString("host")
 	db.token = viper.GetString("token")
@@ -34,12 +36,17 @@ func (db *InfluxDB2) init() (err error) {
 	db.orgId = viper.GetString("org_id")
 	db.skipVerify = viper.GetBool("skip_verify")
 	db.httpDebug = viper.GetBool("http_debug")
+	db.allDatabases = viper.GetBool("allDatabases")
 
 	if db.host == "" {
 		return fmt.Errorf("no host specified in influxdb2 configuration '%s'", db.name)
 	}
 	if db.token == "" {
 		return fmt.Errorf("no token specified in influxdb2 configuration '%s'", db.name)
+	}
+
+	if !db.allDatabases && db.bucket == "" && db.bucketId == "" {
+		return fmt.Errorf("InfluxDB2 bucket or bucket_id config is required when allDatabases is false")
 	}
 
 	return nil
@@ -50,11 +57,13 @@ func (db *InfluxDB2) influxCliArguments() []string {
 	args = append(args, "backup")
 	args = append(args, "--host="+db.host+"")
 	args = append(args, "--token="+db.token+"")
-	if db.bucket != "" {
-		args = append(args, "--bucket="+db.bucket+"")
-	}
-	if db.bucketId != "" {
-		args = append(args, "--bucket-id="+db.bucketId+"")
+	if !db.allDatabases {
+		if db.bucket != "" {
+			args = append(args, "--bucket="+db.bucket+"")
+		}
+		if db.bucketId != "" {
+			args = append(args, "--bucket-id="+db.bucketId+"")
+		}
 	}
 	if db.org != "" {
 		args = append(args, "--org="+db.org+"")
