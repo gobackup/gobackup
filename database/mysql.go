@@ -15,7 +15,8 @@ import (
 // host: 127.0.0.1
 // port: 3306
 // socket:
-// database: (use "*" or "" for all databases)
+// database: <database_name>
+// all_databases: true (backup all databases)
 // username: root
 // password:
 // args:
@@ -30,6 +31,7 @@ type MySQL struct {
 	tables        []string
 	excludeTables []string
 	args          string
+	allDatabases  bool
 }
 
 func (db *MySQL) init() (err error) {
@@ -52,12 +54,11 @@ func (db *MySQL) init() (err error) {
 		db.args = viper.GetString("args")
 	}
 
-	// Check if dumping all databases (database is "" or "*")
-	isAllDatabases := len(db.database) == 0 || db.database == "*"
+	db.allDatabases = viper.GetBool("all_databases")
 
 	// tables/exclude_tables options are not compatible with all databases mode
-	if isAllDatabases && (len(db.tables) > 0 || len(db.excludeTables) > 0) {
-		return fmt.Errorf("tables and exclude_tables options are not supported when dumping all databases (database: \"*\" or \"\")")
+	if db.allDatabases && (len(db.tables) > 0 || len(db.excludeTables) > 0) {
+		return fmt.Errorf("tables and exclude_tables options are not supported when using all_databases: true")
 	}
 
 	// socket
@@ -87,11 +88,8 @@ func (db *MySQL) build() string {
 		dumpArgs = append(dumpArgs, `-p`+db.password)
 	}
 
-	// Check if dumping all databases (database is "" or "*")
-	isAllDatabases := len(db.database) == 0 || db.database == "*"
-
 	// Handle all databases mode
-	if isAllDatabases {
+	if db.allDatabases {
 		dumpArgs = append(dumpArgs, "--all-databases")
 	} else {
 		// Single database mode with optional table filtering
@@ -105,7 +103,7 @@ func (db *MySQL) build() string {
 	}
 
 	// Add database name and tables for single database mode
-	if !isAllDatabases {
+	if !db.allDatabases {
 		dumpArgs = append(dumpArgs, db.database)
 		if len(db.tables) > 0 {
 			dumpArgs = append(dumpArgs, db.tables...)
@@ -114,7 +112,7 @@ func (db *MySQL) build() string {
 
 	// Determine dump file name
 	dumpFileName := db.database + ".sql"
-	if isAllDatabases {
+	if db.allDatabases {
 		dumpFileName = "all-databases.sql"
 	}
 	dumpFilePath := path.Join(db.dumpPath, dumpFileName)
