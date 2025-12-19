@@ -111,3 +111,117 @@ func Test_PostgreSQL_compressionNotSupported(t *testing.T) {
 	err := db.init()
 	assert.Error(t, err)
 }
+
+func TestPostgreSQL_allDatabases(t *testing.T) {
+	viper := viper.New()
+	viper.Set("host", "1.2.3.4")
+	viper.Set("port", "1234")
+	viper.Set("username", "user1")
+	viper.Set("password", "pass1")
+	viper.Set("all_databases", true)
+	viper.Set("args", "--foo --bar")
+
+	base := newBase(
+		config.ModelConfig{
+			DumpPath: "/data/backups/",
+		},
+		config.SubConfig{
+			Type:  "postgresql",
+			Name:  "postgresql1",
+			Viper: viper,
+		},
+	)
+
+	db := &PostgreSQL{
+		Base: base,
+	}
+
+	err := db.init()
+	assert.NoError(t, err)
+	script := db.build()
+	assert.Equal(t, script, "sh -c pg_dumpall --host=1.2.3.4 --port=1234 --username=user1 --foo --bar > /data/backups/postgresql/postgresql1/all_databases.sql")
+}
+
+func TestPostgreSQL_allDatabasesWithoutDatabase(t *testing.T) {
+	viper := viper.New()
+	viper.Set("host", "localhost")
+	viper.Set("port", "5432")
+	viper.Set("username", "postgres")
+	viper.Set("all_databases", true)
+
+	base := newBase(
+		config.ModelConfig{
+			DumpPath: "/data/backups/",
+		},
+		config.SubConfig{
+			Type:  "postgresql",
+			Name:  "postgresql1",
+			Viper: viper,
+		},
+	)
+
+	db := &PostgreSQL{
+		Base: base,
+	}
+
+	err := db.init()
+	assert.NoError(t, err)
+	script := db.build()
+	assert.Equal(t, script, "sh -c pg_dumpall --host=localhost --port=5432 --username=postgres > /data/backups/postgresql/postgresql1/all_databases.sql")
+}
+
+func TestPostgreSQL_allDatabasesWithSocket(t *testing.T) {
+	viper := viper.New()
+	viper.Set("socket", "/var/run/postgresql/pg.5432")
+	viper.Set("username", "user1")
+	viper.Set("all_databases", true)
+
+	base := newBase(
+		config.ModelConfig{
+			DumpPath: "/data/backups/",
+		},
+		config.SubConfig{
+			Type:  "postgresql",
+			Name:  "postgresql1",
+			Viper: viper,
+		},
+	)
+
+	db := &PostgreSQL{
+		Base: base,
+	}
+
+	err := db.init()
+	assert.NoError(t, err)
+	script := db.build()
+	assert.Equal(t, script, "sh -c pg_dumpall --host=/var/run/postgresql --port=5432 --username=user1 > /data/backups/postgresql/postgresql1/all_databases.sql")
+}
+
+func TestPostgreSQL_allDatabasesWithCompression(t *testing.T) {
+	viper := viper.New()
+	viper.Set("host", "1.2.3.4")
+	viper.Set("port", "1234")
+	viper.Set("username", "user1")
+	viper.Set("all_databases", true)
+	viper.Set("compress", "gzip")
+
+	base := newBase(
+		config.ModelConfig{
+			DumpPath: "/data/backups/",
+		},
+		config.SubConfig{
+			Type:  "postgresql",
+			Name:  "postgresql1",
+			Viper: viper,
+		},
+	)
+
+	db := &PostgreSQL{
+		Base: base,
+	}
+
+	err := db.init()
+	assert.NoError(t, err)
+	script := db.build()
+	assert.Equal(t, script, "sh -c pg_dumpall --host=1.2.3.4 --port=1234 --username=user1 > /data/backups/postgresql/postgresql1/all_databases.sql.gz")
+}

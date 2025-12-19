@@ -28,6 +28,7 @@ import (
 //   - tables:
 //   - exclude_tables:
 //   - args:
+//   - all_databases: false
 type PostgreSQL struct {
 	Base
 	host          string
@@ -41,6 +42,7 @@ type PostgreSQL struct {
 	compress      string
 	format        string
 	args          string
+	allDatabases  bool
 	_dumpFilePath string
 }
 
@@ -56,6 +58,7 @@ func (db *PostgreSQL) init() (err error) {
 	viper := db.viper
 	viper.SetDefault("host", "localhost")
 	viper.SetDefault("port", 5432)
+	viper.SetDefault("all_databases", false)
 
 	db.host = viper.GetString("host")
 	db.port = viper.GetString("port")
@@ -63,13 +66,14 @@ func (db *PostgreSQL) init() (err error) {
 	db.database = viper.GetString("database")
 	db.username = viper.GetString("username")
 	db.password = viper.GetString("password")
+	db.allDatabases = viper.GetBool("all_databases")
 	db.tables = viper.GetStringSlice("tables")
 	db.excludeTables = viper.GetStringSlice("exclude_tables")
 	db.compress = viper.GetString("compress")
 	db.format = ".sql"
 	db.args = viper.GetString("args")
 
-	if len(db.database) == 0 {
+	if !db.allDatabases && len(db.database) == 0 {
 		return fmt.Errorf("PostgreSQL database config is required")
 	}
 
@@ -81,7 +85,11 @@ func (db *PostgreSQL) init() (err error) {
 		db.format = fmt.Sprintf("%s.%s", db.format, PostgreSQLCompressionExt[compression])
 	}
 
-	db._dumpFilePath = path.Join(db.dumpPath, db.database+db.format)
+	if db.allDatabases {
+		db._dumpFilePath = path.Join(db.dumpPath, "all_databases"+db.format)
+	} else {
+		db._dumpFilePath = path.Join(db.dumpPath, db.database+db.format)
+	}
 
 	// socket
 	if len(db.socket) != 0 {
@@ -93,45 +101,66 @@ func (db *PostgreSQL) init() (err error) {
 }
 
 func (db *PostgreSQL) build() string {
-	// pg_dump command
 	var dumpArgs []string
+	var command string
 
+	// Common flags for both pg_dump and pg_dumpall
+	commonArgs := []string{}
 	if len(db.host) > 0 {
-		dumpArgs = append(dumpArgs, "--host="+db.host)
+		commonArgs = append(commonArgs, "--host="+db.host)
 	}
 	if len(db.port) > 0 {
-		dumpArgs = append(dumpArgs, "--port="+db.port)
+		commonArgs = append(commonArgs, "--port="+db.port)
 	}
 	if len(db.socket) > 0 {
 		host := filepath.Dir(db.socket)
 		port := strings.TrimPrefix(filepath.Ext(db.socket), ".")
-		dumpArgs = append(dumpArgs, "--host="+host, "--port="+port)
+		commonArgs = append(commonArgs, "--host="+host, "--port="+port)
 	}
 	if len(db.username) > 0 {
-		dumpArgs = append(dumpArgs, "--username="+db.username)
+		commonArgs = append(commonArgs, "--username="+db.username)
 	}
 
-	// include / exclude tables
-	if len(db.tables) > 0 {
-		dumpArgs = append(dumpArgs, "--table="+strings.Join(db.tables, " --table="))
+	if db.allDatabases {
+		// pg_dumpall command for all databases
+		// pg_dumpall outputs to stdout, so we need to use shell redirection
+		pgDumpallArgs := append([]string{}, commonArgs...)
+
+		if len(db.args) > 0 {
+			pgDumpallArgs = append(pgDumpallArgs, db.args)
+		}
+
+		// Use sh -c to execute with output redirection
+		pgDumpallCmd := "pg_dumpall " + strings.Join(pgDumpallArgs, " ")
+		command = "sh"
+		dumpArgs = append(dumpArgs, "-c", pgDumpallCmd+" > "+db._dumpFilePath)
+	} else {
+		// pg_dump command for single database
+		command = "pg_dump"
+		dumpArgs = append(dumpArgs, commonArgs...)
+
+		// include / exclude tables
+		if len(db.tables) > 0 {
+			dumpArgs = append(dumpArgs, "--table="+strings.Join(db.tables, " --table="))
+		}
+
+		if len(db.excludeTables) > 0 {
+			dumpArgs = append(dumpArgs, "--exclude-table="+strings.Join(db.excludeTables, " --exclude-table="))
+		}
+
+		if len(db.compress) > 0 {
+			dumpArgs = append(dumpArgs, "--compress="+db.compress, "--format=custom")
+		}
+
+		if len(db.args) > 0 {
+			dumpArgs = append(dumpArgs, db.args)
+		}
+
+		dumpArgs = append(dumpArgs, db.database)
+		dumpArgs = append(dumpArgs, "-f", db._dumpFilePath)
 	}
 
-	if len(db.excludeTables) > 0 {
-		dumpArgs = append(dumpArgs, "--exclude-table="+strings.Join(db.excludeTables, " --exclude-table="))
-	}
-
-	if len(db.compress) > 0 {
-		dumpArgs = append(dumpArgs, "--compress="+db.compress, "--format=custom")
-	}
-
-	if len(db.args) > 0 {
-		dumpArgs = append(dumpArgs, db.args)
-	}
-
-	dumpArgs = append(dumpArgs, db.database)
-	dumpArgs = append(dumpArgs, "-f", db._dumpFilePath)
-
-	return "pg_dump " + strings.Join(dumpArgs, " ")
+	return command + " " + strings.Join(dumpArgs, " ")
 }
 
 func (db *PostgreSQL) perform() error {
