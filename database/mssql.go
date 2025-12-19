@@ -39,20 +39,20 @@ var (
 
 func (db *MSSQL) init() (err error) {
 	viper := db.viper
-	viper.SetDefault("trustServerCertificate", false)
 	viper.SetDefault("host", "127.0.0.1")
 	viper.SetDefault("port", 1433)
 	viper.SetDefault("username", "sa")
-	viper.SetDefault("allDatabases", false)
+	viper.SetDefault("trust_server_certificate", false)
+	viper.SetDefault("all_databases", false)
 
 	db.host = viper.GetString("host")
 	db.port = viper.GetString("port")
 	db.database = viper.GetString("database")
 	db.username = viper.GetString("username")
 	db.password = viper.GetString("password")
-	db.trustServerCertificate = viper.GetBool("trustServerCertificate")
-	db.allDatabases = viper.GetBool("allDatabases")
-	db.skipDatabases = viper.GetStringSlice("skipDatabases")
+	db.trustServerCertificate = viper.GetBool("trust_server_certificate")
+	db.allDatabases = viper.GetBool("all_databases")
+	db.skipDatabases = viper.GetStringSlice("skip_databases")
 	db.args = viper.GetString("args")
 
 	return nil
@@ -204,7 +204,7 @@ func (db *MSSQL) perform() error {
 	}
 
 	if len(db.database) == 0 {
-		return fmt.Errorf("database config is required when allDatabases is false")
+		return fmt.Errorf("database config is required when `all_databases` is false")
 	}
 
 	out, err := helper.Exec(db.build())
