@@ -72,20 +72,23 @@ func (db *MongoDB) init() (err error) {
 
 func (db *MongoDB) build() string {
 	if len(db.uri) > 0 {
-		return mongodumpCli + " " +
-			"--uri=" + db.uri + " " +
-			db.additionOption() + " " +
-			"--out=" + db.dumpPath
+		cmd := mongodumpCli + " " + "--uri=" + db.uri
+		if opts := db.additionOption(); len(opts) > 0 {
+			cmd += " " + opts
+		}
+		cmd += " " + "--out=" + db.dumpPath
+		return cmd
 	}
 
 	cmd := mongodumpCli + " "
 	if !db.allDatabases {
 		cmd += db.nameOption() + " "
 	}
-	cmd += db.credentialOptions() + " " +
-		db.connectivityOptions() + " " +
-		db.additionOption() + " " +
-		"--out=" + db.dumpPath
+	cmd += db.credentialOptions() + " " + db.connectivityOptions()
+	if opts := db.additionOption(); len(opts) > 0 {
+		cmd += " " + opts
+	}
+	cmd += " " + "--out=" + db.dumpPath
 
 	return cmd
 }

@@ -166,9 +166,6 @@ func TestMongoDB_allDatabasesWithoutDatabase(t *testing.T) {
 	err := db.init()
 	assert.NoError(t, err)
 	script := db.build()
-	// Note: credentialOptions comes before connectivityOptions in build()
-	// When additionOption is empty, there's a single space before --out
-	// Actual output: "mongodump --username=admin --host=localhost --port=27017 --out=/data/backups/mongodb/mongodb1"
 	assert.Equal(t, script, "mongodump --username=admin --host=localhost --port=27017 --out=/data/backups/mongodb/mongodb1")
 }
 
