@@ -64,3 +64,86 @@ func TestMySQL_dumpArgsWithAdditionalOptions(t *testing.T) {
 
 	assert.Equal(t, db.build(), "mysqldump --host 127.0.0.2 --port 6378 -p*&^92' --single-transaction --quick dummy_test --result-file=/data/backups/mysql/mysql1/dummy_test.sql")
 }
+
+func TestMySQL_allDatabases(t *testing.T) {
+	viper := viper.New()
+	viper.Set("host", "127.0.0.1")
+	viper.Set("port", "3306")
+	viper.Set("username", "root")
+	viper.Set("password", "secret")
+	viper.Set("all_databases", true)
+
+	base := newBase(
+		config.ModelConfig{
+			DumpPath: "/data/backups",
+		},
+		config.SubConfig{
+			Type:  "mysql",
+			Name:  "mysql1",
+			Viper: viper,
+		},
+	)
+
+	db := &MySQL{
+		Base: base,
+	}
+
+	err := db.init()
+	assert.NoError(t, err)
+	assert.Equal(t, db.allDatabases, true)
+
+	script := db.build()
+	assert.Contains(t, script, "--all-databases")
+	assert.Contains(t, script, "--result-file=/data/backups/mysql/mysql1/all-databases.sql")
+	assert.Equal(t, script, "mysqldump --host 127.0.0.1 --port 3306 -u root -psecret --all-databases --result-file=/data/backups/mysql/mysql1/all-databases.sql")
+}
+
+func TestMySQL_allDatabasesWithTablesError(t *testing.T) {
+	viper := viper.New()
+	viper.Set("all_databases", true)
+	viper.Set("tables", []string{"foo", "bar"})
+
+	base := newBase(
+		config.ModelConfig{
+			DumpPath: "/data/backups",
+		},
+		config.SubConfig{
+			Type:  "mysql",
+			Name:  "mysql1",
+			Viper: viper,
+		},
+	)
+
+	db := &MySQL{
+		Base: base,
+	}
+
+	err := db.init()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "tables and exclude_tables options are not supported when using all_databases: true")
+}
+
+func TestMySQL_allDatabasesWithExcludeTablesError(t *testing.T) {
+	viper := viper.New()
+	viper.Set("all_databases", true)
+	viper.Set("exclude_tables", []string{"test_table"})
+
+	base := newBase(
+		config.ModelConfig{
+			DumpPath: "/data/backups",
+		},
+		config.SubConfig{
+			Type:  "mysql",
+			Name:  "mysql1",
+			Viper: viper,
+		},
+	)
+
+	db := &MySQL{
+		Base: base,
+	}
+
+	err := db.init()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "tables and exclude_tables options are not supported when using all_databases: true")
+}
