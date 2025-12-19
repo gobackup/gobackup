@@ -170,8 +170,8 @@ func TestMSSQL_init_withSkipDatabases(t *testing.T) {
 	viper := viper.New()
 	viper.Set("host", "1.2.3.4")
 	viper.Set("port", "1234")
-	viper.Set("allDatabases", true)
-	viper.Set("skipDatabases", []string{"test_db", "temp_db"})
+	viper.Set("all_databases", true)
+	viper.Set("skip_databases", []string{"test_db", "temp_db"})
 
 	base := newBase(
 		config.ModelConfig{
