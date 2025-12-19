@@ -18,7 +18,7 @@ import (
 // username: root
 // password:
 // args:
-// allDatabases: false
+// all_databases: false
 
 type MariaDB struct {
 	Base
@@ -37,7 +37,7 @@ func (db *MariaDB) init() (err error) {
 	viper.SetDefault("host", "127.0.0.1")
 	viper.SetDefault("username", "root")
 	viper.SetDefault("port", 3306)
-	viper.SetDefault("allDatabases", false)
+	viper.SetDefault("all_databases", false)
 
 	db.host = viper.GetString("host")
 	db.port = viper.GetString("port")
@@ -45,7 +45,7 @@ func (db *MariaDB) init() (err error) {
 	db.database = viper.GetString("database")
 	db.username = viper.GetString("username")
 	db.password = viper.GetString("password")
-	db.allDatabases = viper.GetBool("allDatabases")
+	db.allDatabases = viper.GetBool("all_databases")
 
 	if len(viper.GetString("args")) > 0 {
 		db.args = viper.GetString("args")

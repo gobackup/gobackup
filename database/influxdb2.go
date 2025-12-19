@@ -26,7 +26,7 @@ func (db *InfluxDB2) init() (err error) {
 	viper := db.viper
 	viper.SetDefault("skip_verify", false)
 	viper.SetDefault("http_debug", false)
-	viper.SetDefault("allDatabases", false)
+	viper.SetDefault("all_databases", false)
 
 	db.host = viper.GetString("host")
 	db.token = viper.GetString("token")
@@ -36,7 +36,7 @@ func (db *InfluxDB2) init() (err error) {
 	db.orgId = viper.GetString("org_id")
 	db.skipVerify = viper.GetBool("skip_verify")
 	db.httpDebug = viper.GetBool("http_debug")
-	db.allDatabases = viper.GetBool("allDatabases")
+	db.allDatabases = viper.GetBool("all_databases")
 
 	if db.host == "" {
 		return fmt.Errorf("no host specified in influxdb2 configuration '%s'", db.name)

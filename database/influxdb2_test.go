@@ -77,7 +77,7 @@ func TestInfluxDB2_allDatabases(t *testing.T) {
 	viper.Set("token", "my-token")
 	viper.Set("org", "my-org")
 	viper.Set("org_id", "my-org-id")
-	viper.Set("allDatabases", true)
+	viper.Set("all_databases", true)
 	viper.Set("http_debug", true)
 	viper.Set("skip_verify", true)
 
@@ -108,7 +108,7 @@ func TestInfluxDB2_allDatabasesWithoutBucket(t *testing.T) {
 	viper := viper.New()
 	viper.Set("host", "http://localhost:8086")
 	viper.Set("token", "my-token")
-	viper.Set("allDatabases", true)
+	viper.Set("all_databases", true)
 
 	base := newBase(
 		config.ModelConfig{
@@ -136,7 +136,7 @@ func TestInfluxDB2_allDatabasesRequiresBucketWhenFalse(t *testing.T) {
 	viper := viper.New()
 	viper.Set("host", "http://localhost:8086")
 	viper.Set("token", "my-token")
-	viper.Set("allDatabases", false)
+	viper.Set("all_databases", false)
 
 	base := newBase(
 		config.ModelConfig{
@@ -163,7 +163,7 @@ func TestInfluxDB2_allDatabasesWithBucketIdOnly(t *testing.T) {
 	viper.Set("host", "http://localhost:8086")
 	viper.Set("token", "my-token")
 	viper.Set("bucket_id", "my-bucket-id")
-	viper.Set("allDatabases", true)
+	viper.Set("all_databases", true)
 
 	base := newBase(
 		config.ModelConfig{

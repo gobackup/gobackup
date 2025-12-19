@@ -118,7 +118,7 @@ func TestPostgreSQL_allDatabases(t *testing.T) {
 	viper.Set("port", "1234")
 	viper.Set("username", "user1")
 	viper.Set("password", "pass1")
-	viper.Set("allDatabases", true)
+	viper.Set("all_databases", true)
 	viper.Set("args", "--foo --bar")
 
 	base := newBase(
@@ -147,7 +147,7 @@ func TestPostgreSQL_allDatabasesWithoutDatabase(t *testing.T) {
 	viper.Set("host", "localhost")
 	viper.Set("port", "5432")
 	viper.Set("username", "postgres")
-	viper.Set("allDatabases", true)
+	viper.Set("all_databases", true)
 
 	base := newBase(
 		config.ModelConfig{
@@ -174,7 +174,7 @@ func TestPostgreSQL_allDatabasesWithSocket(t *testing.T) {
 	viper := viper.New()
 	viper.Set("socket", "/var/run/postgresql/pg.5432")
 	viper.Set("username", "user1")
-	viper.Set("allDatabases", true)
+	viper.Set("all_databases", true)
 
 	base := newBase(
 		config.ModelConfig{
@@ -202,7 +202,7 @@ func TestPostgreSQL_allDatabasesWithCompression(t *testing.T) {
 	viper.Set("host", "1.2.3.4")
 	viper.Set("port", "1234")
 	viper.Set("username", "user1")
-	viper.Set("allDatabases", true)
+	viper.Set("all_databases", true)
 	viper.Set("compress", "gzip")
 
 	base := newBase(

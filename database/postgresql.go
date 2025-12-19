@@ -28,7 +28,7 @@ import (
 //   - tables:
 //   - exclude_tables:
 //   - args:
-//   - allDatabases: false
+//   - all_databases: false
 type PostgreSQL struct {
 	Base
 	host          string
@@ -58,7 +58,7 @@ func (db *PostgreSQL) init() (err error) {
 	viper := db.viper
 	viper.SetDefault("host", "localhost")
 	viper.SetDefault("port", 5432)
-	viper.SetDefault("allDatabases", false)
+	viper.SetDefault("all_databases", false)
 
 	db.host = viper.GetString("host")
 	db.port = viper.GetString("port")
@@ -66,7 +66,7 @@ func (db *PostgreSQL) init() (err error) {
 	db.database = viper.GetString("database")
 	db.username = viper.GetString("username")
 	db.password = viper.GetString("password")
-	db.allDatabases = viper.GetBool("allDatabases")
+	db.allDatabases = viper.GetBool("all_databases")
 	db.tables = viper.GetStringSlice("tables")
 	db.excludeTables = viper.GetStringSlice("exclude_tables")
 	db.compress = viper.GetString("compress")

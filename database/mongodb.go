@@ -22,7 +22,7 @@ import (
 // exclude_tables_prefix:
 // oplog: false
 // args:
-// allDatabases: false
+// all_databases: false
 type MongoDB struct {
 	Base
 	uri                 string
@@ -48,7 +48,7 @@ func (db *MongoDB) init() (err error) {
 	viper.SetDefault("oplog", false)
 	viper.SetDefault("host", "127.0.0.1")
 	viper.SetDefault("port", 27017)
-	viper.SetDefault("allDatabases", false)
+	viper.SetDefault("all_databases", false)
 
 	db.uri = viper.GetString("uri")
 	db.host = viper.GetString("host")
@@ -61,7 +61,7 @@ func (db *MongoDB) init() (err error) {
 	db.excludeTables = viper.GetStringSlice("exclude_tables")
 	db.excludeTablesPrefix = viper.GetStringSlice("exclude_tables_prefix")
 	db.args = viper.GetString("args")
-	db.allDatabases = viper.GetBool("allDatabases")
+	db.allDatabases = viper.GetBool("all_databases")
 
 	if !db.allDatabases && len(db.uri) == 0 && len(db.database) == 0 {
 		return fmt.Errorf("MongoDB database config is required")

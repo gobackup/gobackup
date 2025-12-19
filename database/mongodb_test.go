@@ -117,7 +117,7 @@ func TestMongoDB_allDatabases(t *testing.T) {
 	viper.Set("password", "pass1")
 	viper.Set("authdb", "admin")
 	viper.Set("oplog", true)
-	viper.Set("allDatabases", true)
+	viper.Set("all_databases", true)
 	viper.Set("args", "--foo --bar")
 
 	base := newBase(
@@ -146,7 +146,7 @@ func TestMongoDB_allDatabasesWithoutDatabase(t *testing.T) {
 	viper.Set("host", "localhost")
 	viper.Set("port", "27017")
 	viper.Set("username", "admin")
-	viper.Set("allDatabases", true)
+	viper.Set("all_databases", true)
 
 	base := newBase(
 		config.ModelConfig{
@@ -177,7 +177,7 @@ func TestMongoDB_allDatabasesRequiresDatabaseWhenFalse(t *testing.T) {
 	viper.Set("host", "localhost")
 	viper.Set("port", "27017")
 	viper.Set("username", "admin")
-	viper.Set("allDatabases", false)
+	viper.Set("all_databases", false)
 
 	base := newBase(
 		config.ModelConfig{
@@ -202,7 +202,7 @@ func TestMongoDB_allDatabasesRequiresDatabaseWhenFalse(t *testing.T) {
 func TestMongoDB_allDatabasesWithURI(t *testing.T) {
 	viper := viper.New()
 	viper.Set("uri", "mongodb://user1:pass1@1.2.3.4:1234/?authSource=admin")
-	viper.Set("allDatabases", true)
+	viper.Set("all_databases", true)
 	viper.Set("oplog", true)
 	viper.Set("args", "--foo")
 

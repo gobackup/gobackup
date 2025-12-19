@@ -69,7 +69,7 @@ func TestMariaDB_allDatabases(t *testing.T) {
 	viper.Set("port", "1234")
 	viper.Set("username", "user1")
 	viper.Set("password", "pass1")
-	viper.Set("allDatabases", true)
+	viper.Set("all_databases", true)
 	viper.Set("args", "--a1 --a2")
 
 	base := newBase(
@@ -98,7 +98,7 @@ func TestMariaDB_allDatabasesWithoutDatabase(t *testing.T) {
 	viper.Set("host", "localhost")
 	viper.Set("port", "3306")
 	viper.Set("username", "root")
-	viper.Set("allDatabases", true)
+	viper.Set("all_databases", true)
 
 	base := newBase(
 		config.ModelConfig{
@@ -125,7 +125,7 @@ func TestMariaDB_allDatabasesWithSocket(t *testing.T) {
 	viper := viper.New()
 	viper.Set("socket", "/var/run/mysql/mysql.sock")
 	viper.Set("username", "user1")
-	viper.Set("allDatabases", true)
+	viper.Set("all_databases", true)
 
 	base := newBase(
 		config.ModelConfig{
@@ -153,7 +153,7 @@ func TestMariaDB_allDatabasesRequiresDatabaseWhenFalse(t *testing.T) {
 	viper.Set("host", "localhost")
 	viper.Set("port", "3306")
 	viper.Set("username", "root")
-	viper.Set("allDatabases", false)
+	viper.Set("all_databases", false)
 
 	base := newBase(
 		config.ModelConfig{
