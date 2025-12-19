@@ -15,7 +15,7 @@ func TestMSSQL_init(t *testing.T) {
 	viper.Set("database", "AdventureWorks")
 	viper.Set("username", "AdminUser")
 	viper.Set("password", "AdminPassword1")
-	viper.Set("trustServerCertificate", true)
+	viper.Set("trust_server_certificate", true)
 	viper.Set("args", "/OverwriteFiles:True /MaxParallelism:4")
 
 	base := newBase(
