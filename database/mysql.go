@@ -15,7 +15,8 @@ import (
 // host: 127.0.0.1
 // port: 3306
 // socket:
-// database:
+// database: <database_name>
+// all_databases: true (backup all databases)
 // username: root
 // password:
 // args:
@@ -30,6 +31,7 @@ type MySQL struct {
 	tables        []string
 	excludeTables []string
 	args          string
+	allDatabases  bool
 }
 
 func (db *MySQL) init() (err error) {
@@ -52,9 +54,11 @@ func (db *MySQL) init() (err error) {
 		db.args = viper.GetString("args")
 	}
 
-	// mysqldump command
-	if len(db.database) == 0 {
-		return fmt.Errorf("mysql database config is required")
+	db.allDatabases = viper.GetBool("all_databases")
+
+	// tables/exclude_tables options are not compatible with all databases mode
+	if db.allDatabases && (len(db.tables) > 0 || len(db.excludeTables) > 0) {
+		return fmt.Errorf("tables and exclude_tables options are not supported when using all_databases: true")
 	}
 
 	// socket
@@ -84,20 +88,34 @@ func (db *MySQL) build() string {
 		dumpArgs = append(dumpArgs, `-p`+db.password)
 	}
 
-	for _, table := range db.excludeTables {
-		dumpArgs = append(dumpArgs, "--ignore-table="+db.database+"."+table)
+	// Handle all databases mode
+	if db.allDatabases {
+		dumpArgs = append(dumpArgs, "--all-databases")
+	} else {
+		// Single database mode with optional table filtering
+		for _, table := range db.excludeTables {
+			dumpArgs = append(dumpArgs, "--ignore-table="+db.database+"."+table)
+		}
 	}
 
 	if len(db.args) > 0 {
 		dumpArgs = append(dumpArgs, db.args)
 	}
 
-	dumpArgs = append(dumpArgs, db.database)
-	if len(db.tables) > 0 {
-		dumpArgs = append(dumpArgs, db.tables...)
+	// Add database name and tables for single database mode
+	if !db.allDatabases {
+		dumpArgs = append(dumpArgs, db.database)
+		if len(db.tables) > 0 {
+			dumpArgs = append(dumpArgs, db.tables...)
+		}
 	}
 
-	dumpFilePath := path.Join(db.dumpPath, db.database+".sql")
+	// Determine dump file name
+	dumpFileName := db.database + ".sql"
+	if db.allDatabases {
+		dumpFileName = "all-databases.sql"
+	}
+	dumpFilePath := path.Join(db.dumpPath, dumpFileName)
 	dumpArgs = append(dumpArgs, "--result-file="+dumpFilePath)
 
 	return "mysqldump" + " " + strings.Join(dumpArgs, " ")
