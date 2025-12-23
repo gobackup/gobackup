@@ -139,7 +139,7 @@ func TestPostgreSQL_allDatabases(t *testing.T) {
 	err := db.init()
 	assert.NoError(t, err)
 	script := db.build()
-	assert.Equal(t, script, "sh -c pg_dumpall --host=1.2.3.4 --port=1234 --username=user1 --foo --bar > /data/backups/postgresql/postgresql1/all_databases.sql")
+	assert.Equal(t, script, "pg_dumpall --host=1.2.3.4 --port=1234 --username=user1 --foo --bar > /data/backups/postgresql/postgresql1/all_databases.sql")
 }
 
 func TestPostgreSQL_allDatabasesWithoutDatabase(t *testing.T) {
@@ -167,7 +167,7 @@ func TestPostgreSQL_allDatabasesWithoutDatabase(t *testing.T) {
 	err := db.init()
 	assert.NoError(t, err)
 	script := db.build()
-	assert.Equal(t, script, "sh -c pg_dumpall --host=localhost --port=5432 --username=postgres > /data/backups/postgresql/postgresql1/all_databases.sql")
+	assert.Equal(t, script, "pg_dumpall --host=localhost --port=5432 --username=postgres > /data/backups/postgresql/postgresql1/all_databases.sql")
 }
 
 func TestPostgreSQL_allDatabasesWithSocket(t *testing.T) {
@@ -194,7 +194,7 @@ func TestPostgreSQL_allDatabasesWithSocket(t *testing.T) {
 	err := db.init()
 	assert.NoError(t, err)
 	script := db.build()
-	assert.Equal(t, script, "sh -c pg_dumpall --host=/var/run/postgresql --port=5432 --username=user1 > /data/backups/postgresql/postgresql1/all_databases.sql")
+	assert.Equal(t, script, "pg_dumpall --host=/var/run/postgresql --port=5432 --username=user1 > /data/backups/postgresql/postgresql1/all_databases.sql")
 }
 
 func TestPostgreSQL_allDatabasesWithCompression(t *testing.T) {
@@ -223,5 +223,5 @@ func TestPostgreSQL_allDatabasesWithCompression(t *testing.T) {
 	err := db.init()
 	assert.NoError(t, err)
 	script := db.build()
-	assert.Equal(t, script, "sh -c pg_dumpall --host=1.2.3.4 --port=1234 --username=user1 > /data/backups/postgresql/postgresql1/all_databases.sql.gz")
+	assert.Equal(t, script, "pg_dumpall --host=1.2.3.4 --port=1234 --username=user1 > /data/backups/postgresql/postgresql1/all_databases.sql.gz")
 }

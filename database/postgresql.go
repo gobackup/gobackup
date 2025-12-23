@@ -123,17 +123,15 @@ func (db *PostgreSQL) build() string {
 
 	if db.allDatabases {
 		// pg_dumpall command for all databases
-		// pg_dumpall outputs to stdout, so we need to use shell redirection
 		pgDumpallArgs := append([]string{}, commonArgs...)
 
 		if len(db.args) > 0 {
 			pgDumpallArgs = append(pgDumpallArgs, db.args)
 		}
 
-		// Use sh -c to execute with output redirection
-		pgDumpallCmd := "pg_dumpall " + strings.Join(pgDumpallArgs, " ")
-		command = "sh"
-		dumpArgs = append(dumpArgs, "-c", pgDumpallCmd+" > "+db._dumpFilePath)
+		// Build the complete pg_dumpall command with output redirection
+		pgDumpallCmd := "pg_dumpall " + strings.Join(pgDumpallArgs, " ") + " > " + db._dumpFilePath
+		return pgDumpallCmd
 	} else {
 		// pg_dump command for single database
 		command = "pg_dump"
@@ -171,7 +169,13 @@ func (db *PostgreSQL) perform() error {
 		os.Setenv("PGPASSWORD", db.password)
 	}
 
-	_, err := helper.Exec(db.build())
+	var err error
+	if db.allDatabases {
+		// Use ExecScript for pg_dumpall to properly handle shell redirection
+		_, err = helper.ExecScript(db.build())
+	} else {
+		_, err = helper.Exec(db.build())
+	}
 	if err != nil {
 		return err
 	}
