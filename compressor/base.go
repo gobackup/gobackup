@@ -27,8 +27,8 @@ type Compressor interface {
 }
 
 func (c *Base) archiveFilePath(ext string) string {
-    format := c.model.CompressWith.Viper.GetString("filename_format")
-    return filepath.Join(c.model.TempPath, time.Now().Format(format)+ext)
+	format := c.model.CompressWith.Viper.GetString("filename_format")
+	return filepath.Join(c.model.TempPath, time.Now().Format(format)+ext)
 }
 
 func newBase(model config.ModelConfig) (base Base) {
@@ -49,6 +49,10 @@ func Run(model config.ModelConfig) (string, error) {
 	var c Compressor
 	var ext, parallelProgram string
 	switch model.CompressWith.Type {
+	case "none":
+		// Skip compression, return dump path directly
+		logger.Info("=> Compress | none (skipped)")
+		return model.DumpPath, nil
 	case "gz", "tgz", "taz", "tar.gz":
 		ext = ".tar.gz"
 		parallelProgram = "pigz"
