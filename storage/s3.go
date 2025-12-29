@@ -1,7 +1,9 @@
 package storage
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"math"
 	"net/http"
 	"os"
@@ -396,4 +398,47 @@ func (s *S3) download(fileKey string) (string, error) {
 	}
 
 	return url, nil
+}
+
+// uploadState uploads cycler state data to remote storage
+// State is stored at {path}/.gobackup-state/{key} for persistence across container restarts
+func (s *S3) uploadState(key string, data []byte) error {
+	remotePath := filepath.Join(s.path, key)
+
+	input := &s3manager.UploadInput{
+		Bucket:      aws.String(s.bucket),
+		Key:         aws.String(remotePath),
+		Body:        aws.ReadSeekCloser(bytes.NewReader(data)),
+		ContentType: aws.String("application/json"),
+	}
+
+	_, err := s.client.Upload(input)
+	if err != nil {
+		return fmt.Errorf("failed to upload state to %s: %v", remotePath, err)
+	}
+
+	return nil
+}
+
+// downloadState downloads cycler state data from remote storage
+func (s *S3) downloadState(key string) ([]byte, error) {
+	remotePath := filepath.Join(s.path, key)
+
+	input := &s3.GetObjectInput{
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(remotePath),
+	}
+
+	result, err := s.client.S3.GetObject(input)
+	if err != nil {
+		return nil, fmt.Errorf("failed to download state from %s: %v", remotePath, err)
+	}
+	defer result.Body.Close()
+
+	data, err := io.ReadAll(result.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read state data: %v", err)
+	}
+
+	return data, nil
 }

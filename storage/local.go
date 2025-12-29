@@ -82,3 +82,32 @@ func (s *Local) list(parent string) ([]FileItem, error) {
 func (s *Local) download(fileKey string) (string, error) {
 	return "", fmt.Errorf("Local is not support download")
 }
+
+// uploadState for local storage stores state in the backup path
+// This is useful when the local path is on a persistent volume
+func (s *Local) uploadState(key string, data []byte) error {
+	statePath := path.Join(s.path, key)
+	stateDir := path.Dir(statePath)
+
+	if err := helper.MkdirP(stateDir); err != nil {
+		return fmt.Errorf("failed to create state directory %q: %v", stateDir, err)
+	}
+
+	if err := os.WriteFile(statePath, data, 0660); err != nil {
+		return fmt.Errorf("failed to write state file %q: %v", statePath, err)
+	}
+
+	return nil
+}
+
+// downloadState for local storage reads state from the backup path
+func (s *Local) downloadState(key string) ([]byte, error) {
+	statePath := path.Join(s.path, key)
+
+	data, err := os.ReadFile(statePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read state file %q: %v", statePath, err)
+	}
+
+	return data, nil
+}

@@ -1,8 +1,10 @@
 package storage
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -171,4 +173,49 @@ func (s *Azure) download(fileKey string) (string, error) {
 	blobClient := containerClient.NewBlobClient(fileKey)
 
 	return blobClient.GetSASURL(sas.BlobPermissions{Read: true}, time.Now(), time.Now().Add(time.Hour*1))
+}
+
+// uploadState uploads cycler state data to remote storage
+// State is stored at {path}/.gobackup-state/{key} for persistence across container restarts
+func (s *Azure) uploadState(key string, data []byte) error {
+	var ctx = context.Background()
+	var cancel context.CancelFunc
+
+	if s.timeout.Seconds() > 0 {
+		ctx, cancel = context.WithTimeout(ctx, s.timeout)
+		defer cancel()
+	}
+
+	remotePath := filepath.Join(s.path, key)
+	reader := bytes.NewReader(data)
+
+	if _, err := s.client.UploadStream(ctx, s.container, remotePath, reader, nil); err != nil {
+		return fmt.Errorf("Azure failed to upload state: %v", err)
+	}
+
+	return nil
+}
+
+// downloadState downloads cycler state data from remote storage
+func (s *Azure) downloadState(key string) ([]byte, error) {
+	var ctx = context.Background()
+	var cancel context.CancelFunc
+
+	if s.timeout.Seconds() > 0 {
+		ctx, cancel = context.WithTimeout(ctx, s.timeout)
+		defer cancel()
+	}
+
+	remotePath := filepath.Join(s.path, key)
+	resp, err := s.client.DownloadStream(ctx, s.container, remotePath, nil)
+	if err != nil {
+		return nil, fmt.Errorf("Azure failed to download state: %v", err)
+	}
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("Azure failed to read state data: %v", err)
+	}
+
+	return data, nil
 }

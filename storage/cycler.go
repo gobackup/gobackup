@@ -23,6 +23,8 @@ type Package struct {
 
 var (
 	cyclerPath = filepath.Join(config.GoBackupDir, "cycler")
+	// Remote state path prefix used for storing cycler state on remote storage
+	remoteStatePath = ".gobackup-state"
 )
 
 type Cycler struct {
@@ -49,14 +51,15 @@ func (c *Cycler) shiftByKeep(keep int) (first *Package) {
 	return
 }
 
-func (c *Cycler) run(fileKey string, fileKeys []string, keep int, deletePackage func(fileKey string) error) {
+func (c *Cycler) run(fileKey string, fileKeys []string, keep int, deletePackage func(fileKey string) error, storage Storage) {
 	logger := logger.Tag("Cycler")
 
 	cyclerFileName := filepath.Join(cyclerPath, c.name+".json")
+	remoteStateKey := filepath.Join(remoteStatePath, c.name+".json")
 
-	c.load(cyclerFileName)
+	c.loadWithRemote(cyclerFileName, remoteStateKey, storage)
 	c.add(fileKey, fileKeys)
-	defer c.save(cyclerFileName)
+	defer c.saveWithRemote(cyclerFileName, remoteStateKey, storage)
 
 	if keep == 0 {
 		return
@@ -82,6 +85,34 @@ func (c *Cycler) run(fileKey string, fileKeys []string, keep int, deletePackage 
 			}
 		}
 	}
+}
+
+// loadWithRemote tries to load cycler state from remote storage first,
+// falls back to local state if remote is unavailable.
+// This ensures retention policy works correctly in containerized environments
+// where local filesystem is ephemeral.
+func (c *Cycler) loadWithRemote(cyclerFileName string, remoteStateKey string, storage Storage) {
+	logger := logger.Tag("Cycler")
+
+	// Load from remote storage
+	if storage != nil {
+		remoteData, err := storage.downloadState(remoteStateKey)
+		if err == nil && len(remoteData) > 0 {
+			if err := json.Unmarshal(remoteData, &c.packages); err == nil {
+				logger.Info("Loaded cycler state from remote storage")
+				c.isLoaded = true
+				// Also save to local for faster access next time
+				c.save(cyclerFileName)
+				return
+			}
+			logger.Warnf("Failed to unmarshal remote cycler state: %v", err)
+		} else if err != nil {
+			logger.Infof("Remote cycler state not found or unavailable: %v, falling back to local", err)
+		}
+	}
+
+	// Fall back to local state
+	c.load(cyclerFileName)
 }
 
 func (c *Cycler) load(cyclerFileName string) {
@@ -112,11 +143,41 @@ func (c *Cycler) load(cyclerFileName string) {
 	c.isLoaded = true
 }
 
-func (c *Cycler) save(cyclerFileName string) {
+// saveWithRemote saves cycler state to both remote storage and local filesystem.
+// Remote storage ensures persistence across container restarts.
+// Local storage provides faster access and serves as a fallback.
+func (c *Cycler) saveWithRemote(cyclerFileName string, remoteStateKey string, storage Storage) {
 	logger := logger.Tag("Cycler")
 
 	if !c.isLoaded {
 		logger.Warn("Skip save cycler.json because it is not loaded")
+		return
+	}
+
+	data, err := json.Marshal(&c.packages)
+	if err != nil {
+		logger.Error("Marshal packages to cycler.json failed: ", err)
+		return
+	}
+
+	// Save to remote storage first
+	if storage != nil {
+		if err := storage.uploadState(remoteStateKey, data); err != nil {
+			logger.Warnf("Failed to save cycler state to remote storage: %v", err)
+		} else {
+			logger.Info("Saved cycler state to remote storage")
+		}
+	}
+
+	// Always save locally as well
+	c.save(cyclerFileName)
+}
+
+func (c *Cycler) save(cyclerFileName string) {
+	logger := logger.Tag("Cycler")
+
+	if err := helper.MkdirP(cyclerPath); err != nil {
+		logger.Errorf("Failed to mkdir cycler path %s: %v", cyclerPath, err)
 		return
 	}
 

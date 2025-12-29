@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
@@ -275,4 +276,50 @@ func (s *SCP) list(parent string) ([]FileItem, error) {
 
 func (s *SCP) download(fileKey string) (string, error) {
 	return "", fmt.Errorf("SCP not support download")
+}
+
+// uploadState uploads cycler state data to remote storage
+func (s *SCP) uploadState(key string, data []byte) error {
+	remotePath := path.Join(s.path, key)
+	remoteDir := path.Dir(remotePath)
+
+	// Ensure directory exists
+	if err := s.run(fmt.Sprintf("mkdir -p %s", remoteDir)); err != nil {
+		return fmt.Errorf("failed to create state directory: %v", err)
+	}
+
+	client, err := scp.NewClientBySSH(s.client)
+	if err != nil {
+		return fmt.Errorf("failed to create SCP client: %v", err)
+	}
+	if err := client.Connect(); err != nil {
+		return fmt.Errorf("failed to connect SCP client: %v", err)
+	}
+	defer client.Close()
+
+	reader := bytes.NewReader(data)
+	if err := client.CopyFile(context.Background(), reader, remotePath, "0644"); err != nil {
+		return fmt.Errorf("failed to upload state file: %v", err)
+	}
+
+	return nil
+}
+
+// downloadState downloads cycler state data from remote storage
+// Note: SCP download is limited, using cat command via SSH
+func (s *SCP) downloadState(key string) ([]byte, error) {
+	remotePath := path.Join(s.path, key)
+
+	session, err := s.client.NewSession()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create SSH session: %v", err)
+	}
+	defer session.Close()
+
+	data, err := session.Output(fmt.Sprintf("cat %s", remotePath))
+	if err != nil {
+		return nil, fmt.Errorf("failed to read state file: %v", err)
+	}
+
+	return data, nil
 }
