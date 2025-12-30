@@ -36,3 +36,30 @@ func Test_Telegram(t *testing.T) {
 	err = s.checkResult(403, []byte(respBody))
 	assert.EqualError(t, err, "status: 403, body: "+respBody)
 }
+
+func Test_TelegramWithProxy(t *testing.T) {
+	base := &Base{
+		viper: viper.New(),
+	}
+	base.viper.Set("token", "123213:this-is-my-token")
+	base.viper.Set("chat_id", "@gobackuptest")
+	base.viper.Set("proxy", "http://127.0.0.1:7890")
+
+	s := NewTelegram(base)
+
+	assert.Equal(t, "Telegram", s.Service)
+	assert.Equal(t, "http://127.0.0.1:7890", s.proxy)
+}
+
+func Test_TelegramWithoutProxy(t *testing.T) {
+	base := &Base{
+		viper: viper.New(),
+	}
+	base.viper.Set("token", "123213:this-is-my-token")
+	base.viper.Set("chat_id", "@gobackuptest")
+
+	s := NewTelegram(base)
+
+	assert.Equal(t, "Telegram", s.Service)
+	assert.Equal(t, "", s.proxy)
+}

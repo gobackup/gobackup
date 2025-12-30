@@ -8,8 +8,8 @@ import (
 )
 
 type telegramPayload struct {
-	ChatID 		string `json:"chat_id"`
-	Text   		string `json:"text"`
+	ChatID          string `json:"chat_id"`
+	Text            string `json:"text"`
 	MessageThreadId string `json:"message_thread_id"`
 }
 
@@ -21,6 +21,7 @@ func NewTelegram(base *Base) *Webhook {
 		Service:     "Telegram",
 		method:      "POST",
 		contentType: "application/json",
+		proxy:       base.viper.GetString("proxy"),
 		buildWebhookURL: func(url string) (string, error) {
 			token := base.viper.GetString("token")
 			endpoint := DEFAULT_TELEGRAM_ENDPOINT
@@ -37,8 +38,8 @@ func NewTelegram(base *Base) *Webhook {
 			message_thread_id := base.viper.GetString("message_thread_id")
 
 			payload := telegramPayload{
-				ChatID: chat_id,
-				Text:   fmt.Sprintf("%s\n\n%s", title, message),
+				ChatID:          chat_id,
+				Text:            fmt.Sprintf("%s\n\n%s", title, message),
 				MessageThreadId: message_thread_id,
 			}
 
