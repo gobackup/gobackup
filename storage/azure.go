@@ -172,4 +172,3 @@ func (s *Azure) download(fileKey string) (string, error) {
 
 	return blobClient.GetSASURL(sas.BlobPermissions{Read: true}, time.Now(), time.Now().Add(time.Hour*1))
 }
-
