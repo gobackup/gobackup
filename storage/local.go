@@ -82,4 +82,3 @@ func (s *Local) list(parent string) ([]FileItem, error) {
 func (s *Local) download(fileKey string) (string, error) {
 	return "", fmt.Errorf("Local is not support download")
 }
-

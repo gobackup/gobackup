@@ -133,4 +133,3 @@ func (s *WebDAV) list(parent string) ([]FileItem, error) {
 func (s *WebDAV) download(fileKey string) (string, error) {
 	return "", fmt.Errorf("WebDAV not support download")
 }
-

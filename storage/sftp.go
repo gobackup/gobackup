@@ -183,4 +183,3 @@ func (s *SFTP) list(parent string) ([]FileItem, error) {
 func (s *SFTP) download(fileKey string) (string, error) {
 	return "", fmt.Errorf("SFTP not support download")
 }
-
