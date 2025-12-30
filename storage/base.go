@@ -37,9 +37,6 @@ type Storage interface {
 	delete(fileKey string) error
 	list(parent string) ([]FileItem, error)
 	download(fileKey string) (string, error)
-	// Remote state management for cycler persistence across container restarts
-	uploadState(key string, data []byte) error
-	downloadState(key string) ([]byte, error)
 }
 
 func newBase(model config.ModelConfig, archivePath string, storageConfig config.SubConfig) (base Base, err error) {

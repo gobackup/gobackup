@@ -2,7 +2,6 @@ package storage
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 	"time"
 
@@ -64,17 +63,6 @@ func (m *mockStorage) delete(fileKey string) error           { return nil }
 func (m *mockStorage) list(parent string) ([]FileItem, error) { return nil, nil }
 func (m *mockStorage) download(fileKey string) (string, error) { return "", nil }
 
-func (m *mockStorage) uploadState(key string, data []byte) error {
-	m.state[key] = data
-	return nil
-}
-
-func (m *mockStorage) downloadState(key string) ([]byte, error) {
-	if data, ok := m.state[key]; ok {
-		return data, nil
-	}
-	return nil, fmt.Errorf("state not found: %s", key)
-}
 
 func TestCycler_loadWithRemote_fromRemote(t *testing.T) {
 	// Setup mock storage with existing state

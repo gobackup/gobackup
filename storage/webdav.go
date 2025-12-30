@@ -134,31 +134,3 @@ func (s *WebDAV) download(fileKey string) (string, error) {
 	return "", fmt.Errorf("WebDAV not support download")
 }
 
-// uploadState uploads cycler state data to remote storage
-func (s *WebDAV) uploadState(key string, data []byte) error {
-	remotePath := path.Join(s.path, key)
-	remoteDir := path.Dir(remotePath)
-
-	// Ensure directory exists
-	if err := s.client.MkdirAll(remoteDir, 0644); err != nil {
-		return fmt.Errorf("failed to create state directory: %v", err)
-	}
-
-	if err := s.client.Write(remotePath, data, 0644); err != nil {
-		return fmt.Errorf("failed to write state file: %v", err)
-	}
-
-	return nil
-}
-
-// downloadState downloads cycler state data from remote storage
-func (s *WebDAV) downloadState(key string) ([]byte, error) {
-	remotePath := path.Join(s.path, key)
-
-	data, err := s.client.Read(remotePath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read state file: %v", err)
-	}
-
-	return data, nil
-}
