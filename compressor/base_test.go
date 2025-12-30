@@ -50,15 +50,15 @@ func TestBaseInterface(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestRun_NoneType(t *testing.T) {
+func TestRun_EmptyType(t *testing.T) {
 	v := viper.New()
 	v.SetDefault("filename_format", "2006.01.02.15.04.05")
 
 	model := config.ModelConfig{
-		Name:     "TestNone",
+		Name:     "TestEmptyType",
 		DumpPath: "/tmp/test_dump",
 		CompressWith: config.SubConfig{
-			Type:  "none",
+			Type:  "",
 			Viper: v,
 		},
 		Viper: viper.New(),

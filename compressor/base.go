@@ -44,15 +44,17 @@ func newBase(model config.ModelConfig) (base Base) {
 func Run(model config.ModelConfig) (string, error) {
 	logger := logger.Tag("Compressor")
 
+	// Skip compression if type is not set
+	if model.CompressWith.Type == "" {
+		logger.Info("=> Compress | skipped (no compression type specified)")
+		return model.DumpPath, nil
+	}
+
 	base := newBase(model)
 
 	var c Compressor
 	var ext, parallelProgram string
 	switch model.CompressWith.Type {
-	case "none":
-		// Skip compression, return dump path directly
-		logger.Info("=> Compress | none (skipped)")
-		return model.DumpPath, nil
 	case "gz", "tgz", "taz", "tar.gz":
 		ext = ".tar.gz"
 		parallelProgram = "pigz"
@@ -74,9 +76,6 @@ func Run(model config.ModelConfig) (string, error) {
 		ext = ".tar.zst"
 	case "tar":
 		ext = ".tar"
-	case "":
-		ext = ".tar"
-		model.CompressWith.Type = "tar"
 	default:
 		return "", fmt.Errorf("Unsupported compress type: %s", model.CompressWith.Type)
 	}
