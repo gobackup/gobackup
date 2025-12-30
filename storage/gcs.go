@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
+	"golang.org/x/oauth2/google"
 
 	"github.com/gobackup/gobackup/helper"
 	"github.com/gobackup/gobackup/logger"
