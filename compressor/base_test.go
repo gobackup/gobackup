@@ -21,10 +21,10 @@ func (c Monkey) perform() (archivePath string, err error) {
 }
 
 func TestBase_archiveFilePath(t *testing.T) {
-    viper := viper.New()
+	viper := viper.New()
 	viper.SetDefault("type", "tar")
 	viper.SetDefault("filename_format", "backup-2006.01.02.15.04.05")
-    model := config.ModelConfig{}
+	model := config.ModelConfig{}
 	model.CompressWith = config.SubConfig{
 		Type:  viper.GetString("type"),
 		Viper: viper,
@@ -48,4 +48,23 @@ func TestBaseInterface(t *testing.T) {
 	result, err := c.perform()
 	assert.Equal(t, result, "aaa")
 	assert.Nil(t, err)
+}
+
+func TestRun_EmptyType(t *testing.T) {
+	v := viper.New()
+	v.SetDefault("filename_format", "2006.01.02.15.04.05")
+
+	model := config.ModelConfig{
+		Name:     "TestEmptyType",
+		DumpPath: "/tmp/test_dump",
+		CompressWith: config.SubConfig{
+			Type:  "",
+			Viper: v,
+		},
+		Viper: viper.New(),
+	}
+
+	archivePath, err := Run(model)
+	assert.Nil(t, err)
+	assert.Equal(t, archivePath, "/tmp/test_dump")
 }

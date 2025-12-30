@@ -27,8 +27,8 @@ type Compressor interface {
 }
 
 func (c *Base) archiveFilePath(ext string) string {
-    format := c.model.CompressWith.Viper.GetString("filename_format")
-    return filepath.Join(c.model.TempPath, time.Now().Format(format)+ext)
+	format := c.model.CompressWith.Viper.GetString("filename_format")
+	return filepath.Join(c.model.TempPath, time.Now().Format(format)+ext)
 }
 
 func newBase(model config.ModelConfig) (base Base) {
@@ -43,6 +43,12 @@ func newBase(model config.ModelConfig) (base Base) {
 // Run compressor, return archive path
 func Run(model config.ModelConfig) (string, error) {
 	logger := logger.Tag("Compressor")
+
+	// Skip compression if type is not set
+	if model.CompressWith.Type == "" {
+		logger.Info("=> Compress | skipped (no compression type specified)")
+		return model.DumpPath, nil
+	}
 
 	base := newBase(model)
 
@@ -70,9 +76,6 @@ func Run(model config.ModelConfig) (string, error) {
 		ext = ".tar.zst"
 	case "tar":
 		ext = ".tar"
-	case "":
-		ext = ".tar"
-		model.CompressWith.Type = "tar"
 	default:
 		return "", fmt.Errorf("Unsupported compress type: %s", model.CompressWith.Type)
 	}
