@@ -56,13 +56,12 @@ func newMockStorage() *mockStorage {
 	}
 }
 
-func (m *mockStorage) open() error                           { return nil }
-func (m *mockStorage) close()                                {}
-func (m *mockStorage) upload(fileKey string) error           { return nil }
-func (m *mockStorage) delete(fileKey string) error           { return nil }
-func (m *mockStorage) list(parent string) ([]FileItem, error) { return nil, nil }
+func (m *mockStorage) open() error                             { return nil }
+func (m *mockStorage) close()                                  {}
+func (m *mockStorage) upload(fileKey string) error             { return nil }
+func (m *mockStorage) delete(fileKey string) error             { return nil }
+func (m *mockStorage) list(parent string) ([]FileItem, error)  { return nil, nil }
 func (m *mockStorage) download(fileKey string) (string, error) { return "", nil }
-
 
 func TestCycler_loadWithRemote_fromRemote(t *testing.T) {
 	// Setup mock storage with existing state
@@ -75,7 +74,7 @@ func TestCycler_loadWithRemote_fromRemote(t *testing.T) {
 	mockStore.state[".gobackup-state/test_model.json"] = stateData
 
 	cycler := Cycler{name: "test_model"}
-	cycler.loadWithRemote("/tmp/test_cycler.json", ".gobackup-state/test_model.json", mockStore)
+	cycler.loadRemote(mockStore, "/tmp/test_cycler.json", ".gobackup-state/test_model.json")
 
 	assert.True(t, cycler.isLoaded)
 	assert.Equal(t, len(cycler.packages), 2)
@@ -85,7 +84,7 @@ func TestCycler_loadWithRemote_fromRemote(t *testing.T) {
 
 func TestCycler_saveWithRemote(t *testing.T) {
 	mockStore := newMockStorage()
-	
+
 	cycler := Cycler{
 		name:     "test_model",
 		isLoaded: true,
@@ -95,12 +94,12 @@ func TestCycler_saveWithRemote(t *testing.T) {
 		},
 	}
 
-	cycler.saveWithRemote("/tmp/test_cycler.json", ".gobackup-state/test_model.json", mockStore)
+	cycler.saveRemote(mockStore, "/tmp/test_cycler.json", ".gobackup-state/test_model.json")
 
 	// Verify remote state was saved
 	savedData, ok := mockStore.state[".gobackup-state/test_model.json"]
 	assert.True(t, ok)
-	
+
 	var savedPackages PackageList
 	err := json.Unmarshal(savedData, &savedPackages)
 	assert.Nil(t, err)
