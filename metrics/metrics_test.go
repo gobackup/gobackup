@@ -12,35 +12,35 @@ func TestMetricsRegistration(t *testing.T) {
 	ch := make(chan *prometheus.Desc, 10)
 
 	// BackupTotal
-	BackupTotal.Describe(ch)
+	TotalAttempts.Describe(ch)
 	desc := <-ch
 	assert.NotNil(t, desc)
 
 	// BackupDurationSeconds
-	BackupDurationSeconds.Describe(ch)
+	DuractionSeconds.Describe(ch)
 	desc = <-ch
 	assert.NotNil(t, desc)
 
 	// BackupFileSize
-	BackupFileSize.Describe(ch)
+	FileSizes.Describe(ch)
 	desc = <-ch
 	assert.NotNil(t, desc)
 
 	// BackupLastTimestamp
-	BackupLastTimestamp.Describe(ch)
+	LastTimestamp.Describe(ch)
 	desc = <-ch
 	assert.NotNil(t, desc)
 }
 
 func TestMetricsLabels(t *testing.T) {
 	// Test that metrics can be created with labels
-	BackupTotal.WithLabelValues("test_model", "success").Add(0)
-	BackupTotal.WithLabelValues("test_model", "failure").Add(0)
+	TotalAttempts.WithLabelValues("test_model", "success").Add(0)
+	TotalAttempts.WithLabelValues("test_model", "failure").Add(0)
 
-	BackupDurationSeconds.WithLabelValues("test_model").Observe(0)
+	DuractionSeconds.WithLabelValues("test_model").Observe(0)
 
-	BackupFileSize.WithLabelValues("test_model").Set(0)
+	FileSizes.WithLabelValues("test_model").Set(0)
 
-	BackupLastTimestamp.WithLabelValues("test_model", "success").Set(0)
-	BackupLastTimestamp.WithLabelValues("test_model", "failure").Set(0)
+	LastTimestamp.WithLabelValues("test_model", "success").Set(0)
+	LastTimestamp.WithLabelValues("test_model", "failure").Set(0)
 }

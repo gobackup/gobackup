@@ -35,22 +35,22 @@ func (m Model) Perform() (err error) {
 
 	defer func() {
 		duration := time.Since(startTime).Seconds()
-		metrics.BackupDurationSeconds.WithLabelValues(m.Config.Name).Observe(duration)
+		metrics.DuractionSeconds.WithLabelValues(m.Config.Name).Observe(duration)
 
 		if err != nil {
 			logger.Error(err)
 			notifier.Failure(m.Config, err.Error())
-			metrics.BackupTotal.WithLabelValues(m.Config.Name, "failure").Inc()
-			metrics.BackupLastTimestamp.WithLabelValues(m.Config.Name, "failure").Set(float64(time.Now().Unix()))
+			metrics.TotalAttempts.WithLabelValues(m.Config.Name, "failure").Inc()
+			metrics.LastTimestamp.WithLabelValues(m.Config.Name, "failure").Set(float64(time.Now().Unix()))
 		} else {
 			notifier.Success(m.Config)
-			metrics.BackupTotal.WithLabelValues(m.Config.Name, "success").Inc()
-			metrics.BackupLastTimestamp.WithLabelValues(m.Config.Name, "success").Set(float64(time.Now().Unix()))
+			metrics.TotalAttempts.WithLabelValues(m.Config.Name, "success").Inc()
+			metrics.LastTimestamp.WithLabelValues(m.Config.Name, "success").Set(float64(time.Now().Unix()))
 
 			// Record backup file size if available
 			if archivePath != "" {
 				if fi, statErr := os.Stat(archivePath); statErr == nil {
-					metrics.BackupFileSize.WithLabelValues(m.Config.Name).Set(float64(fi.Size()))
+					metrics.FileSizes.WithLabelValues(m.Config.Name).Set(float64(fi.Size()))
 				}
 			}
 		}
