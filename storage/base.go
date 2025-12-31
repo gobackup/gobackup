@@ -154,7 +154,7 @@ func runModel(model config.ModelConfig, archivePath string, storageConfig config
 		return err
 	}
 
-	base.cycler.run(newFileKey, base.fileKeys, base.keep, s.delete)
+	base.cycler.run(s, newFileKey, base.fileKeys, base.keep, s.delete)
 	return nil
 }
 
