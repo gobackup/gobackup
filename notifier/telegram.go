@@ -21,7 +21,6 @@ func NewTelegram(base *Base) *Webhook {
 		Service:     "Telegram",
 		method:      "POST",
 		contentType: "application/json",
-		proxy:       base.viper.GetString("proxy"),
 		buildWebhookURL: func(url string) (string, error) {
 			token := base.viper.GetString("token")
 			endpoint := DEFAULT_TELEGRAM_ENDPOINT
