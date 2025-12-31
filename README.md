@@ -78,6 +78,9 @@ https://gobackup.github.io
 
 Send notification when backup has success or failed.
 
+Go uses the standard `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` environment
+variables for outbound HTTP requests, which applies to all notifiers.
+
 - Mail (SMTP)
 - Webhook
 - Discord

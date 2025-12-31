@@ -8,8 +8,8 @@ import (
 )
 
 type telegramPayload struct {
-	ChatID 		string `json:"chat_id"`
-	Text   		string `json:"text"`
+	ChatID          string `json:"chat_id"`
+	Text            string `json:"text"`
 	MessageThreadId string `json:"message_thread_id"`
 }
 
@@ -37,8 +37,8 @@ func NewTelegram(base *Base) *Webhook {
 			message_thread_id := base.viper.GetString("message_thread_id")
 
 			payload := telegramPayload{
-				ChatID: chat_id,
-				Text:   fmt.Sprintf("%s\n\n%s", title, message),
+				ChatID:          chat_id,
+				Text:            fmt.Sprintf("%s\n\n%s", title, message),
 				MessageThreadId: message_thread_id,
 			}
 
