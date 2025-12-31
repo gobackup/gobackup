@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	neturl "net/url"
 	"strings"
 
 	"github.com/gobackup/gobackup/logger"
@@ -17,6 +18,7 @@ type Webhook struct {
 
 	method          string
 	contentType     string
+	proxy           string
 	buildBody       func(title, message string) ([]byte, error)
 	buildWebhookURL func(url string) (string, error)
 	checkResult     func(status int, responseBody []byte) error
@@ -104,6 +106,24 @@ func (s *Webhook) notify(title string, message string) error {
 	}
 
 	client := &http.Client{}
+	if s.proxy != "" {
+		proxyValue := s.proxy
+		if !strings.Contains(proxyValue, "://") {
+			proxyValue = "http://" + proxyValue
+		}
+		proxyURL, err := neturl.Parse(proxyValue)
+		if err != nil {
+			logger.Errorf("Invalid proxy URL: %s", err)
+			return err
+		}
+		if transport, ok := http.DefaultTransport.(*http.Transport); ok {
+			clone := transport.Clone()
+			clone.Proxy = http.ProxyURL(proxyURL)
+			client.Transport = clone
+		} else {
+			client.Transport = &http.Transport{Proxy: http.ProxyURL(proxyURL)}
+		}
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		logger.Error(err)
