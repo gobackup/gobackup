@@ -107,13 +107,21 @@ func (s *Webhook) notify(title string, message string) error {
 
 	client := &http.Client{}
 	if s.proxy != "" {
-		proxyURL, err := neturl.Parse(s.proxy)
+		proxyValue := s.proxy
+		if !strings.Contains(proxyValue, "://") {
+			proxyValue = "http://" + proxyValue
+		}
+		proxyURL, err := neturl.Parse(proxyValue)
 		if err != nil {
 			logger.Errorf("Invalid proxy URL: %s", err)
 			return err
 		}
-		client.Transport = &http.Transport{
-			Proxy: http.ProxyURL(proxyURL),
+		if transport, ok := http.DefaultTransport.(*http.Transport); ok {
+			clone := transport.Clone()
+			clone.Proxy = http.ProxyURL(proxyURL)
+			client.Transport = clone
+		} else {
+			client.Transport = &http.Transport{Proxy: http.ProxyURL(proxyURL)}
 		}
 	}
 	resp, err := client.Do(req)
