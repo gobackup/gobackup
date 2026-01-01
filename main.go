@@ -94,7 +94,7 @@ func main() {
 			Action: func(ctx *cli.Context) error {
 				fmt.Println("GoBackup starting...")
 
-				args := []string{"gobackup", "run"}
+				args := []string{"gobackup", "start"}
 				if len(configFile) != 0 {
 					args = append(args, "--config", configFile)
 				}
