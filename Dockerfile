@@ -46,7 +46,7 @@ RUN case "$(uname -m)" in \
     aarch64) arch=arm64 ;; \
     *) echo 'Unsupported architecture' && exit 1 ;; \
     esac && \
-    if [ "${arch}" = "amd64" ] ; then && \
+    if [ "${arch}" = "amd64" ] ; then \
     # The mssql-tools only have x86_64. even we download a `arm64` package, it is actually an x86_64 binary.
     echo "Downloading ODBC Driver and MSSQL Tools for architecture: ${arch}" && \
     echo "Downloading https://download.microsoft.com/download/fae28b9a-d880-42fd-9b98-d779f0fdd77f/msodbcsql18_18.5.1.1-1_${arch}.apk" && \
