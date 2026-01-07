@@ -15,7 +15,6 @@ get_latest_release() {
     awk 'BEGIN{FS=": |,|\""}; /tag_name/{print $5}'
 }
 
-
 repo="gobackup/gobackup"
 version="$(get_latest_release "${repo}")" # v1.2.0
 
@@ -26,6 +25,11 @@ if test "$#" -eq 1; then
 
     echo "Install ${version}"
   fi
+fi
+
+if test -z "${version}"; then
+  echo "Failed to get latest version, this may meet GitHub API rate limit."
+  exit 1
 fi
 
 platform="$(uname | tr "[:upper:]" "[:lower:]")"                    # Linux => linux
