@@ -15,6 +15,7 @@ get_latest_release() {
     awk 'BEGIN{FS=": |,|\""}; /tag_name/{print $5}'
 }
 
+
 repo="gobackup/gobackup"
 version="$(get_latest_release "${repo}")" # v1.2.0
 
