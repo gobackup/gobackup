@@ -48,7 +48,7 @@ RUN case "$(uname -m)" in \
     *) echo 'Unsupported architecture' && exit 1 ;; \
     esac && \
     if [ "${arch}" = "amd64" ] ; then \
-    # The mssql-tools only have x86_64.
+    # The mssql-tools only have x86_64. even we download a `arm64` package, it is actually an x86_64 binary.
     echo "Downloading ODBC Driver and MSSQL Tools for architecture: ${arch}" && \
     echo "Downloading https://download.microsoft.com/download/fae28b9a-d880-42fd-9b98-d779f0fdd77f/msodbcsql18_18.5.1.1-1_${arch}.apk" && \
     curl -O https://download.microsoft.com/download/fae28b9a-d880-42fd-9b98-d779f0fdd77f/msodbcsql18_18.5.1.1-1_${arch}.apk && \
@@ -57,10 +57,10 @@ RUN case "$(uname -m)" in \
     apk add --allow-untrusted msodbcsql18_18.5.1.1-1_${arch}.apk && \
     apk add --allow-untrusted mssql-tools18_18.4.1.1-1_${arch}.apk && \
     rm msodbcsql18_18.5.1.1-1_${arch}.apk && \
-    rm mssql-tools18_18.4.1.1-1_${arch}.apk && \
-    fi && \
+    rm mssql-tools18_18.4.1.1-1_${arch}.apk ;; \
+    fi
 
-    ENV PATH="${PATH}:/opt/sqlpackage:/opt/mssql-tools18/bin"
+ENV PATH="${PATH}:/opt/sqlpackage:/opt/mssql-tools18/bin"
 
 # Install the influx CLI
 ARG INFLUX_CLI_VERSION=2.7.5
