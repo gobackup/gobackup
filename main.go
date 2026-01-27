@@ -178,11 +178,14 @@ func perform(modelNames []string) error {
 		}
 	}
 
+	var last_error error
+	last_error = nil
 	for _, m := range models {
 		if err := m.Perform(); err != nil {
 			logger.Tag(fmt.Sprintf("Model %s", m.Config.Name)).Error(err)
+			last_error = err
 		}
 	}
 
-	return nil
+	return last_error
 }
