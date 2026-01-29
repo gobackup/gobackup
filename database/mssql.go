@@ -8,6 +8,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("mssql", func(base Base) Database {
+		return &MSSQL{Base: base}
+	})
+}
+
 // MSSQL database
 //
 // type: mssql

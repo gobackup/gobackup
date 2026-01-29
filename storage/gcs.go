@@ -18,6 +18,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("gcs", func(base Base) Storage {
+		return &GCS{Base: base}
+	})
+}
+
 // GCS - Google Clound storage
 //
 // type: gcs

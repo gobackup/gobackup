@@ -11,6 +11,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("postgresql", func(base Base) Database {
+		return &PostgreSQL{Base: base}
+	})
+}
+
 // PostgreSQL database
 //
 // ref:

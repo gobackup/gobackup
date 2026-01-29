@@ -5,6 +5,12 @@ import (
 	"fmt"
 )
 
+func init() {
+	Register("slack", func(base *Base) (Notifier, error) {
+		return NewSlack(base), nil
+	})
+}
+
 type slackPayload struct {
 	Text string `json:"text"`
 }

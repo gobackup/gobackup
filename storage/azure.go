@@ -15,6 +15,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("azure", func(base Base) Storage {
+		return &Azure{Base: base}
+	})
+}
+
 // Azure - Microsoft Azure Blob Storage
 //
 // type: azure

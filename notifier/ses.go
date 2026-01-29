@@ -8,6 +8,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("ses", func(base *Base) (Notifier, error) {
+		return NewSES(base), nil
+	})
+}
+
 type SES struct {
 	Base
 	client *ses.SES

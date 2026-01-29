@@ -10,6 +10,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("healthchecks", func(base *Base) (Notifier, error) {
+		return NewHealthchecks(base), nil
+	})
+}
+
 type Healthchecks struct {
 	Base
 	Service         string

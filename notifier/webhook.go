@@ -10,6 +10,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("webhook", func(base *Base) (Notifier, error) {
+		return NewWebhook(base), nil
+	})
+}
+
 type Webhook struct {
 	Base
 

@@ -25,9 +25,9 @@ var (
 	notifyTypeFailure = 2
 )
 
-func newNotifier(name string, config config.SubConfig) (Notifier, *Base, error) {
+func newNotifier(name string, cfg config.SubConfig) (Notifier, *Base, error) {
 	base := &Base{
-		viper: config.Viper,
+		viper: cfg.Viper,
 		Name:  name,
 	}
 	base.viper.SetDefault("on_success", true)
@@ -36,41 +36,13 @@ func newNotifier(name string, config config.SubConfig) (Notifier, *Base, error) 
 	base.onSuccess = base.viper.GetBool("on_success")
 	base.onFailure = base.viper.GetBool("on_failure")
 
-	switch config.Type {
-	case "mail":
-		mail, err := NewMail(base)
-		return mail, base, err
-	case "webhook":
-		return NewWebhook(base), base, nil
-	case "feishu":
-		return NewFeishu(base), base, nil
-	case "dingtalk":
-		return NewDingtalk(base), base, nil
-	case "discord":
-		return NewDiscord(base), base, nil
-	case "slack":
-		return NewSlack(base), base, nil
-	case "github":
-		return NewGitHub(base), base, nil
-	case "telegram":
-		return NewTelegram(base), base, nil
-	case "postmark":
-		return NewPostmark(base), base, nil
-	case "sendgrid":
-		return NewSendGrid(base), base, nil
-	case "ses":
-		return NewSES(base), base, nil
-	case "resend":
-		return NewResend(base), base, nil
-	case "wxwork":
-		return NewWxWork(base), base, nil
-	case "googlechat":
-	        return NewGoogleChat(base), base, nil
-	case "healthchecks":
-		return NewHealthchecks(base), base, nil
+	factory := Get(cfg.Type)
+	if factory == nil {
+		return nil, nil, fmt.Errorf("notifier: %s is not supported", cfg.Type)
 	}
 
-	return nil, nil, fmt.Errorf("Notifier: %s is not supported", name)
+	notifier, err := factory(base)
+	return notifier, base, err
 }
 
 func notify(model config.ModelConfig, title, message string, notifyType int) {

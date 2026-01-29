@@ -5,6 +5,12 @@ import (
 	"fmt"
 )
 
+func init() {
+	Register("resend", func(base *Base) (Notifier, error) {
+		return NewResend(base), nil
+	})
+}
+
 // resendPayload
 // https://resend.com/docs/api-reference/emails/send-email
 type resendPayload struct {

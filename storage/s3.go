@@ -18,6 +18,20 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	// Register S3 and all S3-compatible services
+	s3Services := []string{
+		"s3", "oss", "minio", "b2", "us3", "cos",
+		"kodo", "r2", "spaces", "bos", "obs", "tos", "upyun",
+	}
+	for _, service := range s3Services {
+		svc := service // capture for closure
+		Register(svc, func(base Base) Storage {
+			return &S3{Base: base, Service: svc}
+		})
+	}
+}
+
 // S3 - Amazon S3 storage
 //
 // type: s3

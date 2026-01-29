@@ -18,6 +18,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("scp", func(base Base) Storage {
+		return &SCP{Base: base}
+	})
+}
+
 // SSH
 //
 // host:

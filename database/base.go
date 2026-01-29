@@ -58,37 +58,18 @@ func runHook(action, script string) error {
 	return nil
 }
 
-// New - initialize Database
+// runModel initializes and runs the database backup
 func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 	logger := logger.Tag("Database")
 
-	base := newBase(model, dbConfig)
-	var db Database
-	switch dbConfig.Type {
-	case "mysql":
-		db = &MySQL{Base: base}
-	case "mariadb":
-		db = &MariaDB{Base: base}
-	case "redis":
-		db = &Redis{Base: base}
-	case "postgresql":
-		db = &PostgreSQL{Base: base}
-	case "mongodb":
-		db = &MongoDB{Base: base}
-	case "sqlite":
-		db = &SQLite{Base: base}
-	case "mssql":
-		db = &MSSQL{Base: base}
-	case "influxdb2":
-		db = &InfluxDB2{Base: base}
-	case "etcd":
-		db = &Etcd{Base: base}
-	case "firebird":
-		db = &Firebird{Base: base}
-	default:
-		logger.Warn(fmt.Errorf("model: %s databases.%s config `type: %s`, but is not implement", model.Name, dbConfig.Name, dbConfig.Type))
+	factory := Get(dbConfig.Type)
+	if factory == nil {
+		logger.Warn(fmt.Errorf("model: %s databases.%s config `type: %s`, but is not implemented", model.Name, dbConfig.Name, dbConfig.Type))
 		return
 	}
+
+	base := newBase(model, dbConfig)
+	db := factory(base)
 
 	logger.Infof("=> database | %v: %v", dbConfig.Type, base.name)
 

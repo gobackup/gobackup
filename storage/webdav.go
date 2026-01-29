@@ -12,6 +12,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("webdav", func(base Base) Storage {
+		return &WebDAV{Base: base}
+	})
+}
+
 // WebDAV storage
 //
 // # Install WebDAV Server on macOS

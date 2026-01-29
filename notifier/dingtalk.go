@@ -5,6 +5,12 @@ import (
 	"fmt"
 )
 
+func init() {
+	Register("dingtalk", func(base *Base) (Notifier, error) {
+		return NewDingtalk(base), nil
+	})
+}
+
 type dingtalkResult struct {
 	Code    int    `json:"errcode"`
 	Message string `json:"errmsg"`

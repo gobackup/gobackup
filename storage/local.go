@@ -11,6 +11,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("local", func(base Base) Storage {
+		return &Local{Base: base}
+	})
+}
+
 // Local storage
 //
 // type: local

@@ -10,6 +10,12 @@ import (
 	"strings"
 )
 
+func init() {
+	Register("mail", func(base *Base) (Notifier, error) {
+		return NewMail(base)
+	})
+}
+
 type Mail struct {
 	// Base is the base notifier
 	from     string

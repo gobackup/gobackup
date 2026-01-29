@@ -6,6 +6,12 @@ import (
 	"regexp"
 )
 
+func init() {
+	Register("github", func(base *Base) (Notifier, error) {
+		return NewGitHub(base), nil
+	})
+}
+
 type githubCommentPayload struct {
 	Body string `json:"body"`
 }

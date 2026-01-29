@@ -16,6 +16,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("ftp", func(base Base) Storage {
+		return &FTP{Base: base}
+	})
+}
+
 // FTP storage
 //
 // type: ftp

@@ -8,6 +8,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("mariadb", func(base Base) Database {
+		return &MariaDB{Base: base}
+	})
+}
+
 // Mariadb database
 //
 // type: mariadb

@@ -5,6 +5,12 @@ import (
 	"fmt"
 )
 
+func init() {
+	Register("sendgrid", func(base *Base) (Notifier, error) {
+		return NewSendGrid(base), nil
+	})
+}
+
 // sendgridPayload
 // https://docs.sendgrid.com/api-reference/mail-send/mail-send
 type sendgridPayload struct {

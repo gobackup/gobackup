@@ -5,6 +5,12 @@ import (
 	"fmt"
 )
 
+func init() {
+	Register("feishu", func(base *Base) (Notifier, error) {
+		return NewFeishu(base), nil
+	})
+}
+
 type feishuPayload struct {
 	MsgType string               `json:"msg_type"`
 	Content feishuPayloadContent `json:"content"`

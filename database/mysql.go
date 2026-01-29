@@ -9,6 +9,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("mysql", func(base Base) Database {
+		return &MySQL{Base: base}
+	})
+}
+
 // MySQL database
 //
 // type: mysql

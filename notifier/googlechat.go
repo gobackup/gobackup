@@ -10,6 +10,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("googlechat", func(base *Base) (Notifier, error) {
+		return NewGoogleChat(base), nil
+	})
+}
+
 type GoogleChat struct {
 	Base
 

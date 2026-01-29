@@ -5,6 +5,12 @@ import (
 	"fmt"
 )
 
+func init() {
+	Register("discord", func(base *Base) (Notifier, error) {
+		return NewDiscord(base), nil
+	})
+}
+
 type discordPayload struct {
 	Content string `json:"content"`
 }

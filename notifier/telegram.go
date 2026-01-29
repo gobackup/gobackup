@@ -7,6 +7,12 @@ import (
 	"github.com/gobackup/gobackup/helper"
 )
 
+func init() {
+	Register("telegram", func(base *Base) (Notifier, error) {
+		return NewTelegram(base), nil
+	})
+}
+
 type telegramPayload struct {
 	ChatID 		string `json:"chat_id"`
 	Text   		string `json:"text"`

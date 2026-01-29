@@ -16,6 +16,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("sftp", func(base Base) Storage {
+		return &SFTP{Base: base}
+	})
+}
+
 // SFTP storage
 //
 // type: sftp

@@ -8,6 +8,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("mongodb", func(base Base) Database {
+		return &MongoDB{Base: base}
+	})
+}
+
 // MongoDB database
 //
 // type: mongodb

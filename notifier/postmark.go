@@ -5,6 +5,12 @@ import (
 	"fmt"
 )
 
+func init() {
+	Register("postmark", func(base *Base) (Notifier, error) {
+		return NewPostmark(base), nil
+	})
+}
+
 // postmarkPayload
 // https://postmarkapp.com/developer/user-guide/send-email-with-api
 type postmarkPayload struct {

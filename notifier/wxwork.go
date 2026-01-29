@@ -5,6 +5,12 @@ import (
 	"fmt"
 )
 
+func init() {
+	Register("wxwork", func(base *Base) (Notifier, error) {
+		return NewWxWork(base), nil
+	})
+}
+
 type wxworkResult struct {
 	Code    int    `json:"errcode"`
 	Message string `json:"errmsg"`

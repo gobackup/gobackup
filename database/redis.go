@@ -9,6 +9,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("redis", func(base Base) Database {
+		return &Redis{Base: base}
+	})
+}
+
 type redisMode int
 
 const (

@@ -9,6 +9,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("firebird", func(base Base) Database {
+		return &Firebird{Base: base}
+	})
+}
+
 // Firebird database
 //
 // With gbak utility : https://www.firebirdsql.org/file/documentation/html/en/firebirddocs/gbak/firebird-gbak.html

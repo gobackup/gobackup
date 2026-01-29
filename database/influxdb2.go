@@ -7,6 +7,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("influxdb2", func(base Base) Database {
+		return &InfluxDB2{Base: base}
+	})
+}
+
 // InfluxDB v2 database through `influx` cli
 // See https://docs.influxdata.com/influxdb/v2/reference/cli/influx/backup/
 type InfluxDB2 struct {

@@ -9,6 +9,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("sqlite", func(base Base) Database {
+		return &SQLite{Base: base}
+	})
+}
+
 // SQLite database
 //
 // type: sqlite

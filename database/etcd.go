@@ -9,6 +9,12 @@ import (
 	"github.com/gobackup/gobackup/logger"
 )
 
+func init() {
+	Register("etcd", func(base Base) Database {
+		return &Etcd{Base: base}
+	})
+}
+
 // etcd database
 //
 // ref:
