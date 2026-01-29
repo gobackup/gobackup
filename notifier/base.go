@@ -36,41 +36,17 @@ func newNotifier(name string, config config.SubConfig) (Notifier, *Base, error) 
 	base.onSuccess = base.viper.GetBool("on_success")
 	base.onFailure = base.viper.GetBool("on_failure")
 
-	switch config.Type {
-	case "mail":
-		mail, err := NewMail(base)
-		return mail, base, err
-	case "webhook":
-		return NewWebhook(base), base, nil
-	case "feishu":
-		return NewFeishu(base), base, nil
-	case "dingtalk":
-		return NewDingtalk(base), base, nil
-	case "discord":
-		return NewDiscord(base), base, nil
-	case "slack":
-		return NewSlack(base), base, nil
-	case "github":
-		return NewGitHub(base), base, nil
-	case "telegram":
-		return NewTelegram(base), base, nil
-	case "postmark":
-		return NewPostmark(base), base, nil
-	case "sendgrid":
-		return NewSendGrid(base), base, nil
-	case "ses":
-		return NewSES(base), base, nil
-	case "resend":
-		return NewResend(base), base, nil
-	case "wxwork":
-		return NewWxWork(base), base, nil
-	case "googlechat":
-	        return NewGoogleChat(base), base, nil
-	case "healthchecks":
-		return NewHealthchecks(base), base, nil
+	factory, err := DefaultRegistry.Get(config.Type)
+	if err != nil {
+		return nil, nil, fmt.Errorf("Notifier: %s is not supported", config.Type)
 	}
 
-	return nil, nil, fmt.Errorf("Notifier: %s is not supported", name)
+	notifier, err := factory(base)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return notifier, base, nil
 }
 
 func notify(model config.ModelConfig, title, message string, notifyType int) {
