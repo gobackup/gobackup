@@ -149,6 +149,72 @@ func TestWebConfig(t *testing.T) {
 	assert.Equal(t, Web.Password, "123456")
 }
 
+func TestWebConfig_HasAuth(t *testing.T) {
+	w := WebConfig{Username: "user", Password: "pass"}
+	assert.True(t, w.HasAuth())
+
+	w = WebConfig{Username: "", Password: "pass"}
+	assert.False(t, w.HasAuth())
+
+	w = WebConfig{Username: "user", Password: ""}
+	assert.False(t, w.HasAuth())
+}
+
+func TestWebConfig_Address(t *testing.T) {
+	w := WebConfig{Host: "127.0.0.1", Port: "8080"}
+	assert.Equal(t, "127.0.0.1:8080", w.Address())
+}
+
+func TestModelConfig_Methods(t *testing.T) {
+	model := GetModelConfigByName("base_test")
+
+	// Test String()
+	str := model.String()
+	assert.Contains(t, str, "base_test")
+	assert.Contains(t, str, "databases=3")
+
+	// Test HasSchedule()
+	assert.True(t, model.HasSchedule())
+
+	// Test HasEncryption()
+	assert.True(t, model.HasEncryption())
+
+	// Test DatabaseNames()
+	dbNames := model.DatabaseNames()
+	assert.Len(t, dbNames, 3)
+
+	// Test StorageNames()
+	storageNames := model.StorageNames()
+	assert.True(t, len(storageNames) > 0)
+}
+
+func TestSubConfig_String(t *testing.T) {
+	s := SubConfig{Name: "mydb", Type: "mysql"}
+	assert.Equal(t, "mydb(mysql)", s.String())
+}
+
+func TestScheduleConfig_Validate(t *testing.T) {
+	// Valid: disabled
+	sc := ScheduleConfig{Enabled: false}
+	assert.Nil(t, sc.Validate())
+
+	// Valid: cron only
+	sc = ScheduleConfig{Enabled: true, Cron: "0 0 * * *"}
+	assert.Nil(t, sc.Validate())
+
+	// Valid: every only
+	sc = ScheduleConfig{Enabled: true, Every: "1day"}
+	assert.Nil(t, sc.Validate())
+
+	// Invalid: neither cron nor every
+	sc = ScheduleConfig{Enabled: true}
+	assert.NotNil(t, sc.Validate())
+
+	// Invalid: both cron and every
+	sc = ScheduleConfig{Enabled: true, Cron: "0 0 * * *", Every: "1day"}
+	assert.NotNil(t, sc.Validate())
+}
+
 func TestInitWithNotExistsConfigFile(t *testing.T) {
 	err := Init("config/path/not-exist.yml")
 	assert.NotNil(t, err)

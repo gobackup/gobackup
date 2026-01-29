@@ -36,60 +36,121 @@ var (
 	onConfigChanges = make([]func(fsnotify.Event), 0)
 )
 
+// WebConfig holds the web server configuration
 type WebConfig struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	Enabled  bool
+	Host     string `json:"host,omitempty"`
+	Port     string `json:"port,omitempty"`
+	Username string `json:"-"` // exclude from JSON for security
+	Password string `json:"-"` // exclude from JSON for security
+	Enabled  bool   `json:"enabled,omitempty"`
 }
 
+// HasAuth returns true if web authentication is configured
+func (w WebConfig) HasAuth() bool {
+	return len(w.Username) > 0 && len(w.Password) > 0
+}
+
+// Address returns the full address string (host:port)
+func (w WebConfig) Address() string {
+	return fmt.Sprintf("%s:%s", w.Host, w.Port)
+}
+
+// ScheduleConfig holds the scheduling configuration for a backup model
 type ScheduleConfig struct {
-	Enabled bool `json:"enabled,omitempty"`
-	// Cron expression
-	Cron string `json:"cron,omitempty"`
-	// Every
-	Every string `json:"every,omitempty"`
-	// At time
-	At string `json:"at,omitempty"`
+	Enabled bool   `json:"enabled,omitempty"`
+	Cron    string `json:"cron,omitempty"`  // Cron expression (e.g., "0 0 * * *")
+	Every   string `json:"every,omitempty"` // Duration (e.g., "1day", "12h")
+	At      string `json:"at,omitempty"`    // Time of day (e.g., "03:00")
 }
 
+// String returns a human-readable representation of the schedule
 func (sc ScheduleConfig) String() string {
-	if sc.Enabled {
-		if len(sc.Cron) > 0 {
-			return fmt.Sprintf("cron %s", sc.Cron)
-		} else {
-			if len(sc.At) > 0 {
-				return fmt.Sprintf("every %s at %s", sc.Every, sc.At)
-			} else {
-				return fmt.Sprintf("every %s", sc.Every)
-			}
-		}
+	if !sc.Enabled {
+		return "disabled"
 	}
-
-	return "disabled"
+	if len(sc.Cron) > 0 {
+		return fmt.Sprintf("cron %s", sc.Cron)
+	}
+	if len(sc.At) > 0 {
+		return fmt.Sprintf("every %s at %s", sc.Every, sc.At)
+	}
+	return fmt.Sprintf("every %s", sc.Every)
 }
 
-// ModelConfig for special case
+// Validate checks if the schedule configuration is valid
+func (sc ScheduleConfig) Validate() error {
+	if !sc.Enabled {
+		return nil
+	}
+	// Must have either cron or every
+	if len(sc.Cron) == 0 && len(sc.Every) == 0 {
+		return fmt.Errorf("schedule must have either 'cron' or 'every' configured")
+	}
+	// Cannot have both cron and every
+	if len(sc.Cron) > 0 && len(sc.Every) > 0 {
+		return fmt.Errorf("schedule cannot have both 'cron' and 'every' configured")
+	}
+	return nil
+}
+
+// ModelConfig represents a backup model configuration
 type ModelConfig struct {
-	Name        string
-	Description string
-	// WorkDir of the gobackup started
-	WorkDir        string
-	TempPath       string
-	DumpPath       string
-	Schedule       ScheduleConfig
-	CompressWith   SubConfig
-	EncryptWith    SubConfig
-	Archive        *viper.Viper
-	Splitter       *viper.Viper
-	Databases      map[string]SubConfig
-	Storages       map[string]SubConfig
-	DefaultStorage string
-	Notifiers      map[string]SubConfig
-	Viper          *viper.Viper
-	BeforeScript   string
-	AfterScript    string
+	Name        string         `json:"name"`
+	Description string         `json:"description,omitempty"`
+	WorkDir     string         `json:"-"` // runtime, not serialized
+	TempPath    string         `json:"-"` // runtime, not serialized
+	DumpPath    string         `json:"-"` // runtime, not serialized
+	Schedule    ScheduleConfig `json:"schedule,omitempty"`
+
+	CompressWith   SubConfig `json:"compress_with,omitempty"`
+	EncryptWith    SubConfig `json:"encrypt_with,omitempty"`
+	DefaultStorage string    `json:"default_storage,omitempty"`
+
+	// These use viper.Viper internally, exclude from JSON
+	Archive  *viper.Viper `json:"-"`
+	Splitter *viper.Viper `json:"-"`
+	Viper    *viper.Viper `json:"-"`
+
+	Databases map[string]SubConfig `json:"databases,omitempty"`
+	Storages  map[string]SubConfig `json:"storages,omitempty"`
+	Notifiers map[string]SubConfig `json:"notifiers,omitempty"`
+
+	BeforeScript string `json:"before_script,omitempty"`
+	AfterScript  string `json:"after_script,omitempty"`
+}
+
+// String returns a human-readable representation of the model
+func (m ModelConfig) String() string {
+	return fmt.Sprintf("Model{name=%s, databases=%d, storages=%d, schedule=%s}",
+		m.Name, len(m.Databases), len(m.Storages), m.Schedule.String())
+}
+
+// HasSchedule returns true if the model has scheduling enabled
+func (m ModelConfig) HasSchedule() bool {
+	return m.Schedule.Enabled
+}
+
+// HasEncryption returns true if encryption is configured
+func (m ModelConfig) HasEncryption() bool {
+	return len(m.EncryptWith.Type) > 0
+}
+
+// DatabaseNames returns a list of configured database names
+func (m ModelConfig) DatabaseNames() []string {
+	names := make([]string, 0, len(m.Databases))
+	for name := range m.Databases {
+		names = append(names, name)
+	}
+	return names
+}
+
+// StorageNames returns a list of configured storage names
+func (m ModelConfig) StorageNames() []string {
+	names := make([]string, 0, len(m.Storages))
+	for name := range m.Storages {
+		names = append(names, name)
+	}
+	return names
 }
 
 func getGoBackupDir() string {
@@ -100,11 +161,16 @@ func getGoBackupDir() string {
 	return dir
 }
 
-// SubConfig sub config info
+// SubConfig holds configuration for a sub-component (database, storage, notifier)
 type SubConfig struct {
-	Name  string
-	Type  string
-	Viper *viper.Viper
+	Name  string       `json:"name,omitempty"`
+	Type  string       `json:"type,omitempty"`
+	Viper *viper.Viper `json:"-"` // internal, not serialized
+}
+
+// String returns a human-readable representation
+func (s SubConfig) String() string {
+	return fmt.Sprintf("%s(%s)", s.Name, s.Type)
 }
 
 // Init
@@ -196,15 +262,14 @@ func loadConfig() error {
 		return err
 	}
 
-	// TODO: Here the `useTempWorkDir` and `workdir`, is not in config document. We need removed it.
+	// Setup working directory for temporary backup files
+	// If not configured, create a temporary directory that will be cleaned up after backup
 	viper.Set("useTempWorkDir", false)
 	if workdir := viper.GetString("workdir"); len(workdir) == 0 {
-		// use temp dir as workdir
 		dir, err := os.MkdirTemp("", "gobackup")
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to create temp workdir: %w", err)
 		}
-
 		viper.Set("workdir", dir)
 		viper.Set("useTempWorkDir", true)
 	}
@@ -277,12 +342,14 @@ func loadModel(key string) (ModelConfig, error) {
 	model.BeforeScript = model.Viper.GetString("before_script")
 	model.AfterScript = model.Viper.GetString("after_script")
 
-	loadScheduleConfig(&model)
+	if err := loadScheduleConfig(&model); err != nil {
+		return ModelConfig{}, fmt.Errorf("model %s: %w", model.Name, err)
+	}
 	loadDatabasesConfig(&model)
 	loadStoragesConfig(&model)
 
 	if len(model.Storages) == 0 {
-		return ModelConfig{}, fmt.Errorf("no storage found in model %s", model.Name)
+		return ModelConfig{}, fmt.Errorf("model %s: no storage configured", model.Name)
 	}
 
 	loadNotifiersConfig(&model)
@@ -290,11 +357,11 @@ func loadModel(key string) (ModelConfig, error) {
 	return model, nil
 }
 
-func loadScheduleConfig(model *ModelConfig) {
+func loadScheduleConfig(model *ModelConfig) error {
 	subViper := model.Viper.Sub("schedule")
 	model.Schedule = ScheduleConfig{Enabled: false}
 	if subViper == nil {
-		return
+		return nil
 	}
 
 	model.Schedule = ScheduleConfig{
@@ -303,6 +370,8 @@ func loadScheduleConfig(model *ModelConfig) {
 		Every:   subViper.GetString("every"),
 		At:      subViper.GetString("at"),
 	}
+
+	return model.Schedule.Validate()
 }
 
 func loadDatabasesConfig(model *ModelConfig) {
