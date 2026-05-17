@@ -102,8 +102,21 @@ func (c *Cycler) loadRemote(storage Storage, cyclerFileName string, remoteStateK
 		return
 	}
 
+	// Prepend the storage path so the key matches what upload() writes.
+	// upload() does filepath.Join(s.path, fileKey) internally, but download()
+	// takes the full key as-is (it also serves the public Download API which
+	// already receives full paths from list()). Without this correction,
+	// loadRemote misses the file whenever s.path is non-empty and silently
+	// falls back to an empty local state, so keep never takes effect.
+	fullRemoteKey := remoteStateKey
+	if base := getBaseFromStorage(storage); base != nil && base.viper != nil {
+		if storagePath := base.viper.GetString("path"); storagePath != "" {
+			fullRemoteKey = filepath.Join(storagePath, remoteStateKey)
+		}
+	}
+
 	// Use download method to get a presigned URL
-	url, err := storage.download(remoteStateKey)
+	url, err := storage.download(fullRemoteKey)
 	if err == nil && url != "" {
 		// Fetch the data from the URL
 		resp, err := http.Get(url)
@@ -210,20 +223,22 @@ func (c *Cycler) saveRemote(storage Storage, cyclerFileName string, remoteStateK
 				base := getBaseFromStorage(storage)
 				if base != nil {
 					originalArchivePath := base.archivePath
-					// Set archivePath to a file in tmpDir so filepath.Dir(archivePath) = tmpDir
-					// This way filepath.Join(filepath.Dir(archivePath), remoteStateKey) = tmpFilePath
+					originalFileKeys := base.fileKeys
+					// Set archivePath so filepath.Dir(archivePath) = tmpDir, making
+					// upload read from tmpDir/remoteStateKey.
 					base.archivePath = filepath.Join(tmpDir, "dummy")
+					// Clear fileKeys so upload() uses the remoteStateKey argument
+					// directly instead of iterating over the original backup chunks.
+					base.fileKeys = nil
 
-					// Upload using remoteStateKey as the fileKey
-					// This will read from tmpDir/remoteStateKey and upload to s.path/remoteStateKey
 					if err := storage.upload(remoteStateKey); err != nil {
 						logger.Warnf("Failed to save cycler state to remote storage: %v", err)
 					} else {
 						logger.Info("Saved cycler state to remote storage")
 					}
 
-					// Restore original archivePath
 					base.archivePath = originalArchivePath
+					base.fileKeys = originalFileKeys
 				} else {
 					logger.Warn("Failed to get Base from storage for state upload")
 				}
