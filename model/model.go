@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/spf13/viper"
@@ -30,6 +31,12 @@ func (m Model) Perform() (err error) {
 	logger := logger.Tag(fmt.Sprintf("Model: %s", m.Config.Name))
 	startTime := time.Now()
 	var archivePath string
+
+	// Generate a fresh temp path per run so each backup uses a unique directory.
+	// Config loads TempPath once at startup; reusing the same path after cleanup
+	// causes sqlpackage (and potentially other tools) to fail on subsequent runs.
+	m.Config.TempPath = filepath.Join(viper.GetString("workdir"), fmt.Sprintf("%d", time.Now().UnixNano()))
+	m.Config.DumpPath = filepath.Join(m.Config.TempPath, m.Config.Name)
 
 	m.before()
 
