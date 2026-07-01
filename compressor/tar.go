@@ -15,6 +15,7 @@ func (tar *Tar) perform() (archivePath string, err error) {
 
 	opts := tar.options()
 	opts = append(opts, filePath)
+	opts = append(opts, "-C", tar.model.TempPath)
 	opts = append(opts, tar.name)
 	archivePath = filePath
 

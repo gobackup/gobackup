@@ -2,12 +2,11 @@ package compressor
 
 import (
 	"fmt"
-	"github.com/gobackup/gobackup/helper"
-	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/gobackup/gobackup/config"
+	"github.com/gobackup/gobackup/helper"
 	"github.com/gobackup/gobackup/logger"
 	"github.com/spf13/viper"
 )
@@ -92,11 +91,6 @@ func Run(model config.ModelConfig) (string, error) {
 	if err := helper.MkdirP(model.DumpPath); err != nil {
 		logger.Errorf("Failed to mkdir dump path %s: %v", model.DumpPath, err)
 		return "", err
-	}
-
-	// set workdir
-	if err := os.Chdir(filepath.Join(model.DumpPath, "../")); err != nil {
-		return "", fmt.Errorf("chdir to dump path: %s: %w", model.DumpPath, err)
 	}
 
 	archivePath, err := c.perform()
