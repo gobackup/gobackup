@@ -18,18 +18,11 @@ var (
 	spaceRegexp = regexp.MustCompile(`[\s]+`)
 )
 
-// Exec executes a CLI command and returns its output or an error.
-// It splits the command string into the executable and arguments, then runs the command
-// without directing stdout to the console. Environment variables from the current process
-// are inherited.
+// Exec cli commands
 func Exec(command string, args ...string) (output string, err error) {
 	return ExecWithStdio(command, false, args...)
 }
 
-// ExecWithStdio executes a CLI command with control over stdout redirection.
-// If stdout is true, output is directed to the console; otherwise, it is captured and returned.
-// The function splits the command string, looks up the executable path, and runs the command,
-// capturing stderr for error reporting. Additional arguments can be appended.
 func ExecWithStdio(command string, stdout bool, args ...string) (output string, err error) {
 	commands := spaceRegexp.Split(command, -1)
 	command = commands[0]
@@ -69,10 +62,7 @@ func ExecWithStdio(command string, stdout bool, args ...string) (output string, 
 	return
 }
 
-// ExecScriptWithStdio executes a multi-line script with control over stdout redirection.
-// It creates a temporary shell script file, writes the script content, makes it executable,
-// and runs it via 'sh'. The temporary file is removed after execution. If stdout is true,
-// output is directed to the console; otherwise, it is captured.
+// Execute multiple line script with stdio
 func ExecScriptWithStdio(script string, stdout bool) (string, error) {
 	tmpFileName, _ := uuid.NewUUID()
 	tmpFile := path.Join(os.TempDir(), tmpFileName.String())
@@ -93,8 +83,7 @@ func ExecScriptWithStdio(script string, stdout bool) (string, error) {
 	return ExecWithStdio("sh", stdout, tmpFile)
 }
 
-// ExecScript executes a multi-line script and returns its output or an error.
-// It uses ExecScriptWithStdio internally without directing stdout to the console.
+// Execute multiple line script
 func ExecScript(script string) (output string, err error) {
 	return ExecScriptWithStdio(script, false)
 }
