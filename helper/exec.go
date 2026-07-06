@@ -20,10 +20,21 @@ var (
 
 // Exec cli commands
 func Exec(command string, args ...string) (output string, err error) {
-	return ExecWithStdio(command, false, args...)
+	return execWithStdio(command, false, nil, args...)
+}
+
+// ExecWithEnv runs a CLI command with extra environment variables (each as "KEY=VALUE"),
+// scoped to the spawned child process only. It does not mutate the current process
+// environment, so it is safe for passing secrets and for concurrent use.
+func ExecWithEnv(command string, env []string, args ...string) (output string, err error) {
+	return execWithStdio(command, false, env, args...)
 }
 
 func ExecWithStdio(command string, stdout bool, args ...string) (output string, err error) {
+	return execWithStdio(command, stdout, nil, args...)
+}
+
+func execWithStdio(command string, stdout bool, extraEnv []string, args ...string) (output string, err error) {
 	commands := spaceRegexp.Split(command, -1)
 	command = commands[0]
 	commandArgs := []string{}
@@ -41,6 +52,9 @@ func ExecWithStdio(command string, stdout bool, args ...string) (output string, 
 
 	cmd := exec.Command(fullCommand, commandArgs...)
 	cmd.Env = os.Environ()
+	if len(extraEnv) > 0 {
+		cmd.Env = append(cmd.Env, extraEnv...)
+	}
 
 	var stdErr bytes.Buffer
 	var stdOut bytes.Buffer
@@ -64,6 +78,16 @@ func ExecWithStdio(command string, stdout bool, args ...string) (output string, 
 
 // Execute multiple line script with stdio
 func ExecScriptWithStdio(script string, stdout bool) (string, error) {
+	return execScriptWithStdio(script, stdout, nil)
+}
+
+// ExecScriptWithEnv executes a multi-line script with extra environment variables
+// (each as "KEY=VALUE"), scoped to the spawned child process only.
+func ExecScriptWithEnv(script string, env []string) (string, error) {
+	return execScriptWithStdio(script, false, env)
+}
+
+func execScriptWithStdio(script string, stdout bool, extraEnv []string) (string, error) {
 	tmpFileName, _ := uuid.NewUUID()
 	tmpFile := path.Join(os.TempDir(), tmpFileName.String())
 
@@ -80,7 +104,7 @@ func ExecScriptWithStdio(script string, stdout bool) (string, error) {
 	defer f.Close()
 	defer os.Remove(tmpFile)
 
-	return ExecWithStdio("sh", stdout, tmpFile)
+	return execWithStdio("sh", stdout, extraEnv, tmpFile)
 }
 
 // Execute multiple line script

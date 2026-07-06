@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	"os"
 	"path"
 	"strings"
 
@@ -125,10 +124,13 @@ func (db *MySQL) perform() error {
 	logger := logger.Tag("MySQL")
 
 	logger.Info("-> Dumping MySQL...")
+	var env []string
 	if len(db.password) > 0 {
-		os.Setenv("MYSQL_PWD", db.password)
+		// Pass the password via MYSQL_PWD, scoped to the mysqldump child process only,
+		// so it never touches the command line nor the current process environment.
+		env = append(env, "MYSQL_PWD="+db.password)
 	}
-	_, err := helper.Exec(db.build())
+	_, err := helper.ExecWithEnv(db.build(), env)
 	if err != nil {
 		return fmt.Errorf("-> Dump error: %s", err)
 	}

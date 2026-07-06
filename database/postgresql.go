@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -165,16 +164,19 @@ func (db *PostgreSQL) perform() error {
 	logger := logger.Tag("PostgreSQL")
 
 	logger.Info("-> Dumping PostgreSQL...")
+	var env []string
 	if len(db.password) > 0 {
-		os.Setenv("PGPASSWORD", db.password)
+		// Pass the password via PGPASSWORD, scoped to the dump child process only,
+		// so it never leaks into the current process environment.
+		env = append(env, "PGPASSWORD="+db.password)
 	}
 
 	var err error
 	if db.allDatabases {
 		// Use ExecScript for pg_dumpall to properly handle shell redirection
-		_, err = helper.ExecScript(db.build())
+		_, err = helper.ExecScriptWithEnv(db.build(), env)
 	} else {
-		_, err = helper.Exec(db.build())
+		_, err = helper.ExecWithEnv(db.build(), env)
 	}
 	if err != nil {
 		return err
