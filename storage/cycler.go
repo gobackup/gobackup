@@ -2,6 +2,8 @@ package storage
 
 import (
 	"encoding/json"
+	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -23,6 +25,8 @@ type Package struct {
 
 var (
 	cyclerPath = filepath.Join(config.GoBackupDir, "cycler")
+	// Remote state path prefix used for storing cycler state on remote storage
+	remoteStatePath = ".gobackup-state"
 )
 
 type Cycler struct {
@@ -49,14 +53,15 @@ func (c *Cycler) shiftByKeep(keep int) (first *Package) {
 	return
 }
 
-func (c *Cycler) run(fileKey string, fileKeys []string, keep int, deletePackage func(fileKey string) error) {
+func (c *Cycler) run(storage Storage, fileKey string, fileKeys []string, keep int, deletePackage func(fileKey string) error) {
 	logger := logger.Tag("Cycler")
 
 	cyclerFileName := filepath.Join(cyclerPath, c.name+".json")
+	remoteStateKey := filepath.Join(remoteStatePath, c.name+".json")
 
-	c.load(cyclerFileName)
+	c.loadRemote(storage, cyclerFileName, remoteStateKey)
 	c.add(fileKey, fileKeys)
-	defer c.save(cyclerFileName)
+	defer c.saveRemote(storage, cyclerFileName, remoteStateKey)
 
 	if keep == 0 {
 		return
@@ -82,6 +87,65 @@ func (c *Cycler) run(fileKey string, fileKeys []string, keep int, deletePackage 
 			}
 		}
 	}
+}
+
+// loadRemote tries to load cycler state from remote storage first,
+// falls back to local state if remote is unavailable.
+// This ensures retention policy works correctly in containerized environments
+// where local filesystem is ephemeral.
+func (c *Cycler) loadRemote(storage Storage, cyclerFileName string, remoteStateKey string) {
+	logger := logger.Tag("Cycler")
+
+	// Load from remote storage
+	if storage == nil {
+		logger.Error("Failed to load remote because storage is nil")
+		return
+	}
+
+	// Prepend the storage path so the key matches what upload() writes.
+	// upload() does filepath.Join(s.path, fileKey) internally, but download()
+	// takes the full key as-is (it also serves the public Download API which
+	// already receives full paths from list()). Without this correction,
+	// loadRemote misses the file whenever s.path is non-empty and silently
+	// falls back to an empty local state, so keep never takes effect.
+	fullRemoteKey := remoteStateKey
+	if base := getBaseFromStorage(storage); base != nil && base.viper != nil {
+		if storagePath := base.viper.GetString("path"); storagePath != "" {
+			fullRemoteKey = filepath.Join(storagePath, remoteStateKey)
+		}
+	}
+
+	// Use download method to get a presigned URL
+	url, err := storage.download(fullRemoteKey)
+	if err == nil && url != "" {
+		// Fetch the data from the URL
+		resp, err := http.Get(url)
+		if err == nil {
+			defer resp.Body.Close()
+			if resp.StatusCode == http.StatusOK {
+				remoteData, err := io.ReadAll(resp.Body)
+				if err == nil && len(remoteData) > 0 {
+					if err := json.Unmarshal(remoteData, &c.packages); err == nil {
+						logger.Info("Loaded cycler state from remote storage")
+						c.isLoaded = true
+						// Also save to local for faster access next time
+						c.save(cyclerFileName)
+						return
+					}
+					logger.Warnf("Failed to unmarshal remote cycler state: %v", err)
+				}
+			} else {
+				logger.Infof("Remote cycler state not found (HTTP %d), falling back to local", resp.StatusCode)
+			}
+		} else {
+			logger.Infof("Failed to fetch remote cycler state: %v, falling back to local", err)
+		}
+	} else if err != nil {
+		logger.Infof("Remote cycler state not found or unavailable: %v, falling back to local", err)
+	}
+
+	// Fall back to local state
+	c.load(cyclerFileName)
 }
 
 func (c *Cycler) load(cyclerFileName string) {
@@ -112,11 +176,85 @@ func (c *Cycler) load(cyclerFileName string) {
 	c.isLoaded = true
 }
 
-func (c *Cycler) save(cyclerFileName string) {
+// saveRemote saves cycler state to both remote storage and local filesystem.
+// Remote storage ensures persistence across container restarts.
+// Local storage provides faster access and serves as a fallback.
+func (c *Cycler) saveRemote(storage Storage, cyclerFileName string, remoteStateKey string) {
 	logger := logger.Tag("Cycler")
 
 	if !c.isLoaded {
 		logger.Warn("Skip save cycler.json because it is not loaded")
+		return
+	}
+
+	if storage == nil {
+		logger.Error("Failed save to remote because storage is nil")
+		return
+	}
+
+	data, err := json.Marshal(&c.packages)
+	if err != nil {
+		logger.Error("Marshal packages to cycler.json failed: ", err)
+		return
+	}
+
+	// Create a temporary directory for the state file
+	tmpDir, err := os.MkdirTemp(cyclerPath, "cycler-state-*")
+	if err != nil {
+		logger.Warnf("Failed to create temp directory for state: %v", err)
+	} else {
+		defer os.RemoveAll(tmpDir) // Clean up temp directory
+
+		// upload method expects file at filepath.Join(filepath.Dir(s.archivePath), fileKey)
+		// and uploads to filepath.Join(s.path, fileKey)
+		// So we need to create the file at the path that matches remoteStateKey structure
+		tmpFilePath := filepath.Join(tmpDir, remoteStateKey)
+
+		// Create parent directories if needed
+		if err := os.MkdirAll(filepath.Dir(tmpFilePath), 0755); err != nil {
+			logger.Warnf("Failed to create temp directory structure: %v", err)
+		} else {
+			// Write state data to temp file
+			if err := os.WriteFile(tmpFilePath, data, 0660); err != nil {
+				logger.Warnf("Failed to write state to temp file: %v", err)
+			} else {
+				// Get the storage's Base to temporarily modify archivePath
+				// upload method uses filepath.Dir(s.archivePath) as the base directory
+				base := getBaseFromStorage(storage)
+				if base != nil {
+					originalArchivePath := base.archivePath
+					originalFileKeys := base.fileKeys
+					// Set archivePath so filepath.Dir(archivePath) = tmpDir, making
+					// upload read from tmpDir/remoteStateKey.
+					base.archivePath = filepath.Join(tmpDir, "dummy")
+					// Clear fileKeys so upload() uses the remoteStateKey argument
+					// directly instead of iterating over the original backup chunks.
+					base.fileKeys = nil
+
+					if err := storage.upload(remoteStateKey); err != nil {
+						logger.Warnf("Failed to save cycler state to remote storage: %v", err)
+					} else {
+						logger.Info("Saved cycler state to remote storage")
+					}
+
+					base.archivePath = originalArchivePath
+					base.fileKeys = originalFileKeys
+				} else {
+					logger.Warn("Failed to get Base from storage for state upload")
+				}
+			}
+		}
+	}
+
+	// Always save locally as well
+	c.save(cyclerFileName)
+}
+
+func (c *Cycler) save(cyclerFileName string) {
+	logger := logger.Tag("Cycler")
+
+	if err := helper.MkdirP(cyclerPath); err != nil {
+		logger.Errorf("Failed to mkdir cycler path %s: %v", cyclerPath, err)
 		return
 	}
 
@@ -130,5 +268,30 @@ func (c *Cycler) save(cyclerFileName string) {
 	if err != nil {
 		logger.Error("Save cycler.json failed: ", err)
 		return
+	}
+}
+
+// getBaseFromStorage extracts the Base struct from a Storage implementation
+// This is a helper to access the Base struct which is embedded in storage implementations
+func getBaseFromStorage(s Storage) *Base {
+	switch v := s.(type) {
+	case *S3:
+		return &v.Base
+	case *GCS:
+		return &v.Base
+	case *Azure:
+		return &v.Base
+	case *Local:
+		return &v.Base
+	case *WebDAV:
+		return &v.Base
+	case *FTP:
+		return &v.Base
+	case *SCP:
+		return &v.Base
+	case *SFTP:
+		return &v.Base
+	default:
+		return nil
 	}
 }

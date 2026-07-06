@@ -154,6 +154,158 @@ func TestInitWithNotExistsConfigFile(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestInitWithEmptyDatabasesOrStorages(t *testing.T) {
+	testCases := []struct {
+		name               string
+		configContent      string
+		expectErr          bool
+		expectedErrContain string
+	}{
+		{
+			name: "storages_null",
+			configContent: `models:
+  myjob:
+    databases:
+      postgres_all:
+        host: localhost
+        port: 5432
+    storages: null
+`,
+			expectErr:          true,
+			expectedErrContain: "no storage found in model myjob",
+		},
+		{
+			name: "storages_empty",
+			configContent: `models:
+  myjob:
+    databases:
+      postgres_all:
+        host: localhost
+        port: 5432
+    storages:
+`,
+			expectErr:          true,
+			expectedErrContain: "no storage found in model myjob",
+		},
+		{
+			name: "storages_empty_map",
+			configContent: `models:
+  myjob:
+    databases:
+      postgres_all:
+        host: localhost
+        port: 5432
+    storages: {}
+`,
+			expectErr:          true,
+			expectedErrContain: "no storage found in model myjob",
+		},
+		{
+			name: "storages_missing",
+			configContent: `models:
+  myjob:
+    databases:
+      postgres_all:
+        host: localhost
+        port: 5432
+`,
+			expectErr:          true,
+			expectedErrContain: "no storage found in model myjob",
+		},
+		{
+			name: "databases_null",
+			configContent: `models:
+  myjob:
+    databases: null
+    storages:
+      local:
+        type: local
+        keep: 2
+`,
+			expectErr:          true,
+			expectedErrContain: "model myjob must configure databases or archive",
+		},
+		{
+			name: "databases_empty",
+			configContent: `models:
+  myjob:
+    databases:
+    storages:
+      local:
+        type: local
+        keep: 2
+`,
+			expectErr:          true,
+			expectedErrContain: "model myjob must configure databases or archive",
+		},
+		{
+			name: "databases_empty_map",
+			configContent: `models:
+  myjob:
+    databases: {}
+    storages:
+      local:
+        type: local
+        keep: 2
+`,
+			expectErr:          true,
+			expectedErrContain: "model myjob must configure databases or archive",
+		},
+		{
+			name: "databases_missing",
+			configContent: `models:
+  myjob:
+    storages:
+      local:
+        type: local
+        keep: 2
+`,
+			expectErr:          true,
+			expectedErrContain: "model myjob must configure databases or archive",
+		},
+		{
+			name: "archive_only_with_storage",
+			configContent: `models:
+  myjob:
+    storages:
+      local:
+        type: local
+        keep: 2
+    archive:
+      includes:
+        - /etc/hosts
+`,
+			expectErr: false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			file, err := os.CreateTemp("", "gobackup-test-*.yml")
+			assert.Nil(t, err)
+			t.Cleanup(func() {
+				_ = os.Remove(file.Name())
+			})
+
+			err = os.WriteFile(file.Name(), []byte(tc.configContent), 0644)
+			assert.Nil(t, err)
+
+			err = Init(file.Name())
+			if tc.expectErr {
+				assert.NotNil(t, err)
+				if err != nil {
+					assert.Contains(t, err.Error(), tc.expectedErrContain)
+				}
+			} else {
+				assert.Nil(t, err)
+			}
+
+			err = Init(testConfigFile)
+			assert.Nil(t, err)
+		})
+	}
+}
+
 func TestWatchConfigToReload(t *testing.T) {
 	err := Init(testConfigFile)
 	assert.Nil(t, err)

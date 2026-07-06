@@ -47,6 +47,7 @@ https://gobackup.github.io
 - InfluxDB
 - MariaDB
 - etcd
+- Firebird
 
 ### Storages
 
@@ -203,7 +204,7 @@ models:
   other_backup:
     # At 04:05 on every day.
     schedule:
-      every: "1day",
+      every: "1day"
       at: "04:05"
     storages:
       local:
@@ -221,7 +222,7 @@ models:
 
 ### Start Daemon & Web UI
 
-GoBackup bulit a HTTP Server for Web UI, you can start it by `gobackup start`.
+GoBackup built a HTTP Server for Web UI, you can start it by `gobackup start`.
 
 It also will handle the backup schedule.
 
@@ -255,12 +256,6 @@ $ kill -HUP 20443
 # Exit daemon
 $ kill -QUIT 20443
 ```
-
-## Contributing
-
-The [DEVELOPMENT](./DEVELOPMENT) document will help you to setup development environment, and guide you how to test them in local.
-
-When you finish your work, please send a PR.
 
 ## License
 

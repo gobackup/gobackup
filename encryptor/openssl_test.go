@@ -36,5 +36,8 @@ func TestOpenSSL_options(t *testing.T) {
 	assert.Equal(t, "gobackup-123", enc.password)
 	assert.Equal(t, "-pbkdf2 -iter 1000", enc.args)
 
-	assert.Equal(t, "rc4 -base64 -pbkdf2 -iter 1000 -k gobackup-123", strings.Join(enc.options(), " "))
+	opts := enc.options()
+	assert.Equal(t, "rc4 -base64 -pbkdf2 -iter 1000 -k gobackup-123", strings.Join(opts, " "))
+	// Verify args are properly split into separate tokens (not treated as single string)
+	assert.Equal(t, 7, len(opts)) // rc4, -base64, -pbkdf2, -iter, 1000, -k, gobackup-123
 }

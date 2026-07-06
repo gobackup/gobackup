@@ -27,6 +27,11 @@ if test "$#" -eq 1; then
   fi
 fi
 
+if test -z "${version}"; then
+  echo "Failed to get latest version, this may meet GitHub API rate limit."
+  exit 1
+fi
+
 platform="$(uname | tr "[:upper:]" "[:lower:]")"                    # Linux => linux
 arch="$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" # x86_64 => amd64, aarch64 => arm64
 package="gobackup-${platform}-${arch}.tar.gz"

@@ -12,11 +12,16 @@ import (
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/stoicperlman/fls"
+
 	"github.com/gobackup/gobackup/config"
 	"github.com/gobackup/gobackup/logger"
 	"github.com/gobackup/gobackup/model"
 	"github.com/gobackup/gobackup/storage"
-	"github.com/stoicperlman/fls"
+
+	// Register Prometheus metrics
+	_ "github.com/gobackup/gobackup/metrics"
 )
 
 //go:embed dist
@@ -98,6 +103,9 @@ func setupRouter(version string) *gin.Engine {
 			"version": version,
 		})
 	})
+
+	// Prometheus metrics endpoint
+	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	r.Use(func(c *gin.Context) {
 		c.Next()

@@ -41,6 +41,7 @@ type WebConfig struct {
 	Port     string
 	Username string
 	Password string
+	Enabled  bool
 }
 
 type ScheduleConfig struct {
@@ -227,10 +228,12 @@ func loadConfig() error {
 	Web = WebConfig{}
 	viper.SetDefault("web.host", "0.0.0.0")
 	viper.SetDefault("web.port", 2703)
+	viper.SetDefault("web.enabled", true)
 	Web.Host = viper.GetString("web.host")
 	Web.Port = viper.GetString("web.port")
 	Web.Username = viper.GetString("web.username")
 	Web.Password = viper.GetString("web.password")
+	Web.Enabled = viper.GetBool("web.enabled")
 
 	UpdatedAt = time.Now()
 	logger.Infof("Config loaded, found %d models.", len(Models))
@@ -248,14 +251,22 @@ func loadModel(key string) (ModelConfig, error) {
 	model.TempPath = filepath.Join(viper.GetString("workdir"), fmt.Sprintf("%d", time.Now().UnixNano()))
 	model.DumpPath = filepath.Join(model.TempPath, key)
 	model.Viper = viper.Sub("models." + key)
+	if model.Viper == nil {
+		return ModelConfig{}, fmt.Errorf("model %s is empty or not a map", key)
+	}
 
 	model.Description = model.Viper.GetString("description")
 	model.Schedule = ScheduleConfig{Enabled: false}
 
-	model.Viper.SetDefault("compress_with.type", "tar")
+	compressViper := model.Viper.Sub("compress_with")
+	if compressViper == nil {
+		compressViper = viper.New()
+	}
+	compressViper.SetDefault("type", "tar")
+	compressViper.SetDefault("filename_format", "2006.01.02.15.04.05")
 	model.CompressWith = SubConfig{
-		Type:  model.Viper.GetString("compress_with.type"),
-		Viper: model.Viper.Sub("compress_with"),
+		Type:  compressViper.GetString("type"),
+		Viper: compressViper,
 	}
 
 	model.EncryptWith = SubConfig{
@@ -272,6 +283,10 @@ func loadModel(key string) (ModelConfig, error) {
 	loadScheduleConfig(&model)
 	loadDatabasesConfig(&model)
 	loadStoragesConfig(&model)
+
+	if len(model.Databases) == 0 && model.Archive == nil {
+		return ModelConfig{}, fmt.Errorf("model %s must configure databases or archive", model.Name)
+	}
 
 	if len(model.Storages) == 0 {
 		return ModelConfig{}, fmt.Errorf("no storage found in model %s", model.Name)
@@ -299,6 +314,9 @@ func loadScheduleConfig(model *ModelConfig) {
 
 func loadDatabasesConfig(model *ModelConfig) {
 	subViper := model.Viper.Sub("databases")
+	if subViper == nil {
+		return
+	}
 	model.Databases = map[string]SubConfig{}
 	for key := range model.Viper.GetStringMap("databases") {
 		dbViper := subViper.Sub(key)
@@ -316,6 +334,10 @@ func loadStoragesConfig(model *ModelConfig) {
 	model.DefaultStorage = model.Viper.GetString("default_storage")
 
 	subViper := model.Viper.Sub("storages")
+	if subViper == nil {
+		model.Storages = storageConfigs
+		return
+	}
 	for key := range model.Viper.GetStringMap("storages") {
 		storageViper := subViper.Sub(key)
 		storageConfigs[key] = SubConfig{
@@ -335,6 +357,9 @@ func loadStoragesConfig(model *ModelConfig) {
 
 func loadNotifiersConfig(model *ModelConfig) {
 	subViper := model.Viper.Sub("notifiers")
+	if subViper == nil {
+		return
+	}
 	model.Notifiers = map[string]SubConfig{}
 	for key := range model.Viper.GetStringMap("notifiers") {
 		dbViper := subViper.Sub(key)

@@ -145,6 +145,10 @@ func main() {
 					return fmt.Errorf("failed to start scheduler: %w", err)
 				}
 
+				if !config.Web.Enabled {
+					select {}
+				}
+
 				return web.StartHTTP(version)
 			},
 		},
@@ -174,11 +178,14 @@ func perform(modelNames []string) error {
 		}
 	}
 
+	var last_error error
+	last_error = nil
 	for _, m := range models {
 		if err := m.Perform(); err != nil {
 			logger.Tag(fmt.Sprintf("Model %s", m.Config.Name)).Error(err)
+			last_error = err
 		}
 	}
 
-	return nil
+	return last_error
 }

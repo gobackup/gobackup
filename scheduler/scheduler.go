@@ -2,6 +2,9 @@ package scheduler
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -14,7 +17,40 @@ import (
 
 var (
 	mycron *gocron.Scheduler
+
+	// Regex to match duration strings with extended units like "1day", "2weeks", etc.
+	extendedDurationRegex = regexp.MustCompile(`^(\d+)\s*(day|days|d|week|weeks|w|month|months)$`)
 )
+
+// parseDuration parses a duration string, supporting extended units like "day", "week", "month"
+// in addition to Go's standard time.ParseDuration units.
+func parseDuration(s string) (time.Duration, error) {
+	// First try Go's standard ParseDuration
+	if d, err := time.ParseDuration(s); err == nil {
+		return d, nil
+	}
+
+	// Try to match extended units (case-insensitive)
+	matches := extendedDurationRegex.FindStringSubmatch(strings.ToLower(s))
+	if matches == nil {
+		return 0, fmt.Errorf("invalid duration format: %s", s)
+	}
+
+	value, _ := strconv.Atoi(matches[1])
+	unit := matches[2]
+
+	switch unit {
+	case "day", "days", "d":
+		return time.Duration(value) * 24 * time.Hour, nil
+	case "week", "weeks", "w":
+		return time.Duration(value) * 7 * 24 * time.Hour, nil
+	case "month", "months":
+		// Approximate month as 30 days
+		return time.Duration(value) * 30 * 24 * time.Hour, nil
+	}
+
+	return 0, fmt.Errorf("invalid duration format: %s", s)
+}
 
 func init() {
 	config.OnConfigChange(func(in fsnotify.Event) {
@@ -45,8 +81,8 @@ func Start() error {
 			if len(modelConfig.Schedule.At) > 0 {
 				scheduler = scheduler.At(modelConfig.Schedule.At)
 			} else {
-				// If no $at present, delay start cron job with $eveny duration
-				startDuration, _ := time.ParseDuration(modelConfig.Schedule.Every)
+				// If no $at present, delay start cron job with $every duration
+				startDuration, _ := parseDuration(modelConfig.Schedule.Every)
 				scheduler = scheduler.StartAt(time.Now().Add(startDuration))
 			}
 		}

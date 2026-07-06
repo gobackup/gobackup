@@ -18,16 +18,18 @@ import (
 // username: root
 // password:
 // args:
+// all_databases: false
 
 type MariaDB struct {
 	Base
-	host          		string
-	port          		string
-	socket        		string
-	database     		string
-	username      		string
-	password      		string
-	args          		string
+	host         string
+	port         string
+	socket       string
+	database     string
+	username     string
+	password     string
+	args         string
+	allDatabases bool
 }
 
 func (db *MariaDB) init() (err error) {
@@ -35,6 +37,7 @@ func (db *MariaDB) init() (err error) {
 	viper.SetDefault("host", "127.0.0.1")
 	viper.SetDefault("username", "root")
 	viper.SetDefault("port", 3306)
+	viper.SetDefault("all_databases", false)
 
 	db.host = viper.GetString("host")
 	db.port = viper.GetString("port")
@@ -42,9 +45,14 @@ func (db *MariaDB) init() (err error) {
 	db.database = viper.GetString("database")
 	db.username = viper.GetString("username")
 	db.password = viper.GetString("password")
+	db.allDatabases = viper.GetBool("all_databases")
 
 	if len(viper.GetString("args")) > 0 {
 		db.args = viper.GetString("args")
+	}
+
+	if !db.allDatabases && len(db.database) == 0 {
+		return fmt.Errorf("MariaDB database config is required")
 	}
 
 	// socket
@@ -77,7 +85,7 @@ func (db *MariaDB) build() string {
 	if len(db.args) > 0 {
 		dumpArgs = append(dumpArgs, db.args)
 	}
-	if len(db.database) > 0 {
+	if !db.allDatabases && len(db.database) > 0 {
 		dumpArgs = append(dumpArgs, "--databases="+db.database)
 	}
 	dumpArgs = append(dumpArgs, "--target-dir="+db.dumpPath)

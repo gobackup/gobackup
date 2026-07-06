@@ -66,7 +66,7 @@ func (enc *OpenSSL) options() (opts []string) {
 		opts = append(opts, "-salt")
 	}
 	if len(enc.args) > 0 {
-		opts = append(opts, enc.args)
+		opts = append(opts, strings.Fields(enc.args)...)
 	}
 
 	opts = append(opts, `-k`, enc.password)

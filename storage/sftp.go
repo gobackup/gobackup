@@ -37,7 +37,7 @@ func (s *SFTP) open() error {
 	s.username = s.viper.GetString("username")
 	s.password = s.viper.GetString("password")
 	s.privateKey = helper.ExplandHome(s.viper.GetString("private_key"))
-	s.passpharase = s.viper.GetString("passpharase")
+	s.passphrase = s.viper.GetString("passphrase")
 
 	if len(s.host) == 0 {
 		return fmt.Errorf("host is required")
@@ -53,10 +53,10 @@ func (s *SFTP) open() error {
 	}
 
 	sc := sshConfig{
-		username:    s.username,
-		password:    s.password,
-		privateKey:  s.privateKey,
-		passpharase: s.passpharase,
+		username:   s.username,
+		password:   s.password,
+		privateKey: s.privateKey,
+		passphrase: s.passphrase,
 	}
 
 	clientConfig := newSSHClientConfig(sc)
