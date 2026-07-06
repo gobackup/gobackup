@@ -1,6 +1,7 @@
 package database
 
 import (
+	"os"
 	"testing"
 
 	"github.com/gobackup/gobackup/config"
@@ -84,9 +85,23 @@ func TestMySQL_dumpArgsWithDollarInPassword(t *testing.T) {
 		args:     "--skip-ssl-verify-server-cert",
 	}
 
-	// The password (with special characters) is passed via MYSQL_PWD, so it must
-	// never appear in the command line built here.
+	// The password (with special characters) is passed via a temporary
+	// --defaults-extra-file, so it must never appear in the command line built here.
 	assert.Equal(t, db.build(), "mysqldump --host 127.0.0.1 --port 3306 -u test --skip-ssl-verify-server-cert dummy_test --result-file=/tmp/backups/mysql/mysql1/dummy_test.sql")
+}
+
+func TestMySQL_writePasswordConfig(t *testing.T) {
+	db := &MySQL{password: `$ecure_pa"ss\word`}
+
+	confPath, err := db.writePasswordConfig()
+	assert.NoError(t, err)
+	defer os.Remove(confPath)
+
+	data, err := os.ReadFile(confPath)
+	assert.NoError(t, err)
+	// Backslashes and double quotes are escaped; $ and other shell-special chars are
+	// written literally (option files perform no shell/variable expansion).
+	assert.Equal(t, string(data), "[client]\npassword=\"$ecure_pa\\\"ss\\\\word\"\n")
 }
 
 func TestMySQL_dumpWithSocket(t *testing.T) {

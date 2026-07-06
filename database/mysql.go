@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"os"
 	"path"
 	"strings"
 
@@ -84,7 +85,7 @@ func (db *MySQL) build() string {
 	if len(db.username) > 0 {
 		dumpArgs = append(dumpArgs, "-u", db.username)
 	}
-	// The password is passed via the MYSQL_PWD environment variable in perform(),
+	// The password is passed via a temporary --defaults-extra-file in perform(),
 	// never on the command line, so special characters in it need no escaping.
 
 	// Handle all databases mode
@@ -124,17 +125,48 @@ func (db *MySQL) perform() error {
 	logger := logger.Tag("MySQL")
 
 	logger.Info("-> Dumping MySQL...")
-	var env []string
+
+	command := db.build()
 	if len(db.password) > 0 {
-		// Pass the password via MYSQL_PWD, scoped to the mysqldump child process only,
-		// so it never touches the command line nor the current process environment.
-		env = append(env, "MYSQL_PWD="+db.password)
+		// Pass the password through a temporary defaults-extra-file rather than the
+		// command line or the deprecated MYSQL_PWD env var. --defaults-extra-file must
+		// be the first argument, and the file is removed as soon as the dump finishes.
+		confPath, err := db.writePasswordConfig()
+		if err != nil {
+			return fmt.Errorf("-> Dump error: %s", err)
+		}
+		defer os.Remove(confPath)
+		command = strings.Replace(command, "mysqldump", "mysqldump --defaults-extra-file="+confPath, 1)
 	}
-	_, err := helper.ExecWithEnv(db.build(), env)
+
+	_, err := helper.Exec(command)
 	if err != nil {
 		return fmt.Errorf("-> Dump error: %s", err)
 	}
 
 	logger.Info("dump path:", db.dumpPath)
 	return nil
+}
+
+// writePasswordConfig writes the MySQL password into a temporary option file
+// (created with 0600 permissions) and returns its path, for use with
+// --defaults-extra-file. This keeps the password off the command line (invisible in
+// `ps`) and out of the process environment, without relying on the deprecated
+// MYSQL_PWD variable. The value is double-quoted with backslashes and double quotes
+// escaped, so any special character in the password is handled.
+func (db *MySQL) writePasswordConfig() (string, error) {
+	f, err := os.CreateTemp("", "gobackup-mysql-*.cnf")
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	escaped := strings.NewReplacer(`\`, `\\`, `"`, `\"`).Replace(db.password)
+	content := "[client]\npassword=\"" + escaped + "\"\n"
+	if _, err := f.WriteString(content); err != nil {
+		os.Remove(f.Name())
+		return "", err
+	}
+
+	return f.Name(), nil
 }
