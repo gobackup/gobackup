@@ -36,6 +36,15 @@ type Storage interface {
 	upload(fileKey string) error
 	delete(fileKey string) error
 	list(parent string) ([]FileItem, error)
+	// download returns a URL for the given fileKey.
+	//
+	// NOTE: fileKey semantics differ from upload. upload() joins the storage
+	// `path` prefix internally, whereas download() expects fileKey to be the
+	// FULL remote path (already including the `path` prefix), matching the keys
+	// returned by list(). Callers that build a key from a relative name must
+	// prepend the storage `path` themselves — see Cycler.loadRemote. New
+	// implementations must NOT join `path` here, or such callers will
+	// double-prepend it and silently miss the object.
 	download(fileKey string) (string, error)
 }
 
