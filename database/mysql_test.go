@@ -28,7 +28,7 @@ func TestMySQL_init(t *testing.T) {
 		config.SubConfig{
 			Type:  "mysql",
 			Name:  "mysql1",
-			Viper: vpr,
+			Viper: viper,
 		},
 	)
 
