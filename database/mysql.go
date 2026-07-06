@@ -122,9 +122,9 @@ func (db *MySQL) build() string {
 }
 
 func (db *MySQL) perform() error {
-	lgr := logger.Tag("MySQL")
+	logger := logger.Tag("MySQL")
 
-	lgr.Info("-> Dumping MySQL...")
+	logger.Info("-> Dumping MySQL...")
 	if len(db.password) > 0 {
 		os.Setenv("MYSQL_PWD", db.password)
 	}
@@ -133,6 +133,6 @@ func (db *MySQL) perform() error {
 		return fmt.Errorf("-> Dump error: %s", err)
 	}
 
-	lgr.Info("dump path:", db.dumpPath)
+	logger.Info("dump path:", db.dumpPath)
 	return nil
 }
