@@ -69,28 +69,6 @@ func ExecWithStdio(command string, stdout bool, args ...string) (output string, 
 	return
 }
 
-// ExecShell executes a command string through a shell (/bin/sh -c) to enable shell processing,
-// such as quote handling and variable expansion. It captures the output and returns it or an error.
-// This is useful for commands that require shell interpretation, like those with quoted arguments.
-func ExecShell(command string) (output string, err error) {
-	cmd := exec.Command("sh", "-c", command)
-	cmd.Env = os.Environ()
-
-	var stdErr bytes.Buffer
-	var stdOut bytes.Buffer
-	cmd.Stderr = &stdErr
-	cmd.Stdout = &stdOut
-
-	err = cmd.Run()
-	if err != nil {
-		logger.Debug("sh -c", " ", command)
-		err = errors.New(stdErr.String())
-	}
-	output = strings.Trim(stdOut.String(), "\n")
-
-	return
-}
-
 // ExecScriptWithStdio executes a multi-line script with control over stdout redirection.
 // It creates a temporary shell script file, writes the script content, makes it executable,
 // and runs it via 'sh'. The temporary file is removed after execution. If stdout is true,

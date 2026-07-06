@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"os"
 	"path"
 	"strings"
 
@@ -80,13 +81,8 @@ func (db *MySQL) build() string {
 	if len(db.username) > 0 {
 		dumpArgs = append(dumpArgs, "-u", db.username)
 	}
-	if len(db.password) > 0 {
-		if helper.PasswordContainsSpecialCharacters(db.password) {
-			dumpArgs = append(dumpArgs, "-p'"+db.password+"'")
-		} else {
-			dumpArgs = append(dumpArgs, "-p"+db.password)
-		}
-	}
+	// The password is passed via the MYSQL_PWD environment variable in perform(),
+	// never on the command line, so special characters in it need no escaping.
 
 	for _, table := range db.excludeTables {
 		dumpArgs = append(dumpArgs, "--ignore-table="+db.database+"."+table)
@@ -111,16 +107,12 @@ func (db *MySQL) perform() error {
 	lgr := logger.Tag("MySQL")
 
 	lgr.Info("-> Dumping MySQL...")
-	if helper.PasswordContainsSpecialCharacters(db.password) {
-		_, err := helper.ExecShell(db.build())
-		if err != nil {
-			return fmt.Errorf("-> Dump error: %s", err)
-		}
-	} else {
-		_, err := helper.Exec(db.build())
-		if err != nil {
-			return fmt.Errorf("-> Dump error: %s", err)
-		}
+	if len(db.password) > 0 {
+		os.Setenv("MYSQL_PWD", db.password)
+	}
+	_, err := helper.Exec(db.build())
+	if err != nil {
+		return fmt.Errorf("-> Dump error: %s", err)
 	}
 
 	lgr.Info("dump path:", db.dumpPath)
