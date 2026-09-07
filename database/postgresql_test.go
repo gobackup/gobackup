@@ -225,3 +225,99 @@ func TestPostgreSQL_allDatabasesWithCompression(t *testing.T) {
 	script := db.build()
 	assert.Equal(t, script, "pg_dumpall --host=1.2.3.4 --port=1234 --username=user1 > /data/backups/postgresql/postgresql1/all_databases.sql.gz")
 }
+
+func TestPostgreSQL_allDatabasesSeparateFiles(t *testing.T) {
+	viper := viper.New()
+	viper.Set("host", "1.2.3.4")
+	viper.Set("port", "1234")
+	viper.Set("username", "user1")
+	viper.Set("password", "pass1")
+	viper.Set("all_databases", true)
+	viper.Set("separate_files", true)
+	viper.Set("exclude_databases", []string{"staging"})
+
+	base := newBase(
+		config.ModelConfig{
+			DumpPath: "/data/backups/",
+		},
+		config.SubConfig{
+			Type:  "postgresql",
+			Name:  "postgresql1",
+			Viper: viper,
+		},
+	)
+
+	db := &PostgreSQL{
+		Base: base,
+	}
+
+	err := db.init()
+	assert.NoError(t, err)
+	assert.Equal(t, db.separateFiles, true)
+
+	assert.Equal(t, db.listDatabasesArgs(), []string{
+		"--host=1.2.3.4", "--port=1234", "--username=user1",
+		"--no-align", "--tuples-only", "--dbname=postgres",
+		"--command=SELECT datname FROM pg_database WHERE datallowconn AND NOT datistemplate",
+	})
+
+	assert.Equal(t, db.buildGlobals(), "pg_dumpall --host=1.2.3.4 --port=1234 --username=user1 --globals-only -f /data/backups/postgresql/postgresql1/globals.sql")
+	assert.Equal(t, db.buildDatabase("my_db", db.dumpFilePath("my_db")), "pg_dump --host=1.2.3.4 --port=1234 --username=user1 my_db -f /data/backups/postgresql/postgresql1/my_db.sql")
+
+	assert.Equal(t, db.shouldSkipDatabase("staging"), true)
+	assert.Equal(t, db.shouldSkipDatabase("my_db"), false)
+}
+
+func TestPostgreSQL_allDatabasesSeparateFilesWithCompression(t *testing.T) {
+	viper := viper.New()
+	viper.Set("host", "1.2.3.4")
+	viper.Set("port", "1234")
+	viper.Set("username", "user1")
+	viper.Set("all_databases", true)
+	viper.Set("separate_files", true)
+	viper.Set("compress", "gzip")
+
+	base := newBase(
+		config.ModelConfig{
+			DumpPath: "/data/backups/",
+		},
+		config.SubConfig{
+			Type:  "postgresql",
+			Name:  "postgresql1",
+			Viper: viper,
+		},
+	)
+
+	db := &PostgreSQL{
+		Base: base,
+	}
+
+	err := db.init()
+	assert.NoError(t, err)
+	assert.Equal(t, db.buildDatabase("my_db", db.dumpFilePath("my_db")), "pg_dump --host=1.2.3.4 --port=1234 --username=user1 --compress=gzip --format=custom my_db -f /data/backups/postgresql/postgresql1/my_db.sql.gz")
+}
+
+func TestPostgreSQL_separateFilesWithoutAllDatabasesError(t *testing.T) {
+	viper := viper.New()
+	viper.Set("database", "my_db")
+	viper.Set("separate_files", true)
+
+	base := newBase(
+		config.ModelConfig{
+			DumpPath: "/data/backups/",
+		},
+		config.SubConfig{
+			Type:  "postgresql",
+			Name:  "postgresql1",
+			Viper: viper,
+		},
+	)
+
+	db := &PostgreSQL{
+		Base: base,
+	}
+
+	err := db.init()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "separate_files option is only supported when using all_databases: true")
+}
