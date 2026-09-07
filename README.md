@@ -161,6 +161,45 @@ models:
       type: tgz
 ```
 
+### Backup all databases
+
+MySQL and PostgreSQL can dump every database of the server with `all_databases: true`,
+this writes a single file holding the whole server.
+
+Set `separate_files: true` to dump each database into its own file instead, so a single
+database can be restored without touching the others. Use `exclude_databases` to skip
+the databases you don't want:
+
+```yml
+models:
+  my_backup:
+    databases:
+      mysql:
+        type: mysql
+        host: localhost
+        port: 3306
+        username: root
+        password: password
+        all_databases: true
+        separate_files: true
+        exclude_databases:
+          - staging
+```
+
+This produces one dump per database:
+
+```
+mysql/mysql/app_production.sql
+mysql/mysql/app_cache.sql
+```
+
+For PostgreSQL, the cluster wide objects (roles, tablespaces) are dumped into an extra
+`globals.sql` file, they are required to restore the databases with their owners and
+grants.
+
+> NOTE: `separate_files` requires `all_databases: true`, and the MySQL system databases
+> (`information_schema`, `performance_schema`) are always skipped.
+
 ## Usage
 
 ### Perform backup
