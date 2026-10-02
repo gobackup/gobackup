@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"time"
 
@@ -66,6 +67,15 @@ func (m Model) Perform() (err error) {
 		m.after()
 	}()
 
+	if m.Config.Stream {
+		var size int64
+		size, err = m.performStream()
+		if err == nil {
+			metrics.FileSizes.WithLabelValues(m.Config.Name).Set(float64(size))
+		}
+		return
+	}
+
 	err = database.Run(m.Config)
 	if err != nil {
 		return
@@ -100,6 +110,36 @@ func (m Model) Perform() (err error) {
 	}
 
 	return nil
+}
+
+// performStream pipes the database dump to the storage with no intermediate
+// files. Returns the number of bytes uploaded.
+func (m Model) performStream() (size int64, err error) {
+	logger := logger.Tag("Model")
+
+	src, err := database.RunStream(m.Config)
+	if err != nil {
+		return 0, err
+	}
+	defer src.Close()
+
+	var r io.Reader = src
+	fileName := time.Now().Format(m.Config.CompressWith.Viper.GetString("filename_format")) + src.Ext
+
+	cr := &countReader{r: r}
+	r = cr
+	if m.Config.Viper.GetString("compress_with.type") == "gz" {
+		zr := gzipStream(cr)
+		defer zr.Close()
+		r = zr
+		fileName += ".gz"
+	}
+
+	logger.Info("Stream backup:", fileName)
+	if err = storage.RunStream(m.Config, r, fileName); err != nil {
+		return 0, err
+	}
+	return cr.n, nil
 }
 
 func (m Model) before() {

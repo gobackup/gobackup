@@ -2,10 +2,12 @@ package storage
 
 import (
 	"fmt"
+	"io"
 	"math"
 	"net/http"
 	"os"
 	"path/filepath"
+	"sync/atomic"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -14,6 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 
+	"github.com/dustin/go-humanize"
 	"github.com/gobackup/gobackup/helper"
 	"github.com/gobackup/gobackup/logger"
 )
@@ -327,6 +330,70 @@ func (s *S3) upload(fileKey string) (err error) {
 		}
 	}
 
+	return nil
+}
+
+type readerFunc func(p []byte) (int, error)
+
+func (f readerFunc) Read(p []byte) (int, error) { return f(p) }
+
+// uploadStream uploads r as a multipart upload without knowing its size.
+// A read error aborts the upload, so no partial object is left behind.
+//
+// The maximum object size is part_size (MiB, default 64) * 10000 parts.
+func (s *S3) uploadStream(r io.Reader, fileKey string) (err error) {
+	logger := logger.Tag(s.providerName())
+
+	remotePath := filepath.Join(s.path, fileKey)
+	input := &s3manager.UploadInput{
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(remotePath),
+		Body:   r,
+	}
+	if len(s.storageClass) > 0 {
+		input.StorageClass = aws.String(s.storageClass)
+	}
+
+	partSize := int64(s.viper.GetInt("part_size")) * 1024 * 1024
+	if partSize <= 0 {
+		partSize = 64 * 1024 * 1024
+	}
+
+	// The stream size is unknown, so report the progress by bytes read.
+	var sent atomic.Int64
+	input.Body = readerFunc(func(p []byte) (int, error) {
+		n, err := r.Read(p)
+		sent.Add(int64(n))
+		return n, err
+	})
+
+	logger.Info("-> Uploading stream...")
+	start := time.Now()
+	done := make(chan struct{})
+	go func() {
+		ticker := time.NewTicker(time.Minute)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-done:
+				return
+			case <-ticker.C:
+				logger.Infof("-> Uploading stream... %s sent", humanize.Bytes(uint64(sent.Load())))
+			}
+		}
+	}()
+
+	result, err := s.client.Upload(input, func(uploader *s3manager.Uploader) {
+		uploader.Concurrency = 1
+		uploader.LeavePartsOnError = false
+		uploader.PartSize = partSize
+	})
+	close(done)
+	if err != nil {
+		return err
+	}
+
+	logger.Infof("Uploaded: %s (%s, Duration %s)", result.Location, humanize.Bytes(uint64(sent.Load())), time.Since(start).Round(time.Millisecond))
 	return nil
 }
 

@@ -2,6 +2,7 @@ package storage
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -164,6 +165,41 @@ func runModel(model config.ModelConfig, archivePath string, storageConfig config
 	}
 
 	base.cycler.run(s, newFileKey, base.fileKeys, base.keep, s.delete)
+	return nil
+}
+
+// StreamUploader is implemented by storages that can upload from a reader.
+type StreamUploader interface {
+	uploadStream(r io.Reader, fileKey string) error
+}
+
+// RunStream uploads r to the model's only storage as fileKey.
+func RunStream(model config.ModelConfig, r io.Reader, fileKey string) error {
+	logger := logger.Tag("Storage")
+
+	if len(model.Storages) != 1 {
+		return fmt.Errorf("stream mode requires exactly one storage")
+	}
+
+	for _, storageConfig := range model.Storages {
+		base, s := new(model, "", storageConfig)
+		su, ok := s.(StreamUploader)
+		if !ok {
+			return fmt.Errorf("storage type %q does not support stream", storageConfig.Type)
+		}
+
+		logger.Info("=> Storage | " + storageConfig.Type + " (stream)")
+		if err := s.open(); err != nil {
+			return err
+		}
+		defer s.close()
+
+		if err := su.uploadStream(r, fileKey); err != nil {
+			return err
+		}
+
+		base.cycler.run(s, fileKey, nil, base.keep, s.delete)
+	}
 	return nil
 }
 

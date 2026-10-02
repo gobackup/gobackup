@@ -90,6 +90,9 @@ type ModelConfig struct {
 	Viper          *viper.Viper
 	BeforeScript   string
 	AfterScript    string
+	// Stream pipes the database dump directly to the storage, without
+	// writing intermediate dump/archive files to disk.
+	Stream bool
 }
 
 func getGoBackupDir() string {
@@ -279,6 +282,7 @@ func loadModel(key string) (ModelConfig, error) {
 
 	model.BeforeScript = model.Viper.GetString("before_script")
 	model.AfterScript = model.Viper.GetString("after_script")
+	model.Stream = model.Viper.GetBool("stream")
 
 	loadScheduleConfig(&model)
 	loadDatabasesConfig(&model)
@@ -290,6 +294,12 @@ func loadModel(key string) (ModelConfig, error) {
 
 	if len(model.Storages) == 0 {
 		return ModelConfig{}, fmt.Errorf("no storage found in model %s", model.Name)
+	}
+
+	if model.Stream {
+		if err := validateStreamModel(model); err != nil {
+			return ModelConfig{}, err
+		}
 	}
 
 	loadNotifiersConfig(&model)
@@ -391,4 +401,49 @@ func (model *ModelConfig) GetDatabaseByName(name string) (subConfig *SubConfig) 
 		}
 	}
 	return
+}
+
+// validateStreamModel checks that a model with `stream: true` only uses
+// features that are supported in streaming mode.
+func validateStreamModel(model ModelConfig) error {
+	if model.Archive != nil {
+		return fmt.Errorf("model %s: `archive` is not supported with `stream: true`", model.Name)
+	}
+	if model.EncryptWith.Type != "" {
+		return fmt.Errorf("model %s: `encrypt_with` is not supported with `stream: true`", model.Name)
+	}
+	if model.Splitter != nil {
+		return fmt.Errorf("model %s: `split_with` is not supported with `stream: true`", model.Name)
+	}
+	if len(model.Databases) != 1 {
+		return fmt.Errorf("model %s: `stream: true` requires exactly one database", model.Name)
+	}
+	for _, db := range model.Databases {
+		if !streamDatabaseTypes[db.Type] {
+			return fmt.Errorf("model %s: database type %q does not support `stream: true`", model.Name, db.Type)
+		}
+		// pg_dump `compress` already compresses the output, don't compress it twice
+		if db.Type == "postgresql" && db.Viper.GetString("compress") != "" && model.Viper.GetString("compress_with.type") != "" {
+			return fmt.Errorf("model %s: `compress` of the postgresql database and `compress_with` can't be used together with `stream: true`", model.Name)
+		}
+	}
+	if len(model.Storages) != 1 {
+		return fmt.Errorf("model %s: `stream: true` requires exactly one storage", model.Name)
+	}
+	for _, st := range model.Storages {
+		if !streamStorageTypes[st.Type] {
+			return fmt.Errorf("model %s: storage type %q does not support `stream: true`", model.Name, st.Type)
+		}
+	}
+	if t := model.Viper.GetString("compress_with.type"); t != "" && t != "gz" {
+		return fmt.Errorf("model %s: compress_with.type %q is not supported with `stream: true` (only gz)", model.Name, t)
+	}
+	return nil
+}
+
+var streamDatabaseTypes = map[string]bool{"mysql": true, "mongodb": true, "postgresql": true}
+
+var streamStorageTypes = map[string]bool{
+	"s3": true, "minio": true, "b2": true, "r2": true, "spaces": true, "oss": true,
+	"cos": true, "kodo": true, "us3": true, "bos": true, "obs": true, "tos": true, "upyun": true,
 }

@@ -70,7 +70,8 @@ func (db *MySQL) init() (err error) {
 	return nil
 }
 
-func (db *MySQL) build() string {
+// dumpArgs builds mysqldump arguments, without any output target.
+func (db *MySQL) dumpArgs() []string {
 	dumpArgs := []string{}
 	if len(db.host) > 0 {
 		dumpArgs = append(dumpArgs, "--host", db.host)
@@ -110,12 +111,20 @@ func (db *MySQL) build() string {
 		}
 	}
 
-	// Determine dump file name
-	dumpFileName := db.database + ".sql"
+	return dumpArgs
+}
+
+// dumpFileName returns the name of the dump file.
+func (db *MySQL) dumpFileName() string {
 	if db.allDatabases {
-		dumpFileName = "all-databases.sql"
+		return "all-databases.sql"
 	}
-	dumpFilePath := path.Join(db.dumpPath, dumpFileName)
+	return db.database + ".sql"
+}
+
+func (db *MySQL) build() string {
+	dumpArgs := db.dumpArgs()
+	dumpFilePath := path.Join(db.dumpPath, db.dumpFileName())
 	dumpArgs = append(dumpArgs, "--result-file="+dumpFilePath)
 
 	return "mysqldump" + " " + strings.Join(dumpArgs, " ")
@@ -131,4 +140,10 @@ func (db *MySQL) perform() error {
 	}
 	logger.Info("dump path:", db.dumpPath)
 	return nil
+}
+
+// stream starts mysqldump writing to stdout and returns the dump as a stream.
+func (db *MySQL) stream() (*Stream, error) {
+	cmd := "mysqldump " + strings.Join(db.dumpArgs(), " ")
+	return startStream(cmd, db.dumpFileName(), ".sql")
 }

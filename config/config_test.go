@@ -2,6 +2,8 @@ package config
 
 import (
 	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -337,4 +339,47 @@ func updateFile(path string) error {
 	}
 
 	return nil
+}
+
+func TestStreamModelValidation(t *testing.T) {
+	st := `    storages:
+      s3:
+        type: s3
+        bucket: b
+`
+	db := `    databases:
+      app:
+        type: mysql
+        database: app
+`
+	cases := []struct{ name, cfg, errContain string }{
+		{"ok", "    stream: true\n" + db + st, ""},
+		{"ok_gz", "    stream: true\n    compress_with:\n      type: gz\n" + db + st, ""},
+		{"bad_compress", "    stream: true\n    compress_with:\n      type: xz\n" + db + st, "only gz"},
+		{"encrypt", "    stream: true\n    encrypt_with:\n      type: openssl\n" + db + st, "encrypt_with"},
+		{"split", "    stream: true\n    split_with:\n      chunk_size: 1m\n" + db + st, "split_with"},
+		{"archive", "    stream: true\n    archive:\n      includes: [/tmp]\n" + db + st, "archive"},
+		{"mongo_ok", "    stream: true\n    databases:\n      app:\n        type: mongodb\n        database: app\n" + st, ""},
+		{"unsupported_db", "    stream: true\n    databases:\n      app:\n        type: redis\n" + st, "does not support"},
+		{"pg_ok", "    stream: true\n    databases:\n      app:\n        type: postgresql\n        database: app\n" + st, ""},
+		{"pg_all_ok", "    stream: true\n    compress_with:\n      type: gz\n    databases:\n      app:\n        type: postgresql\n        all_databases: true\n" + st, ""},
+		{"pg_native_compress_ok", "    stream: true\n    databases:\n      app:\n        type: postgresql\n        database: app\n        compress: gzip:6\n" + st, ""},
+		{"pg_double_compress", "    stream: true\n    compress_with:\n      type: gz\n    databases:\n      app:\n        type: postgresql\n        database: app\n        compress: gzip:6\n" + st, "can't be used together"},
+		{"local_storage", "    stream: true\n" + db + "    storages:\n      l:\n        type: local\n        path: /tmp\n", "storage type"},
+		{"two_storages", "    stream: true\n" + db + st + "      s4:\n        type: s3\n        bucket: c\n", "exactly one storage"},
+		{"not_stream_unaffected", "    encrypt_with:\n      type: openssl\n" + db + "    storages:\n      l:\n        type: local\n        path: /tmp\n", ""},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			f := filepath.Join(t.TempDir(), "gobackup.yml")
+			assert.NoError(t, os.WriteFile(f, []byte("models:\n  m:\n"+c.cfg), 0644))
+			err := Init(f)
+			if c.errContain == "" {
+				assert.NoError(t, err)
+			} else {
+				assert.NotNil(t, err)
+				assert.Equal(t, true, strings.Contains(err.Error(), c.errContain))
+			}
+		})
+	}
 }

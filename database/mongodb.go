@@ -70,13 +70,13 @@ func (db *MongoDB) init() (err error) {
 	return nil
 }
 
-func (db *MongoDB) build() string {
+// dumpCommand builds the mongodump command without any output target.
+func (db *MongoDB) dumpCommand() string {
 	if len(db.uri) > 0 {
 		cmd := mongodumpCli + " " + "--uri=" + db.uri
 		if opts := db.additionOption(); len(opts) > 0 {
 			cmd += " " + opts
 		}
-		cmd += " " + "--out=" + db.dumpPath
 		return cmd
 	}
 
@@ -88,9 +88,22 @@ func (db *MongoDB) build() string {
 	if opts := db.additionOption(); len(opts) > 0 {
 		cmd += " " + opts
 	}
-	cmd += " " + "--out=" + db.dumpPath
 
 	return cmd
+}
+
+func (db *MongoDB) build() string {
+	return db.dumpCommand() + " " + "--out=" + db.dumpPath
+}
+
+// stream starts mongodump writing an archive to stdout.
+// Restore with: mongorestore --archive < file
+func (db *MongoDB) stream() (*Stream, error) {
+	name := db.database
+	if db.allDatabases || len(name) == 0 {
+		name = "all-databases"
+	}
+	return startStream(db.dumpCommand()+" --archive", name+".archive", ".archive")
 }
 
 func (db *MongoDB) nameOption() string {

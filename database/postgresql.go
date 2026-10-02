@@ -100,9 +100,9 @@ func (db *PostgreSQL) init() (err error) {
 	return nil
 }
 
-func (db *PostgreSQL) build() string {
+// dumpCommand builds the pg_dump / pg_dumpall command without any output target.
+func (db *PostgreSQL) dumpCommand() string {
 	var dumpArgs []string
-	var command string
 
 	// Common flags for both pg_dump and pg_dumpall
 	commonArgs := []string{}
@@ -129,36 +129,53 @@ func (db *PostgreSQL) build() string {
 			pgDumpallArgs = append(pgDumpallArgs, db.args)
 		}
 
-		// Build the complete pg_dumpall command with output redirection
-		pgDumpallCmd := "pg_dumpall " + strings.Join(pgDumpallArgs, " ") + " > " + db._dumpFilePath
-		return pgDumpallCmd
-	} else {
-		// pg_dump command for single database
-		command = "pg_dump"
-		dumpArgs = append(dumpArgs, commonArgs...)
-
-		// include / exclude tables
-		if len(db.tables) > 0 {
-			dumpArgs = append(dumpArgs, "--table="+strings.Join(db.tables, " --table="))
-		}
-
-		if len(db.excludeTables) > 0 {
-			dumpArgs = append(dumpArgs, "--exclude-table="+strings.Join(db.excludeTables, " --exclude-table="))
-		}
-
-		if len(db.compress) > 0 {
-			dumpArgs = append(dumpArgs, "--compress="+db.compress, "--format=custom")
-		}
-
-		if len(db.args) > 0 {
-			dumpArgs = append(dumpArgs, db.args)
-		}
-
-		dumpArgs = append(dumpArgs, db.database)
-		dumpArgs = append(dumpArgs, "-f", db._dumpFilePath)
+		return "pg_dumpall " + strings.Join(pgDumpallArgs, " ")
 	}
 
-	return command + " " + strings.Join(dumpArgs, " ")
+	// pg_dump command for single database
+	dumpArgs = append(dumpArgs, commonArgs...)
+
+	// include / exclude tables
+	if len(db.tables) > 0 {
+		dumpArgs = append(dumpArgs, "--table="+strings.Join(db.tables, " --table="))
+	}
+
+	if len(db.excludeTables) > 0 {
+		dumpArgs = append(dumpArgs, "--exclude-table="+strings.Join(db.excludeTables, " --exclude-table="))
+	}
+
+	if len(db.compress) > 0 {
+		dumpArgs = append(dumpArgs, "--compress="+db.compress, "--format=custom")
+	}
+
+	if len(db.args) > 0 {
+		dumpArgs = append(dumpArgs, db.args)
+	}
+
+	dumpArgs = append(dumpArgs, db.database)
+
+	return "pg_dump " + strings.Join(dumpArgs, " ")
+}
+
+func (db *PostgreSQL) build() string {
+	if db.allDatabases {
+		// Build the complete pg_dumpall command with output redirection
+		return db.dumpCommand() + " > " + db._dumpFilePath
+	}
+	return db.dumpCommand() + " -f " + db._dumpFilePath
+}
+
+// stream starts pg_dump / pg_dumpall writing to stdout.
+func (db *PostgreSQL) stream() (*Stream, error) {
+	if len(db.password) > 0 {
+		os.Setenv("PGPASSWORD", db.password)
+	}
+
+	name := db.database
+	if db.allDatabases {
+		name = "all_databases"
+	}
+	return startStream(db.dumpCommand(), name+db.format, db.format)
 }
 
 func (db *PostgreSQL) perform() error {
