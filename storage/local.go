@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/gobackup/gobackup/helper"
@@ -22,6 +21,9 @@ type Local struct {
 
 func (s *Local) open() error {
 	s.path = s.viper.GetString("path")
+	if !filepath.IsAbs(s.path) {
+		s.path = filepath.Join(s.model.WorkDir, s.path)
+	}
 	return helper.MkdirP(s.path)
 }
 
@@ -30,22 +32,39 @@ func (s *Local) close() {}
 func (s *Local) upload(fileKey string) (err error) {
 	logger := logger.Tag("Local")
 
-	// Related path
-	if !path.IsAbs(s.path) {
-		s.path = path.Join(s.model.WorkDir, s.path)
+	if s.path == "" && s.viper != nil {
+		s.path = s.viper.GetString("path")
+	}
+	if !filepath.IsAbs(s.path) {
+		s.path = filepath.Join(s.model.WorkDir, s.path)
 	}
 
-	targetPath := path.Join(s.path, fileKey)
-	targetDir := path.Dir(targetPath)
-	if err := helper.MkdirP(targetDir); err != nil {
-		logger.Errorf("failed to mkdir %q, %v", targetDir, err)
+	var fileKeys []string
+	if len(s.fileKeys) != 0 {
+		fileKeys = s.fileKeys
+	} else {
+		fileKeys = append(fileKeys, fileKey)
 	}
 
-	_, err = helper.Exec("cp", "-a", s.archivePath, targetPath)
-	if err != nil {
-		return err
+	for _, key := range fileKeys {
+		sourcePath := filepath.Join(filepath.Dir(s.archivePath), key)
+		if !helper.IsExistsPath(sourcePath) && helper.IsExistsPath(s.archivePath) {
+			sourcePath = s.archivePath
+		}
+
+		targetPath := filepath.Join(s.path, key)
+		targetDir := filepath.Dir(targetPath)
+		if err := helper.MkdirP(targetDir); err != nil {
+			logger.Errorf("failed to mkdir %q, %v", targetDir, err)
+			return err
+		}
+
+		_, err = helper.Exec("cp", "-a", sourcePath, targetPath)
+		if err != nil {
+			return err
+		}
+		logger.Info("Store succeeded", targetPath)
 	}
-	logger.Info("Store succeeded", targetPath)
 	return nil
 }
 
@@ -53,7 +72,7 @@ func (s *Local) delete(fileKey string) (err error) {
 	targetPath := filepath.Join(s.path, fileKey)
 	logger.Info("Deleting", targetPath)
 
-	return os.Remove(targetPath)
+	return os.RemoveAll(targetPath)
 }
 
 // List all files

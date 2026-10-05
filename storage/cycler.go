@@ -102,6 +102,35 @@ func (c *Cycler) loadRemote(storage Storage, cyclerFileName string, remoteStateK
 		return
 	}
 
+	// For Local storage, read directly from the configured local path
+	if local, ok := storage.(*Local); ok {
+		localPath := local.path
+		if localPath == "" && local.viper != nil {
+			localPath = local.viper.GetString("path")
+		}
+		if !filepath.IsAbs(localPath) {
+			localPath = filepath.Join(local.model.WorkDir, localPath)
+		}
+		stateFilePath := filepath.Join(localPath, remoteStateKey)
+		if helper.IsExistsPath(stateFilePath) {
+			remoteData, err := os.ReadFile(stateFilePath)
+			if err == nil && len(remoteData) > 0 {
+				if err := json.Unmarshal(remoteData, &c.packages); err == nil {
+					logger.Info("Loaded cycler state from remote storage")
+					c.isLoaded = true
+					c.save(cyclerFileName)
+					return
+				}
+				logger.Warnf("Failed to unmarshal remote cycler state: %v", err)
+			}
+		} else {
+			logger.Infof("Remote cycler state not found (%s), falling back to local", stateFilePath)
+		}
+
+		c.load(cyclerFileName)
+		return
+	}
+
 	// Prepend the storage path so the key matches what upload() writes.
 	// upload() does filepath.Join(s.path, fileKey) internally, but download()
 	// takes the full key as-is (it also serves the public Download API which
@@ -196,6 +225,10 @@ func (c *Cycler) saveRemote(storage Storage, cyclerFileName string, remoteStateK
 	if err != nil {
 		logger.Error("Marshal packages to cycler.json failed: ", err)
 		return
+	}
+
+	if err := helper.MkdirP(cyclerPath); err != nil {
+		logger.Errorf("Failed to mkdir cycler path %s: %v", cyclerPath, err)
 	}
 
 	// Create a temporary directory for the state file
