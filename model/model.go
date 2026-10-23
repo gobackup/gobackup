@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"os"
+	"runtime/debug"
 	"time"
 
 	"github.com/spf13/viper"
@@ -12,7 +13,7 @@ import (
 	"github.com/gobackup/gobackup/config"
 	"github.com/gobackup/gobackup/database"
 	"github.com/gobackup/gobackup/encryptor"
-	"github.com/gobackup/gobackup/helper"
+	"github.com/gobackup/gobackup/hook"
 	"github.com/gobackup/gobackup/logger"
 	"github.com/gobackup/gobackup/metrics"
 	"github.com/gobackup/gobackup/notifier"
@@ -30,8 +31,6 @@ func (m Model) Perform() (err error) {
 	logger := logger.Tag(fmt.Sprintf("Model: %s", m.Config.Name))
 	startTime := time.Now()
 	var archivePath string
-
-	m.before()
 
 	defer func() {
 		duration := time.Since(startTime).Seconds()
@@ -58,13 +57,20 @@ func (m Model) Perform() (err error) {
 
 	logger.Info("WorkDir:", m.Config.DumpPath)
 
+	hooks := m.hooks()
+
 	defer func() {
 		if r := recover(); r != nil {
-			m.after()
+			logger.Errorf("panic: %v\n%s", r, debug.Stack())
+			err = fmt.Errorf("panic: %v", r)
 		}
 
-		m.after()
+		m.after(hooks, hook.Result{Err: err, Duration: time.Since(startTime)})
 	}()
+
+	if err = m.before(hooks); err != nil {
+		return
+	}
 
 	err = database.Run(m.Config)
 	if err != nil {
@@ -102,20 +108,44 @@ func (m Model) Perform() (err error) {
 	return nil
 }
 
-func (m Model) before() {
-	// Execute before_script
-	if len(m.Config.BeforeScript) > 0 {
-		logger.Info("Executing before_script...")
-		_, err := helper.ExecScriptWithStdio(m.Config.BeforeScript, true)
-		if err != nil {
-			logger.Error(err)
-		}
-	}
+func (m Model) hookContext() hook.Context {
+	return hook.Context{Model: m.Config.Name, Stage: hook.StageRun}
 }
 
-// Cleanup model temp files
-func (m Model) after() {
+// hooks returns model run hooks with legacy before_script / after_script
+// prepended as implicit hooks. Legacy semantics are kept: before_script
+// failure is only logged, after_script always runs.
+func (m Model) hooks() []config.HookConfig {
+	hooks := []config.HookConfig{}
+	if len(m.Config.BeforeScript) > 0 {
+		hooks = append(hooks, config.HookConfig{
+			Name:            "before_script",
+			When:            config.HookBefore,
+			Script:          m.Config.BeforeScript,
+			ContinueOnError: true,
+		})
+	}
+	if len(m.Config.AfterScript) > 0 {
+		hooks = append(hooks, config.HookConfig{
+			Name:   "after_script",
+			When:   config.HookAfter,
+			OnExit: config.HookOnExitAlways,
+			Script: m.Config.AfterScript,
+		})
+	}
+	return append(hooks, m.Config.Hooks...)
+}
+
+// Run before_script and before hooks
+func (m Model) before(hooks []config.HookConfig) error {
+	return hook.RunBefore(hooks, m.hookContext())
+}
+
+// Run after_script and after hooks, then cleanup model temp files
+func (m Model) after(hooks []config.HookConfig, result hook.Result) {
 	logger := logger.Tag("Model")
+
+	hook.RunAfter(hooks, m.hookContext(), result)
 
 	tempDir := m.Config.TempPath
 	if viper.GetBool("useTempWorkDir") {
@@ -124,15 +154,6 @@ func (m Model) after() {
 	logger.Infof("Cleanup temp: %s/", tempDir)
 	if err := os.RemoveAll(tempDir); err != nil {
 		logger.Errorf("Cleanup temp dir %s error: %v", tempDir, err)
-	}
-
-	// Execute after_script
-	if len(m.Config.AfterScript) > 0 {
-		logger.Info("Executing after_script...")
-		_, err := helper.ExecScriptWithStdio(m.Config.AfterScript, true)
-		if err != nil {
-			logger.Error(err)
-		}
 	}
 }
 

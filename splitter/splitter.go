@@ -6,22 +6,37 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gobackup/gobackup/config"
 	"github.com/gobackup/gobackup/helper"
+	"github.com/gobackup/gobackup/hook"
 	"github.com/gobackup/gobackup/logger"
 	"github.com/spf13/viper"
 )
 
 // Run splitter
 func Run(archivePath string, model config.ModelConfig) (archiveDirPath string, err error) {
-	logger := logger.Tag("Splitter")
-
-	splitter := model.Splitter
-	if splitter == nil {
-		archiveDirPath = archivePath
-		return
+	if model.Splitter == nil {
+		return archivePath, nil
 	}
+
+	ctx := hook.Context{Model: model.Name, Stage: hook.StageSplit}
+	startTime := time.Now()
+	if err = hook.RunBefore(model.SplitterHooks, ctx); err == nil {
+		archiveDirPath, err = run(archivePath, model)
+	}
+	hook.RunAfter(model.SplitterHooks, ctx, hook.Result{Err: err, Duration: time.Since(startTime)})
+
+	if err != nil {
+		return "", err
+	}
+	return archiveDirPath, nil
+}
+
+func run(archivePath string, model config.ModelConfig) (archiveDirPath string, err error) {
+	logger := logger.Tag("Splitter")
+	splitter := model.Splitter
 
 	logger.Info("Split to chunks")
 

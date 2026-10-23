@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gobackup/gobackup/config"
+	"github.com/gobackup/gobackup/hook"
 	"github.com/gobackup/gobackup/logger"
 	"github.com/spf13/viper"
 )
@@ -152,18 +153,29 @@ func runModel(model config.ModelConfig, archivePath string, storageConfig config
 	base, s := new(model, archivePath, storageConfig)
 
 	logger.Info("=> Storage | " + storageConfig.Type)
-	err = s.open()
-	if err != nil {
+
+	ctx := hook.Context{Model: model.Name, Stage: hook.StageStorage, Step: storageConfig.Name}
+	startTime := time.Now()
+	if err = hook.RunBefore(storageConfig.Hooks, ctx); err == nil {
+		err = upload(base, s, newFileKey)
+	}
+	hook.RunAfter(storageConfig.Hooks, ctx, hook.Result{Err: err, Duration: time.Since(startTime)})
+
+	return err
+}
+
+// upload archive to the storage and run cycler. Cycler errors are only logged.
+func upload(base Base, s Storage, fileKey string) error {
+	if err := s.open(); err != nil {
 		return err
 	}
 	defer s.close()
 
-	err = s.upload(newFileKey)
-	if err != nil {
+	if err := s.upload(fileKey); err != nil {
 		return err
 	}
 
-	base.cycler.run(s, newFileKey, base.fileKeys, base.keep, s.delete)
+	base.cycler.run(s, fileKey, base.fileKeys, base.keep, s.delete)
 	return nil
 }
 

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gobackup/gobackup/config"
+	"github.com/gobackup/gobackup/hook"
 	"github.com/gobackup/gobackup/logger"
 	"github.com/spf13/viper"
 )
@@ -41,14 +42,33 @@ func newBase(model config.ModelConfig) (base Base) {
 }
 
 // Run compressor, return archive path
-func Run(model config.ModelConfig) (string, error) {
+func Run(model config.ModelConfig) (archivePath string, err error) {
 	logger := logger.Tag("Compressor")
 
 	// Skip compression if type is not set
 	if model.CompressWith.Type == "" {
 		logger.Info("=> Compress | skipped (no compression type specified)")
+		if len(model.CompressWith.Hooks) > 0 {
+			logger.Warnf("compress_with.hooks are ignored because compress stage is skipped")
+		}
 		return model.DumpPath, nil
 	}
+
+	ctx := hook.Context{Model: model.Name, Stage: hook.StageCompress}
+	startTime := time.Now()
+	if err = hook.RunBefore(model.CompressWith.Hooks, ctx); err == nil {
+		archivePath, err = run(model)
+	}
+	hook.RunAfter(model.CompressWith.Hooks, ctx, hook.Result{Err: err, Duration: time.Since(startTime)})
+
+	if err != nil {
+		return "", err
+	}
+	return archivePath, nil
+}
+
+func run(model config.ModelConfig) (string, error) {
+	logger := logger.Tag("Compressor")
 
 	base := newBase(model)
 

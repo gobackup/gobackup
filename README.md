@@ -220,6 +220,88 @@ models:
         password: password
 ```
 
+### Hooks
+
+Run your own scripts before and after the whole backup, a stage, or a single step. Put a `hooks` list next to the thing it wraps:
+
+| Place                                   | Wraps                                  |
+| --------------------------------------- | -------------------------------------- |
+| `models.<name>.hooks`                   | the whole model run                    |
+| `models.<name>.databases.<db>.hooks`    | the dump of that database              |
+| `models.<name>.archive.hooks`           | the archive stage                      |
+| `models.<name>.compress_with.hooks`     | the compress stage                     |
+| `models.<name>.encrypt_with.hooks`      | the encrypt stage                      |
+| `models.<name>.split_with.hooks`        | the split stage                        |
+| `models.<name>.storages.<storage>.hooks`| the upload to that storage (and cycler) |
+
+Each hook has the same fields everywhere:
+
+```yml
+hooks:
+  - name: stop-app              # optional, used in logs
+    when: before                 # required: before | after
+    on_exit: always              # after hooks only: always (default) | success | failure
+    script: |                    # required, runs as `<shell> <tmpfile>`
+      systemctl stop app
+    shell: bash                  # optional interpreter, default sh
+    timeout: 300                 # optional, seconds, 0 = no limit
+    continue_on_error: false     # before hooks only, default false
+```
+
+Rules:
+
+- Hooks run in the order they are declared, both `before` and `after`.
+- A failed `before` hook aborts the wrapped work (and the backup) unless `continue_on_error: true`.
+- A failed `after` hook is only logged, it never changes the backup result.
+- `after` hooks run even when a `before` hook of the same level failed, with status `failure`.
+- A hook that exceeds `timeout` counts as failed. It runs in its own process group, which gets `SIGTERM` first and `SIGKILL` 5 seconds later, so a `trap TERM` can clean up. Ctrl-C on gobackup is forwarded to it.
+- `on_exit` on a `before` hook, or `continue_on_error` on an `after` hook, is a config error.
+
+The script only receives the environment of the `gobackup` process. Note that `$VAR` in the config file is expanded when the config is loaded.
+
+Example:
+
+```yml
+models:
+  my_backup:
+    hooks:
+      - name: lock
+        when: before
+        script: touch /var/lock/backup
+      - name: unlock
+        when: after
+        script: rm -f /var/lock/backup
+      - name: alert
+        when: after
+        on_exit: failure
+        timeout: 30
+        script: curl -X POST "$ALERT_URL" -d "backup my_backup failed"
+    databases:
+      pg:
+        type: postgresql
+        hooks:
+          - when: before
+            script: psql -c "CHECKPOINT"
+    compress_with:
+      type: tgz
+      hooks:
+        - name: snapshot
+          when: before
+          timeout: 120
+          continue_on_error: true
+          script: zfs snapshot tank/data@backup
+    storages:
+      s3:
+        type: s3
+        bucket: backups
+        hooks:
+          - when: after
+            on_exit: success
+            script: echo "uploaded"
+```
+
+The older `before_script` / `after_script` (on a model) and `before_script` / `after_script` / `on_exit` (on a database) still work and run before `hooks`. They are deprecated in favor of `hooks`.
+
 ### Start Daemon & Web UI
 
 GoBackup built a HTTP Server for Web UI, you can start it by `gobackup start`.
