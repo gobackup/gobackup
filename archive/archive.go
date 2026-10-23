@@ -4,19 +4,32 @@ import (
 	"fmt"
 	"path"
 	"path/filepath"
+	"time"
 
 	"github.com/gobackup/gobackup/config"
 	"github.com/gobackup/gobackup/helper"
+	"github.com/gobackup/gobackup/hook"
 	"github.com/gobackup/gobackup/logger"
 )
 
 // Run archive
-func Run(model config.ModelConfig) error {
-	logger := logger.Tag("Archive")
-
+func Run(model config.ModelConfig) (err error) {
 	if model.Archive == nil {
 		return nil
 	}
+
+	ctx := hook.Context{Model: model.Name, Stage: hook.StageArchive}
+	startTime := time.Now()
+	if err = hook.RunBefore(model.ArchiveHooks, ctx); err == nil {
+		err = run(model)
+	}
+	hook.RunAfter(model.ArchiveHooks, ctx, hook.Result{Err: err, Duration: time.Since(startTime)})
+
+	return err
+}
+
+func run(model config.ModelConfig) error {
+	logger := logger.Tag("Archive")
 
 	if err := helper.MkdirP(model.DumpPath); err != nil {
 		logger.Errorf("Failed to mkdir dump path %s: %v", model.DumpPath, err)

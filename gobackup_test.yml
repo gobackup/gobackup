@@ -141,14 +141,80 @@ models:
       echo after_script invoked.
       ls -lh | wc -l
       echo This is after_script second line.
+    hooks:
+      - name: demo-before
+        when: before
+        script: echo "hook demo-before invoked"
+      - name: demo-after
+        when: after
+        on_exit: failure
+        script: echo "hook demo-after invoked, backup failed"
     storages:
       local:
         type: local
         keep: 10
         path: /Users/jason/Downloads/backup1
+        hooks:
+          - when: after
+            script: echo "hook storage local after invoked"
     archive:
       includes:
         - /Users/jason/work/imageproxy
       excludes:
         - /home/ubuntu/.ssh/known_hosts
         - /etc/logrotate.d/syslog
+  hooks_test:
+    description: "Hooks on every supported level."
+    hooks:
+      - name: lock
+        when: before
+        script: echo "lock"
+      - name: unlock
+        when: after
+        on_exit: failure
+        shell: bash
+        timeout: 30
+        script: |
+          echo "unlock"
+          echo "second line"
+      - when: before
+        continue_on_error: true
+        script: echo "unnamed"
+    databases:
+      pg:
+        type: postgresql
+        host: localhost
+        hooks:
+          - when: before
+            script: echo "db before"
+    archive:
+      includes:
+        - /etc/hosts
+      hooks:
+        - when: after
+          script: echo "archive after"
+    compress_with:
+      type: tgz
+      hooks:
+        - when: before
+          script: echo "compress before"
+    encrypt_with:
+      type: openssl
+      password: 123456
+      hooks:
+        - when: after
+          on_exit: success
+          script: echo "encrypt after"
+    split_with:
+      chunk_size: 10M
+      hooks:
+        - when: before
+          script: echo "split before"
+    storages:
+      local:
+        type: local
+        keep: 2
+        path: /tmp/gobackup-hooks-test
+        hooks:
+          - when: after
+            script: echo "storage after"

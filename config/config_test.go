@@ -22,7 +22,7 @@ func init() {
 
 func TestModelsLength(t *testing.T) {
 	assert.Equal(t, Exist, true)
-	assert.Equal(t, len(Models), 5)
+	assert.Equal(t, len(Models), 6)
 }
 
 func TestModel(t *testing.T) {
@@ -317,11 +317,26 @@ func TestWatchConfigToReload(t *testing.T) {
 	err = updateFile(testConfigFile)
 	assert.Nil(t, err)
 
-	// Wait for reload
-	time.Sleep(10 * time.Millisecond)
+	// Wait for reload (fsnotify callback is async)
+	deadline := time.Now().Add(2 * time.Second)
+	for time.Now().Before(deadline) {
+		wLock.Lock()
+		reloaded := UpdatedAt.UnixNano() != lastUpdatedAt
+		wLock.Unlock()
+		if reloaded {
+			break
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+
+	// Let duplicated events (write + chmod) settle before next tests touch Models
+	time.Sleep(50 * time.Millisecond)
 
 	// check config reload updated_at
-	assert.NotEqual(t, lastUpdatedAt, UpdatedAt.UnixNano())
+	wLock.Lock()
+	updatedAt := UpdatedAt.UnixNano()
+	wLock.Unlock()
+	assert.NotEqual(t, lastUpdatedAt, updatedAt)
 }
 
 func updateFile(path string) error {

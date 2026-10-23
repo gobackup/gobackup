@@ -1,7 +1,10 @@
 package encryptor
 
 import (
+	"time"
+
 	"github.com/gobackup/gobackup/config"
+	"github.com/gobackup/gobackup/hook"
 	"github.com/gobackup/gobackup/logger"
 	"github.com/spf13/viper"
 )
@@ -37,14 +40,22 @@ func Run(archivePath string, model config.ModelConfig) (encryptPath string, err 
 	case "openssl":
 		enc = NewOpenSSL(base)
 	default:
+		if len(model.EncryptWith.Hooks) > 0 {
+			logger.Warnf("encrypt_with.hooks are ignored because encrypt type %q is not supported", model.EncryptWith.Type)
+		}
 		encryptPath = archivePath
 		return
 	}
 
-	logger.Info("encrypt | " + model.EncryptWith.Type)
-	encryptPath, err = enc.perform()
+	ctx := hook.Context{Model: model.Name, Stage: hook.StageEncrypt}
+	startTime := time.Now()
+	if err = hook.RunBefore(model.EncryptWith.Hooks, ctx); err == nil {
+		logger.Info("encrypt | " + model.EncryptWith.Type)
+		encryptPath, err = enc.perform()
+	}
+	hook.RunAfter(model.EncryptWith.Hooks, ctx, hook.Result{Err: err, Duration: time.Since(startTime)})
 	if err != nil {
-		return
+		return "", err
 	}
 	logger.Info("encrypted:", encryptPath)
 
